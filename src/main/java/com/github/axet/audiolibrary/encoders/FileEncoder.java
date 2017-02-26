@@ -16,6 +16,7 @@ public class FileEncoder {
 
     File in;
     Encoder encoder;
+    RawSamples rs;
     Thread thread;
     long samples;
     long cur;
@@ -34,7 +35,7 @@ public class FileEncoder {
             public void run() {
                 cur = 0;
 
-                RawSamples rs = new RawSamples(in);
+                rs = new RawSamples(in);
 
                 samples = rs.getSamples();
 
@@ -56,9 +57,9 @@ public class FileEncoder {
                         }
                     }
                     encoder.close();
-                    if (rs != null) {
-                        rs.close();
-                    }
+                    encoder = null;
+                    rs.close();
+                    rs = null;
                     handler.post(done);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "Exception", e);
@@ -83,7 +84,20 @@ public class FileEncoder {
     public void close() {
         if (thread != null) {
             thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             thread = null;
+        }
+        if (encoder != null) {
+            encoder.close();
+            encoder = null;
+        }
+        if (rs != null) {
+            rs.close();
+            rs = null;
         }
     }
 }
