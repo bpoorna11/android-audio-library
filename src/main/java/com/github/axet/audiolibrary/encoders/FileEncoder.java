@@ -7,6 +7,7 @@ import android.util.Log;
 import com.github.axet.audiolibrary.app.RawSamples;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileEncoder {
     public static final String TAG = FileEncoder.class.getSimpleName();
@@ -21,6 +22,7 @@ public class FileEncoder {
     long samples;
     long cur;
     Throwable t;
+    final AtomicBoolean pause = new AtomicBoolean(false);
 
     public FileEncoder(Context context, File in, Encoder encoder) {
         this.context = context;
@@ -45,9 +47,18 @@ public class FileEncoder {
 
                 try {
                     while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            synchronized (pause) {
+                                if (pause.get()) {
+                                    pause.wait();
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                            break;
+                        }
                         int len = rs.read(buf);
                         if (len <= 0) {
-                            break;
+                            return;
                         } else {
                             encoder.encode(buf, len);
                             handler.post(progress);
@@ -79,6 +90,19 @@ public class FileEncoder {
 
     public Throwable getException() {
         return t;
+    }
+
+    public void pause() {
+        synchronized (pause) {
+            pause.set(true);
+        }
+    }
+
+    public void resume() {
+        synchronized (pause) {
+            pause.set(false);
+            pause.notifyAll();
+        }
     }
 
     public void close() {

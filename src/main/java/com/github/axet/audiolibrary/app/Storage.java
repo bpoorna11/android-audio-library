@@ -26,6 +26,90 @@ public class Storage {
     public static final String TMP_REC = "recorind.data";
     public static final String RECORDINGS = "recordings";
 
+    public static String getNameNoExt(File f) {
+        String fileName = f.getName();
+
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            fileName = fileName.substring(0, i);
+        }
+        return fileName;
+    }
+
+    public static String getExt(File f) {
+        String fileName = f.getName();
+
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            return fileName.substring(i + 1);
+        }
+        return "";
+    }
+
+    public static File getNextFile(File parent, File f) {
+        String fileName = f.getName();
+
+        String extension = "";
+
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            extension = fileName.substring(i + 1);
+            fileName = fileName.substring(0, i);
+        }
+
+        return getNextFile(parent, fileName, extension);
+    }
+
+    public static File getNextFile(File parent, String name, String ext) {
+        String fileName;
+        if (ext == null || ext.isEmpty())
+            fileName = name;
+        else
+            fileName = String.format("%s.%s", name, ext);
+
+        File file = new File(parent, fileName);
+
+        int i = 1;
+        while (file.exists()) {
+            if (ext == null || ext.isEmpty())
+                fileName = String.format("%s (%d)", name, i);
+            else
+                fileName = String.format("%s (%d).%s", name, i, ext);
+            file = new File(parent, fileName);
+            i++;
+        }
+
+//        try {
+//            file.createNewFile();
+//        } catch (IOException e) {
+//            throw new RuntimeException("Unable to create: " + file, e);
+//        }
+
+        return file;
+    }
+
+    public static void delete(File f) {
+        f.delete();
+    }
+
+    public static void move(File f, File to) {
+        try {
+            InputStream in = new FileInputStream(f);
+            OutputStream out = new FileOutputStream(to);
+
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+            f.delete();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected Context context;
 
     public Storage(Context context) {
@@ -108,65 +192,6 @@ public class Storage {
         }
 
         return getNextFile(parent, s.format(new Date()), ext);
-    }
-
-    public static String getNameNoExt(File f) {
-        String fileName = f.getName();
-
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            fileName = fileName.substring(0, i);
-        }
-        return fileName;
-    }
-
-    public static String getExt(File f) {
-        String fileName = f.getName();
-
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            return fileName.substring(i + 1);
-        }
-        return "";
-    }
-
-    File getNextFile(File parent, File f) {
-        String fileName = f.getName();
-
-        String extension = "";
-
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            extension = fileName.substring(i + 1);
-            fileName = fileName.substring(0, i);
-        }
-
-        return getNextFile(parent, fileName, extension);
-    }
-
-    protected File getNextFile(File parent, String name, String ext) {
-        String fileName;
-        if (ext.isEmpty())
-            fileName = name;
-        else
-            fileName = String.format("%s.%s", name, ext);
-
-        File file = new File(parent, fileName);
-
-        int i = 1;
-        while (file.exists()) {
-            fileName = String.format("%s (%d).%s", name, i, ext);
-            file = new File(parent, fileName);
-            i++;
-        }
-
-//        try {
-//            file.createNewFile();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Unable to create: " + file, e);
-//        }
-
-        return file;
     }
 
     public List<File> scan(File dir) {
@@ -258,26 +283,5 @@ public class Storage {
         }
     }
 
-    public void delete(File f) {
-        f.delete();
-    }
-
-    public void move(File f, File to) {
-        try {
-            InputStream in = new FileInputStream(f);
-            OutputStream out = new FileOutputStream(to);
-
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            in.close();
-            out.close();
-            f.delete();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }
