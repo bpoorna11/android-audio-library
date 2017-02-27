@@ -58,7 +58,7 @@ public class FileEncoder {
                         }
                         int len = rs.read(buf);
                         if (len <= 0) {
-                            return;
+                            break;
                         } else {
                             encoder.encode(buf, len);
                             handler.post(progress);
