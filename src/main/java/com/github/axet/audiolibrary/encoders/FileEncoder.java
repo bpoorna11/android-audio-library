@@ -54,7 +54,7 @@ public class FileEncoder {
                                 }
                             }
                         } catch (InterruptedException e) {
-                            break;
+                            return;
                         }
                         int len = rs.read(buf);
                         if (len <= 0) {
