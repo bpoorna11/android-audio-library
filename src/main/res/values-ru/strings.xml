@@ -1,6 +1,7 @@
 <resources>
     <string-array name="encodings_text">
-        <item>.wav (по умолчанию)</item>
+        <item>.ogg (по умолчанию)</item>
+        <item>.wav</item>
     </string-array>
 
     <string name="title_header">%1$s свободно ~ %2$s</string>

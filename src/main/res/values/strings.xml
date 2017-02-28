@@ -2,10 +2,12 @@
     <string name="app_name">Audio Library</string>
 
     <string-array name="encodings_text">
-        <item>.wav (default)</item>
+        <item>.ogg (default)</item>
+        <item>.wav</item>
     </string-array>
 
     <string-array name="encodings_values" translatable="false">
+        <item>ogg</item>
         <item>wav</item>
     </string-array>
 

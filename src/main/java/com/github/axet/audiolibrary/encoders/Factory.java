@@ -24,7 +24,6 @@ public class Factory {
             ll.add(".m4a");
         if (Build.VERSION.SDK_INT >= 16)
             ll.add(".mka");
-        ll.add(".ogg");
         return ll.toArray(new String[]{});
     }
 
@@ -35,7 +34,6 @@ public class Factory {
             ll.add("m4a");
         if (Build.VERSION.SDK_INT >= 16)
             ll.add("mka");
-        ll.add("ogg");
         return ll.toArray(new String[]{});
     }
 
