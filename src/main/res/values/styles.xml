@@ -27,17 +27,9 @@
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
-        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
-        <item name="colorPrimary">@color/primary_material_dark</item>
-        <item name="colorAccent">@color/colorAccentDark</item>
         <item name="titleColor">@android:color/primary_text_dark</item>
         <item name="secondBackground">#151515</item>
         <item name="roundButton">@drawable/round_button_dark</item>
-        <item name="alertDialogTheme">@style/AppThemeDialogDark</item>
-    </style>
-
-    <style name="AppThemeDialogDark" parent="@style/Theme.AppCompat.Dialog.Alert">
-        <item name="colorAccent">@color/colorAccentDark</item>
     </style>
 
     <style name="AppThemeDark.NoActionBar">
