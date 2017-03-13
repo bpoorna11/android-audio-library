@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -63,7 +65,6 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     Runnable updatePlayer;
     int selected = -1;
     ListView list;
-    PopupShareActionProvider shareProvider;
     int scrollState;
 
     Map<File, Integer> durations = new TreeMap<>();
@@ -259,18 +260,22 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    shareProvider = new PopupShareActionProvider(getContext(), share);
+                    Uri u = Uri.fromFile(f);
 
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType(Factory.MP4A);
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, "");
-                    emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, f.getName());
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, getContext().getString(R.string.app_name)));
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("audio/*");
+                    intent.putExtra(Intent.EXTRA_EMAIL, "");
+                    intent.putExtra(Intent.EXTRA_STREAM, u);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, f.getName());
+                    intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, getContext().getString(R.string.app_name)));
 
-                    shareProvider.setShareIntent(emailIntent);
-
-                    shareProvider.show();
+                    if (Build.VERSION.SDK_INT < 11) {
+                        getContext().startActivity(intent);
+                    } else {
+                        PopupShareActionProvider shareProvider = new PopupShareActionProvider(getContext(), share);
+                        shareProvider.setShareIntent(intent);
+                        shareProvider.show();
+                    }
                 }
             });
 
