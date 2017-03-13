@@ -64,8 +64,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public File getStoragePath() {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
-        if (permitted(PERMISSIONS)) {
-            return new File(path);
+        File file = new File(path);
+        File parent = file.getParentFile();
+        if (permitted(PERMISSIONS) && (file.canWrite() || parent.canWrite())) {
+            return file;
         } else {
             return getLocalStorage();
         }
@@ -82,7 +84,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         File l = getLocalStorage();
         File t = new File(path);
 
-        t.mkdirs();
+        if(!t.mkdirs())
+            return;
 
         File[] ff = l.listFiles();
 
