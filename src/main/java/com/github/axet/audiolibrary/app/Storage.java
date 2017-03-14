@@ -35,7 +35,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String[] PERMISSIONS = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     public boolean permitted(String[] ss) {
-        if (Build.VERSION.SDK_INT < 11)
+        if (Build.VERSION.SDK_INT < 15)
             return true;
         for (String s : ss) {
             if (ContextCompat.checkSelfPermission(context, s) != PackageManager.PERMISSION_GRANTED) {
