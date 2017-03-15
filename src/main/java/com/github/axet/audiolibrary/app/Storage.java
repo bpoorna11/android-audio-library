@@ -73,8 +73,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return;
 
         for (File f : ff) {
-            File tt = getNextFile(t, f);
-            move(f, tt);
+            if (f.isFile()) { // skip dirrectories (we didnt create one)
+                File tt = getNextFile(t, f);
+                move(f, tt);
+            }
         }
     }
 
