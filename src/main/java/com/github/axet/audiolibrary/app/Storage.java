@@ -23,38 +23,20 @@ import java.util.Date;
 import java.util.List;
 
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
-    public static final String TMP_REC = "recorind.data";
-    public static final String RECORDINGS = "recordings";
-
-    protected Context context;
+    public static final String TMP_REC = "recording.data";
 
     public Storage(Context context) {
-        this.context = context;
+        super(context);
     }
 
     public static final String[] PERMISSIONS = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-    public boolean permitted(String[] ss) {
-        if (Build.VERSION.SDK_INT < 15)
-            return true;
-        for (String s : ss) {
-            if (ContextCompat.checkSelfPermission(context, s) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public File getLocalStorage() {
-        return new File(context.getApplicationInfo().dataDir, RECORDINGS);
-    }
 
     public boolean isLocalStorageEmpty() {
         return getLocalStorage().listFiles().length == 0;
     }
 
     public boolean isExternalStoragePermitted() {
-        return permitted(PERMISSIONS);
+        return permitted(context, PERMISSIONS);
     }
 
     public boolean recordingPending() {
@@ -64,19 +46,15 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public File getStoragePath() {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
-        File file = new File(path);
-        File parent = file.getParentFile();
-        while (!parent.exists())
-            parent = file.getParentFile();
-        if (permitted(PERMISSIONS) && (file.canWrite() || parent.canWrite())) {
-            return file;
-        } else {
+        if (!permitted(context, PERMISSIONS)) {
             return getLocalStorage();
+        } else {
+            return super.getStoragePath(new File(path));
         }
     }
 
     public void migrateLocalStorage() {
-        if (!permitted(PERMISSIONS)) {
+        if (!permitted(context, PERMISSIONS)) {
             return;
         }
 
@@ -148,8 +126,14 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public File getTempRecording() {
-        File internal = new File(context.getApplicationInfo().dataDir, TMP_REC);
+        File internalOld = new File(context.getApplicationInfo().dataDir, "recorind.data");
+        if (internalOld.exists())
+            return internalOld;
+        internalOld = new File(context.getApplicationInfo().dataDir, TMP_REC);
+        if (internalOld.exists())
+            return internalOld;
 
+        File internal = new File(context.getCacheDir(), TMP_REC);
         if (internal.exists())
             return internal;
 
@@ -161,7 +145,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         }
 
         File c = context.getExternalCacheDir();
-        if (c == null) // some old phones 11 with disabled sdcard return null
+        if (c == null) // some old phones <15API with disabled sdcard return null
             return internal;
 
         File external = new File(c, TMP_REC);
