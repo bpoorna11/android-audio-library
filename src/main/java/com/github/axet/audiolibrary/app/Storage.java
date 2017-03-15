@@ -35,7 +35,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String[] PERMISSIONS = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     public boolean permitted(String[] ss) {
-        if (Build.VERSION.SDK_INT < 11)
+        if (Build.VERSION.SDK_INT < 15)
             return true;
         for (String s : ss) {
             if (ContextCompat.checkSelfPermission(context, s) != PackageManager.PERMISSION_GRANTED) {
@@ -66,6 +66,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
         File file = new File(path);
         File parent = file.getParentFile();
+        while (!parent.exists())
+            parent = file.getParentFile();
         if (permitted(PERMISSIONS) && (file.canWrite() || parent.canWrite())) {
             return file;
         } else {
@@ -84,7 +86,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         File l = getLocalStorage();
         File t = new File(path);
 
-        if(!t.mkdirs())
+        if (!t.mkdirs())
             return;
 
         File[] ff = l.listFiles();
