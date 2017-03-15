@@ -60,14 +60,22 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (!permitted(context, PERMISSIONS)) {
             return;
         }
+        migrateLocalStorage(new File(context.getApplicationInfo().dataDir, "recordings")); // old recordings folder
+        migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
+        migrateLocalStorage(getLocalInternal());
+        migrateLocalStorage(getLocalExternal());
+    }
+
+    public void migrateLocalStorage(File l) {
+        if (l == null)
+            return;
 
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
 
-        File l = getLocalStorage();
         File t = new File(path);
 
-        if (!t.mkdirs())
+        if (!t.exists() && !t.mkdirs())
             return;
 
         File[] ff = l.listFiles();
@@ -76,7 +84,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return;
 
         for (File f : ff) {
-            if (f.isFile()) { // skip dirrectories (we didnt create one)
+            if (f.isFile()) { // skip directories (we didn't create one)
                 File tt = getNextFile(t, f);
                 move(f, tt);
             }
@@ -90,10 +98,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
 
         File parent = getStoragePath();
-        if (!parent.exists()) {
-            if (!parent.mkdirs())
-                throw new RuntimeException("Unable to create: " + parent);
-        }
+        if (!parent.exists() && !parent.mkdirs())
+            throw new RuntimeException("Unable to create: " + parent);
 
         return getNextFile(parent, s.format(new Date()), ext);
     }
