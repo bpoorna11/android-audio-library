@@ -75,6 +75,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         File t = new File(path);
 
+        if (l.getAbsolutePath().equals(t.getAbsolutePath()))
+            return;
+
         if (!t.exists() && !t.mkdirs())
             return;
 
