@@ -25,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
-import com.github.axet.androidlibrary.app.MainLibrary;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.audiolibrary.R;
@@ -163,10 +162,10 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         time.setText(s.format(new Date(f.lastModified())));
 
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
-        dur.setText(MainLibrary.formatDuration(getContext(), durations.get(f)));
+        dur.setText(MainApplication.formatDuration(getContext(), durations.get(f)));
 
         TextView size = (TextView) convertView.findViewById(R.id.recording_size);
-        size.setText(MainLibrary.formatSize(getContext(), f.length()));
+        size.setText(MainApplication.formatSize(getContext(), f.length()));
 
         final View playerBase = convertView.findViewById(R.id.recording_player);
         playerBase.setOnClickListener(new View.OnClickListener() {
@@ -435,11 +434,11 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             }
         });
 
-        start.setText(MainLibrary.formatDuration(getContext(), c));
+        start.setText(MainApplication.formatDuration(getContext(), c));
         bar.setMax(d);
         bar.setKeyProgressIncrement(1);
         bar.setProgress(c);
-        end.setText("-" + MainLibrary.formatDuration(getContext(), d - c));
+        end.setText("-" + MainApplication.formatDuration(getContext(), d - c));
 
         return playing;
     }

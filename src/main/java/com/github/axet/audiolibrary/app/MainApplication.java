@@ -6,10 +6,9 @@ import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.preference.PreferenceManager;
 
-import com.github.axet.androidlibrary.app.MainLibrary;
 import com.github.axet.audiolibrary.R;
 
-public class MainApplication extends Application {
+public class MainApplication extends com.github.axet.androidlibrary.app.MainApplication {
     public static final String PREFERENCE_STORAGE = "storage_path";
     public static final String PREFERENCE_RATE = "sample_rate";
     public static final String PREFERENCE_CALL = "call";
@@ -60,7 +59,7 @@ public class MainApplication extends Application {
             str = getResources().getQuantityString(R.plurals.seconds, diffSeconds, diffSeconds);
         }
 
-        return getString(R.string.title_header, MainLibrary.formatSize(this, free), str);
+        return getString(R.string.title_header, formatSize(this, free), str);
     }
 
     public static int getChannels(Context context) {
