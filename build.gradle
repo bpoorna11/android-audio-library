@@ -121,7 +121,7 @@ dependencies {
     })
     compile 'com.android.support:design:25.3.1'
     compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'com.github.axet:android-library:1.11.10' // compile project(':android-library')
+    compile 'com.github.axet:android-library:1.11.12' // compile project(':android-library')
     compile 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
     compile 'com.github.axet:vorbis:1.0.0-3' // debugCompile project(path:':android-vorbis', configuration:'libraryDebug')
     testCompile 'junit:junit:4.12'
