@@ -73,12 +73,12 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
 
-        File t = new File(path);
+        File dir = new File(path);
 
-        if (l.getAbsolutePath().equals(t.getAbsolutePath()))
+        if (isSame(l, dir))
             return;
 
-        if (!t.exists() && !t.mkdirs())
+        if (!dir.exists() && !dir.mkdirs())
             return;
 
         File[] ff = l.listFiles();
@@ -88,8 +88,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         for (File f : ff) {
             if (f.isFile()) { // skip directories (we didn't create one)
-                File tt = getNextFile(t, f);
-                move(f, tt);
+                File t = getNextFile(new File(dir, f.getName()));
+                move(f, t);
             }
         }
     }
