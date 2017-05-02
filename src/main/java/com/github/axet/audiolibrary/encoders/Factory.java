@@ -4,9 +4,11 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.os.Build;
 
+import com.github.axet.androidlibrary.app.Native;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.app.RawSamples;
 import com.github.axet.audiolibrary.app.Sound;
+import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +26,12 @@ public class Factory {
             ll.add(".m4a");
         if (Build.VERSION.SDK_INT >= 16)
             ll.add(".mka");
+        try {
+            FormatOGG.natives(context);
+            Vorbis v = new Vorbis();
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            ll.remove(".ogg");
+        }
         return ll.toArray(new String[]{});
     }
 
@@ -34,10 +42,16 @@ public class Factory {
             ll.add("m4a");
         if (Build.VERSION.SDK_INT >= 16)
             ll.add("mka");
+        try {
+            FormatOGG.natives(context);
+            Vorbis v = new Vorbis();
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            ll.remove("ogg");
+        }
         return ll.toArray(new String[]{});
     }
 
-    public static Encoder getEncoder(String ext, EncoderInfo info, File out) {
+    public static Encoder getEncoder(Context context, String ext, EncoderInfo info, File out) {
         if (ext.equals("wav")) {
             return new FormatWAV(info, out);
         }
@@ -51,7 +65,7 @@ public class Factory {
             return new FormatMKA(info, out);
         }
         if (ext.equals("ogg")) {
-            return new FormatOGG(info, out);
+            return new FormatOGG(context, info, out);
         }
         return null;
     }
