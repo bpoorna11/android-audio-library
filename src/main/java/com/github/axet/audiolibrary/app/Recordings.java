@@ -76,7 +76,6 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         this.list.setOnScrollListener(this);
     }
 
-
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         this.scrollState = scrollState;
