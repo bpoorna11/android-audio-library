@@ -8,6 +8,7 @@ import com.github.axet.androidlibrary.app.Native;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.app.RawSamples;
 import com.github.axet.audiolibrary.app.Sound;
+import com.github.axet.lamejni.Lame;
 import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
@@ -32,6 +33,13 @@ public class Factory {
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             ll.remove(".ogg");
         }
+        try {
+            FormatMP3.natives(context);
+            Lame v = new Lame();
+            ll.add(".mp3");
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            ll.remove(".mp3");
+        }
         return ll.toArray(new String[]{});
     }
 
@@ -47,6 +55,13 @@ public class Factory {
             Vorbis v = new Vorbis();
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             ll.remove("ogg");
+        }
+        try {
+            FormatMP3.natives(context);
+            Lame v = new Lame();
+            ll.add("mp3");
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            ll.remove("mp3");
         }
         return ll.toArray(new String[]{});
     }
@@ -66,6 +81,9 @@ public class Factory {
         }
         if (ext.equals("ogg")) {
             return new FormatOGG(context, info, out);
+        }
+        if (ext.equals("mp3")) {
+            return new FormatMP3(context, info, out);
         }
         return null;
     }
@@ -95,6 +113,16 @@ public class Factory {
             long y1 = 174892; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
             long y2 = 405565; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.equals("mp3")) {
+            long y1 = 971136; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 968828; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;

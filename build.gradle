@@ -124,5 +124,6 @@ dependencies {
     compile 'com.github.axet:android-library:1.12.9' // compile project(':android-library')
     compile 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
     compile 'com.github.axet:vorbis:1.0.0-4' // debugCompile project(path:':android-vorbis', configuration:'libraryDebug')
+    compile 'com.github.axet:lame:1.0.0-1' // compile project(':android-lame')
     testCompile 'junit:junit:4.12'
 }
