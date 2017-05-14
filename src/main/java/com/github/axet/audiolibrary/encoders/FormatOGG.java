@@ -60,6 +60,7 @@ public class FormatOGG implements Encoder {
         try {
             byte[] bb = vorbis.encode(null, 0);
             writer.write(bb);
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
