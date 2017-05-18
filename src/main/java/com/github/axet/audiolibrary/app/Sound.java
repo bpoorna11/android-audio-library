@@ -33,29 +33,37 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
     }
 
     public AudioTrack generateTrack(int sampleRate, short[] buf, int len) {
-        int end = len;
-
-        int c = 0;
+        int last;
+        int c;
 
         switch (MainApplication.getChannels(context)) {
             case 1:
                 c = AudioFormat.CHANNEL_OUT_MONO;
+                last = len - 1;
                 break;
             case 2:
                 c = AudioFormat.CHANNEL_OUT_STEREO;
+                last = len / 2 - 1;
                 break;
             default:
                 throw new RuntimeException("unknown mode");
         }
 
+        int min = AudioTrack.getMinBufferSize(sampleRate, c, AUDIO_FORMAT);
+
+        int bytes = len * (Short.SIZE / 8);
+
+        if (bytes < min)
+            bytes = min;
+
         // old phones bug.
         // http://stackoverflow.com/questions/27602492
         //
         // with MODE_STATIC setNotificationMarkerPosition not called
-        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, c, AUDIO_FORMAT, len * (Short.SIZE / 8), AudioTrack.MODE_STREAM);
+        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, c, AUDIO_FORMAT, bytes, AudioTrack.MODE_STREAM);
         track.write(buf, 0, len);
-        if (track.setNotificationMarkerPosition(end) != AudioTrack.SUCCESS)
-            throw new RuntimeException("unable to set marker");
+        track.setNotificationMarkerPosition(last); // do not check != AudioTrack.SUCCESS crash often
+
         return track;
     }
 }
