@@ -4,8 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.preference.PreferenceManager;
+
+import com.github.axet.androidlibrary.app.AudioTrack;
 
 public class Sound extends com.github.axet.androidlibrary.sound.Sound {
     public static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
@@ -49,20 +50,9 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
                 throw new RuntimeException("unknown mode");
         }
 
-        int min = AudioTrack.getMinBufferSize(sampleRate, c, AUDIO_FORMAT);
-
-        int bytes = len * (Short.SIZE / 8);
-
-        if (bytes < min)
-            bytes = min;
-
-        // old phones bug.
-        // http://stackoverflow.com/questions/27602492
-        //
-        // with MODE_STATIC setNotificationMarkerPosition not called
-        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, c, AUDIO_FORMAT, bytes, AudioTrack.MODE_STREAM);
+        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, c, AUDIO_FORMAT, len * (Short.SIZE / 8));
         track.write(buf, 0, len);
-        track.setNotificationMarkerPosition(last); // do not check != AudioTrack.SUCCESS crash often
+        track.setNotificationMarkerPosition(last);
 
         return track;
     }
