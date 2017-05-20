@@ -6,7 +6,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.preference.PreferenceManager;
 
-import com.github.axet.androidlibrary.app.AudioTrack;
+import com.github.axet.androidlibrary.sound.AudioTrack;
 
 public class Sound extends com.github.axet.androidlibrary.sound.Sound {
     public static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
