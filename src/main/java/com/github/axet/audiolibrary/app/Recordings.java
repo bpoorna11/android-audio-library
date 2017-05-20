@@ -120,14 +120,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     }
 
     public void close() {
-        if (player != null) {
-            player.release();
-            player = null;
-        }
-        if (updatePlayer != null) {
-            handler.removeCallbacks(updatePlayer);
-            updatePlayer = null;
-        }
+        playerStop();
     }
 
     public void load() {
@@ -214,6 +207,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                 e.setPositiveButton(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        playerStop();
                         String ext = Storage.getExt(f);
                         String s = String.format("%s.%s", e.getText(), ext);
                         File ff = new File(f.getParent(), s);
