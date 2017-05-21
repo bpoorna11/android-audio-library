@@ -23,6 +23,7 @@ public class Factory {
     public static CharSequence[] getEncodingTexts(Context context) {
         String[] aa = context.getResources().getStringArray(R.array.encodings_text);
         ArrayList<String> ll = new ArrayList<>(Arrays.asList(aa));
+        ll.add(".flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add(".m4a");
         if (Build.VERSION.SDK_INT >= 16)
@@ -46,6 +47,7 @@ public class Factory {
     public static String[] getEncodingValues(Context context) {
         String[] aa = context.getResources().getStringArray(R.array.encodings_values);
         ArrayList<String> ll = new ArrayList<>(Arrays.asList(aa));
+        ll.add("flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add("m4a");
         if (Build.VERSION.SDK_INT >= 16)
@@ -84,6 +86,9 @@ public class Factory {
         }
         if (ext.equals("mp3")) {
             return new FormatMP3(context, info, out);
+        }
+        if (ext.equals("flac")) {
+            return new FormatFLAC(info, out);
         }
         return null;
     }
