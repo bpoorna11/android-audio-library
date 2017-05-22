@@ -134,6 +134,16 @@ public class Factory {
             return y / 60;
         }
 
+        if (ext.equals("flac")) {
+            long y1 = 1060832; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 1296766; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
         // default raw
         int c = Sound.AUDIO_FORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
         return c * rate;
