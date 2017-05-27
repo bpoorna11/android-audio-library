@@ -25,8 +25,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 45
-        versionName "0.0.45"
+        versionCode 46
+        versionName "0.0.46"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -125,6 +125,6 @@ dependencies {
     compile 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
     compile 'com.github.axet:vorbis:1.0.0-4' // debugCompile project(path:':android-vorbis', configuration:'libraryDebug')
     compile 'com.github.axet:lame:1.0.0-1' // compile project(':android-lame')
-    compile group: 'net.sourceforge.javaflacencoder', name: 'java-flac-encoder', version: '0.3.7'
+    compile 'com.github.axet:java-flac-encoder:0.3.8'
     testCompile 'junit:junit:4.12'
 }
