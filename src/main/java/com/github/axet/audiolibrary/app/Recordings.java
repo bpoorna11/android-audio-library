@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.StatFs;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -33,11 +34,13 @@ import com.github.axet.audiolibrary.encoders.Factory;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScrollListener {
     public static String TAG = Recordings.class.getSimpleName();
@@ -58,6 +61,12 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         }
     }
 
+    public static class FileStats {
+        public int duration;
+        public long size;
+        public long last;
+    }
+
     Handler handler;
     Storage storage;
     MediaPlayer player;
@@ -65,6 +74,9 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     int selected = -1;
     ListView list;
     int scrollState;
+    Thread thread;
+
+    Map<File, FileStats> cache = new TreeMap<>();
 
     Map<File, Integer> durations = new TreeMap<>();
 
@@ -85,34 +97,71 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
     }
 
-    public void scan(File dir) {
+    public void scan(File dir, final Runnable done) {
         setNotifyOnChange(false);
         clear();
         durations.clear();
 
-        List<File> ff = storage.scan(dir);
+        final List<File> ff = storage.scan(dir);
 
-        for (File f : ff) {
-            if (f.isFile()) {
-                MediaPlayer mp = null;
-                try {
-                    mp = MediaPlayer.create(getContext(), Uri.fromFile(f));
-                } catch (IllegalStateException e) {
-                    Log.d(TAG, f.toString(), e);
+        if (thread != null)
+            thread.interrupt();
+
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final ArrayList<File> all = new ArrayList<>();
+                for (File f : ff) {
+                    if (Thread.currentThread().isInterrupted())
+                        return;
+                    if (f.isFile()) {
+                        FileStats fs = cache.get(f);
+                        if (fs != null) {
+                            long last = f.lastModified();
+                            long size = f.length();
+                            if (last != fs.last || size != fs.size)
+                                fs = null;
+                        }
+                        if (fs == null) {
+                            fs = new FileStats();
+                            fs.size = f.length();
+                            fs.last = f.lastModified();
+                            try {
+                                MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(f));
+                                fs.duration = mp.getDuration();
+                                cache.put(f, fs);
+                                durations.put(f, fs.duration);
+                                all.add(f);
+                                mp.release();
+                            } catch (Exception e) {
+                                Log.d(TAG, f.toString(), e);
+                            }
+                        } else {
+                            durations.put(f, fs.duration);
+                            all.add(f);
+                        }
+                    }
                 }
-                if (mp != null) {
-                    int d = mp.getDuration();
-                    mp.release();
-                    durations.put(f, d);
-                    add(f);
-                } else {
-                    Log.e(TAG, f.toString());
+                for (File f : new TreeSet<>(cache.keySet())) {
+                    if (!f.exists()) {
+                        cache.remove(f);
+                    }
                 }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (File f : all) {
+                            add(f);
+                        }
+                        sort();
+                        notifyDataSetChanged();
+                        if (done != null)
+                            done.run();
+                    }
+                });
             }
-        }
-
-        sort();
-        notifyDataSetChanged();
+        });
+        thread.start();
     }
 
     public void sort() {
@@ -121,10 +170,19 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
 
     public void close() {
         playerStop();
+        if (thread != null) {
+            thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            thread = null;
+        }
     }
 
-    public void load() {
-        scan(storage.getStoragePath());
+    public void load(Runnable done) {
+        scan(storage.getStoragePath(), done);
     }
 
     @Override
@@ -183,7 +241,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                                 f.delete();
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
-                                load();
+                                load(null);
                             }
                         });
                     }
@@ -212,7 +270,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         String s = String.format("%s.%s", e.getText(), ext);
                         File ff = new File(f.getParent(), s);
                         f.renameTo(ff);
-                        load();
+                        load(null);
                     }
                 });
                 e.show();
