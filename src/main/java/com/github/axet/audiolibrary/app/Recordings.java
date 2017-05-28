@@ -98,10 +98,6 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     }
 
     public void scan(File dir, final Runnable done) {
-        setNotifyOnChange(false);
-        clear();
-        durations.clear();
-
         final List<File> ff = storage.scan(dir);
 
         if (thread != null)
@@ -110,6 +106,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                final Map<File, Integer> durations = new TreeMap<>();
                 final ArrayList<File> all = new ArrayList<>();
                 for (File f : ff) {
                     if (Thread.currentThread().isInterrupted())
@@ -150,6 +147,9 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        setNotifyOnChange(false);
+                        clear();
+                        Recordings.this.durations = durations;
                         for (File f : all) {
                             add(f);
                         }
