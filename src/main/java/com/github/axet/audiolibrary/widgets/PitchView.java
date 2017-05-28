@@ -167,7 +167,7 @@ public class PitchView extends ViewGroup {
             super(context, attrs, defStyleAttr);
 
             paint = new Paint();
-            paint.setColor(getThemeColor(R.attr.colorPrimary));
+            paint.setColor(getThemeColor(R.attr.colorPrimaryDark));
             paint.setStrokeWidth(pitchWidth);
 
             paintRed = new Paint();
@@ -179,11 +179,11 @@ public class PitchView extends ViewGroup {
             cutColor.setStrokeWidth(pitchWidth);
 
             editPaint = new Paint();
-            editPaint.setColor(getThemeColor(R.attr.colorPrimaryDark));
+            editPaint.setColor(getThemeColor(R.attr.colorPrimary));
             editPaint.setStrokeWidth(pitchWidth);
 
             playPaint = new Paint();
-            playPaint.setColor(getThemeColor(R.attr.colorPrimaryDark));
+            playPaint.setColor(getThemeColor(R.attr.colorPrimary));
             playPaint.setStrokeWidth(pitchWidth / 2);
         }
 
@@ -311,7 +311,7 @@ public class PitchView extends ViewGroup {
             textPaint.setTextSize(20f);
 
             paint = new Paint();
-            paint.setColor(getThemeColor(R.attr.colorPrimary));
+            paint.setColor(getThemeColor(R.attr.colorPrimaryDark));
             paint.setStrokeWidth(pitchWidth);
         }
 
