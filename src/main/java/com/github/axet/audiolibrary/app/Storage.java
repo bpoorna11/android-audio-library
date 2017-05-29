@@ -25,6 +25,9 @@ import java.util.List;
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String TMP_REC = "recording.data";
 
+    SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+    SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
     public Storage(Context context) {
         super(context);
     }
@@ -95,8 +98,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public File getNewFile() {
-        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
-
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
 
@@ -104,7 +105,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (!parent.exists() && !parent.mkdirs())
             throw new RuntimeException("Unable to create: " + parent);
 
-        return getNextFile(parent, s.format(new Date()), ext);
+        return getNextFile(parent, SIMPLE.format(new Date()), ext);
     }
 
     public List<File> scan(File dir) {
