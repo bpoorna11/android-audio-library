@@ -25,8 +25,8 @@ import java.util.List;
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String TMP_REC = "recording.data";
 
-    SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
-    SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+    public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+    public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
     public Storage(Context context) {
         super(context);
