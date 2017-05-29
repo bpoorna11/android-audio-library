@@ -1,6 +1,5 @@
 package com.github.axet.audiolibrary.app;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
@@ -17,6 +16,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_LAST = "last_recording";
     public static final String PREFERENCE_THEME = "theme";
     public static final String PREFERENCE_CHANNELS = "channels";
+    public static final String PREFERENCE_FORMAT = "format";
 
     @Override
     public void onCreate() {
