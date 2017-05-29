@@ -68,12 +68,23 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         return i;
     }
 
-    public static int getMode(Context context) {
+    public static int getInMode(Context context) {
         switch (getChannels(context)) {
             case 1:
                 return AudioFormat.CHANNEL_IN_MONO;
             case 2:
                 return AudioFormat.CHANNEL_IN_STEREO;
+            default:
+                throw new RuntimeException("unknown mode");
+        }
+    }
+
+    public static int getOutMode(Context context) {
+        switch (getChannels(context)) {
+            case 1:
+                return AudioFormat.CHANNEL_OUT_MONO;
+            case 2:
+                return AudioFormat.CHANNEL_OUT_STEREO;
             default:
                 throw new RuntimeException("unknown mode");
         }

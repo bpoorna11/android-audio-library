@@ -33,25 +33,10 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
         }
     }
 
-    public AudioTrack generateTrack(int sampleRate, short[] buf, int len) {
-        int last;
-        int c;
+    public AudioTrack generateTrack(AudioTrack.AudioBuffer buffer) {
+        int last = buffer.len / buffer.getChannels() - 1;
 
-        switch (MainApplication.getChannels(context)) {
-            case 1:
-                c = AudioFormat.CHANNEL_OUT_MONO;
-                last = len - 1;
-                break;
-            case 2:
-                c = AudioFormat.CHANNEL_OUT_STEREO;
-                last = len / 2 - 1;
-                break;
-            default:
-                throw new RuntimeException("unknown mode");
-        }
-
-        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, c, AUDIO_FORMAT, len * (Short.SIZE / 8));
-        track.write(buf, 0, len);
+        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, buffer);
         track.setNotificationMarkerPosition(last);
 
         return track;
