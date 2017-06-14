@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import com.github.axet.androidlibrary.sound.AudioTrack;
 
 public class Sound extends com.github.axet.androidlibrary.sound.Sound {
-    public static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     // quite room gives me 20db
     public static int NOISE_DB = 20;
     // max 90 dB detection for android mic

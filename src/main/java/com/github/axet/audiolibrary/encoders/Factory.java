@@ -145,7 +145,7 @@ public class Factory {
         }
 
         // default raw
-        int c = Sound.AUDIO_FORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
+        int c = Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
         return c * rate;
     }
 }

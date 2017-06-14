@@ -106,10 +106,11 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                final Thread t = Thread.currentThread();
                 final Map<File, Integer> durations = new TreeMap<>();
                 final ArrayList<File> all = new ArrayList<>();
                 for (File f : ff) {
-                    if (Thread.currentThread().isInterrupted())
+                    if (t.isInterrupted())
                         return;
                     if (f.isFile()) {
                         FileStats fs = cache.get(f);
@@ -147,6 +148,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        if (t.isInterrupted())
+                            return;
                         setNotifyOnChange(false);
                         clear();
                         Recordings.this.durations = durations;
@@ -172,11 +175,6 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         playerStop();
         if (thread != null) {
             thread.interrupt();
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
             thread = null;
         }
     }
@@ -207,9 +205,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         TextView title = (TextView) convertView.findViewById(R.id.recording_title);
         title.setText(f.getName());
 
-        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         TextView time = (TextView) convertView.findViewById(R.id.recording_time);
-        time.setText(s.format(new Date(f.lastModified())));
+        time.setText(MainApplication.SIMPLE.format(new Date(f.lastModified())));
 
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
         dur.setText(MainApplication.formatDuration(getContext(), durations.get(f)));

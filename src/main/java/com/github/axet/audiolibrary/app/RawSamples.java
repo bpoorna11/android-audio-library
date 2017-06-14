@@ -55,7 +55,7 @@ public class RawSamples {
         try {
             readBuffer = new byte[(int) getBufferLen(bufReadSize)];
             is = new FileInputStream(in);
-            is.skip(offset * (Sound.AUDIO_FORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1));
+            is.skip(offset * (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -95,11 +95,11 @@ public class RawSamples {
     }
 
     public static long getSamples(long len) {
-        return len / (Sound.AUDIO_FORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
+        return len / (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
     }
 
     public static long getBufferLen(long samples) {
-        return samples * (Sound.AUDIO_FORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
+        return samples * (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
     }
 
     public void trunk(long pos) {
