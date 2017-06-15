@@ -100,8 +100,15 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     public void scan(File dir, final Runnable done) {
         final List<File> ff = storage.scan(dir);
 
-        if (thread != null)
+        if (thread != null) {
             thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
 
         thread = new Thread(new Runnable() {
             @Override
