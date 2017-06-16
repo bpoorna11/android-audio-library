@@ -2,6 +2,7 @@ package com.github.axet.audiolibrary.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.preference.PreferenceManager;
@@ -13,6 +14,9 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
     public static int NOISE_DB = 20;
     // max 90 dB detection for android mic
     public static int MAXIMUM_DB = 90;
+    public static int SOUND_STREAM = AudioManager.STREAM_MUSIC;
+    public static int SOUND_CHANNEL = AudioAttributes.USAGE_MEDIA;
+    public static int SOUND_TYPE = AudioAttributes.CONTENT_TYPE_MUSIC;
 
     public Sound(Context context) {
         super(context);
@@ -35,7 +39,7 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
     public AudioTrack generateTrack(AudioTrack.AudioBuffer buffer) {
         int last = buffer.len / buffer.getChannels() - 1;
 
-        AudioTrack track = new AudioTrack(AudioManager.STREAM_MUSIC, buffer);
+        AudioTrack track = AudioTrack.create(SOUND_STREAM, SOUND_CHANNEL, SOUND_TYPE, buffer);
         track.setNotificationMarkerPosition(last);
 
         return track;
