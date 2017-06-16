@@ -35,13 +35,4 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
             super.unsilent();
         }
     }
-
-    public AudioTrack generateTrack(AudioTrack.AudioBuffer buffer) {
-        int last = buffer.len / buffer.getChannels() - 1;
-
-        AudioTrack track = AudioTrack.create(SOUND_STREAM, SOUND_CHANNEL, SOUND_TYPE, buffer);
-        track.setNotificationMarkerPosition(last);
-
-        return track;
-    }
 }
