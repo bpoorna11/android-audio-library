@@ -45,8 +45,9 @@ public class FormatFLAC implements Encoder {
             int[] ii = new int[buflen];
             for (int i = 0; i < buflen; i++)
                 ii[i] = buf[i];
-            flacEncoder.addSamples(ii, buflen);
-            flacEncoder.encodeSamples(buflen, false);
+            int count = buflen / info.channels;
+            flacEncoder.addSamples(ii, count);
+            flacEncoder.encodeSamples(count, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
