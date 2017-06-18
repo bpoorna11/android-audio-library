@@ -39,7 +39,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         }
     }
 
-    public String formatFree(long free, long left) {
+    public static String formatFree(Context context, long free, long left) {
         String str = "";
 
         long diff = left;
@@ -50,16 +50,16 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         int diffDays = (int) (diff / (24 * 60 * 60 * 1000));
 
         if (diffDays > 0) {
-            str = getResources().getQuantityString(R.plurals.days, diffDays, diffDays);
+            str = context.getResources().getQuantityString(R.plurals.days, diffDays, diffDays);
         } else if (diffHours > 0) {
-            str = getResources().getQuantityString(R.plurals.hours, diffHours, diffHours);
+            str = context.getResources().getQuantityString(R.plurals.hours, diffHours, diffHours);
         } else if (diffMinutes > 0) {
-            str = getResources().getQuantityString(R.plurals.minutes, diffMinutes, diffMinutes);
+            str = context.getResources().getQuantityString(R.plurals.minutes, diffMinutes, diffMinutes);
         } else if (diffSeconds > 0) {
-            str = getResources().getQuantityString(R.plurals.seconds, diffSeconds, diffSeconds);
+            str = context.getResources().getQuantityString(R.plurals.seconds, diffSeconds, diffSeconds);
         }
 
-        return getString(R.string.title_header, formatSize(this, free), str);
+        return context.getString(R.string.title_header, formatSize(context, free), str);
     }
 
     public static int getChannels(Context context) {
