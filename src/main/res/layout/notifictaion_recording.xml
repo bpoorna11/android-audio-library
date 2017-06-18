@@ -48,7 +48,15 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/notification_record"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_fiber_manual_record_black_24dp"
+                android:tint="#ff0000"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/notification_pause"
