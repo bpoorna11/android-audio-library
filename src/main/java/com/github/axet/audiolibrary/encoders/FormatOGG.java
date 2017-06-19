@@ -16,10 +16,8 @@ public class FormatOGG implements Encoder {
     FileOutputStream writer;
     Vorbis vorbis;
 
-    static boolean natives = true;
-
     public static void natives(Context context) {
-        if (natives) {
+        if (Config.natives) {
             try {
                 System.loadLibrary("ogg"); // API16 failed to find ogg dependency
                 System.loadLibrary("vorbis"); // API16 failed to find vorbis dependency
@@ -30,7 +28,6 @@ public class FormatOGG implements Encoder {
                 Native.loadLibrary(context, "vorbisjni");
             }
             Config.natives = false;
-            natives = false;
         }
     }
 

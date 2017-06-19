@@ -87,7 +87,7 @@ public class FormatMKA implements Encoder {
         if (input == null)
             return;
         encoder.queueInputBuffer(inputIndex, 0, input.position(), getCurrentTimeStamp(), 0);
-        NumSamples += input.position() / info.channels / (Short.SIZE / 8);
+        NumSamples += input.position() / info.channels / (Short.SIZE / Byte.SIZE);
         input = null;
         while (encode())
             ;// do encode()
