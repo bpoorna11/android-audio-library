@@ -43,9 +43,7 @@ public class FormatOPUS implements Encoder {
     ShortBuffer left;
     int frameSize;
     int hz;
-    Thread thread = null;
-    PipedOutputStream is;
-    PipedInputStream os;
+    Resample resample;
 
     public static void natives(Context context) {
         if (Config.natives) {
@@ -103,26 +101,7 @@ public class FormatOPUS implements Encoder {
             hz = match(info.sampleRate);
 
             if (hz != info.sampleRate) {
-                this.is = new PipedOutputStream();
-                this.os = new PipedInputStream(100 * 1024);
-                final PipedInputStream is = new PipedInputStream(this.is);
-                final PipedOutputStream os = new PipedOutputStream(this.os);
-                final int c = com.github.axet.audiolibrary.app.Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
-                thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            SSRC ssrc = new SSRC(is, os, info.sampleRate, hz, c, c, info.channels, Integer.MAX_VALUE, 0, 0, true);
-                        } catch (RuntimeException e) {
-                            Log.d(TAG, "SSRC", e);
-                            throw e;
-                        } catch (IOException e) {
-                            Log.d(TAG, "SSRC", e);
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }, "SSRC");
-                thread.start();
+                resample = new Resample(info.sampleRate, info.channels, hz);
             }
 
             int b = 128000;
@@ -169,33 +148,17 @@ public class FormatOPUS implements Encoder {
 
     @Override
     public void encode(short[] buf, int len) {
-        if (thread != null) {
-            try {
-                ByteBuffer bb = ByteBuffer.allocate(len * (Short.SIZE / Byte.SIZE));
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                bb.asShortBuffer().put(buf, 0, len);
-                is.write(bb.array());
-                is.flush();
-                while (true) {
-                    int blen = os.available();
-                    if (blen <= 0)
-                        return;
-                    int max = buf.length * (Short.SIZE / Byte.SIZE);
-                    if (blen > max)
-                        blen = max;
-                    byte[] b = new byte[blen];
-                    int read = os.read(b);
-                    bb = ByteBuffer.allocate(read);
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                    bb.put(b, 0, read);
-                    bb.flip();
-                    len = read / (Short.SIZE / Byte.SIZE);
-                    bb.asShortBuffer().get(buf, 0, len);
-                    encode2(buf, len);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        if (resample != null) {
+            resample.write(buf, len);
+            ByteBuffer bb;
+            while ((bb = resample.read()) != null) {
+                len = bb.position() / (Short.SIZE / Byte.SIZE);
+                short[] b = new short[len];
+                bb.flip();
+                bb.asShortBuffer().get(b, 0, len);
+                encode2(b, len);
             }
+            return;
         }
         encode2(buf, len);
     }
@@ -253,27 +216,18 @@ public class FormatOPUS implements Encoder {
     }
 
     public void close() {
-        if (thread != null) {
-            try {
-                is.close();
-                while (true) {
-                    int len = os.available();
-                    if (len <= 0)
-                        break;
-                    byte[] b = new byte[len];
-                    int read = os.read(b);
-                    int ss = read / (Short.SIZE / Byte.SIZE);
-                    short[] buf = new short[ss];
-                    ByteBuffer bb = ByteBuffer.allocate(read);
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                    bb.put(b);
-                    bb.flip();
-                    bb.asShortBuffer().get(buf, 0, ss);
-                    encode2(buf, ss);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        if (resample != null) {
+            resample.end();
+            ByteBuffer bb;
+            while ((bb = resample.read()) != null) {
+                int len = bb.position() / (Short.SIZE / Byte.SIZE);
+                short[] buf = new short[len];
+                bb.flip();
+                bb.asShortBuffer().get(buf, 0, len);
+                encode2(buf, len);
             }
+            resample.close();
+            resample = null;
         }
         opus.close();
         writer.setDuration(getCurrentTimeStamp());
