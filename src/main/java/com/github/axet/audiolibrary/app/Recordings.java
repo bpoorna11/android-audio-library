@@ -246,7 +246,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                                 f.delete();
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
-                                load(null);
+                                remove(f); // instant remove
+                                load(null); // thread load
                             }
                         });
                     }
