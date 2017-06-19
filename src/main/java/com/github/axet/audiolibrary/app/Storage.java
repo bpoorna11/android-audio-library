@@ -130,7 +130,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     // get average recording miliseconds based on compression format
-    public long average(long free) {
+    public static long average(Context context, long free) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         int rate = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_RATE, ""));
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
