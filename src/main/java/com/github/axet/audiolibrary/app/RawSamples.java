@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 
 public class RawSamples {
@@ -20,6 +21,33 @@ public class RawSamples {
     byte[] readBuffer;
 
     OutputStream os;
+
+    // get samples from bytes
+    public static long getSamples(long len) {
+        return len / (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
+    }
+
+    // get bytes from samples
+    public static long getBufferLen(long samples) {
+        return samples * (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
+    }
+
+    public static double getAmplitude(short[] buffer, int offset, int len) {
+        double sum = 0;
+        for (int i = offset; i < offset + len; i++) {
+            sum += buffer[i] * buffer[i];
+        }
+        return Math.sqrt(sum / len);
+    }
+
+    public static double getDB(short[] buffer, int offset, int len) {
+        return getDB(getAmplitude(buffer, offset, len));
+    }
+
+    // https://en.wikipedia.org/wiki/Sound_pressure
+    public static double getDB(double amplitude) {
+        return 20.0 * Math.log10(amplitude / 0x7FFF);
+    }
 
     public RawSamples(File in) {
         this.in = in;
@@ -65,7 +93,7 @@ public class RawSamples {
         try {
             int len = is.read(readBuffer);
             if (len <= 0)
-                return 0;
+                return len;
             ByteBuffer.wrap(readBuffer, 0, len).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(buf, 0, (int) getSamples(len));
             return (int) getSamples(len);
         } catch (IOException e) {
@@ -84,22 +112,20 @@ public class RawSamples {
         }
     }
 
-    public void write(short[] buf, int len) {
-        for (int i = 0; i < len; i++) {
-            write(buf[i]);
+    public void write(short[] buf, int pos, int len) {
+        try {
+            ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE * len);
+            bb.order(ByteOrder.BIG_ENDIAN);
+            ShortBuffer ss = bb.asShortBuffer();
+            ss.put(buf, pos, len);
+            os.write(bb.array(), 0, bb.limit());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     public long getSamples() {
         return getSamples(in.length());
-    }
-
-    public static long getSamples(long len) {
-        return len / (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
-    }
-
-    public static long getBufferLen(long samples) {
-        return samples * (Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1);
     }
 
     public void trunk(long pos) {
@@ -110,23 +136,6 @@ public class RawSamples {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static double getAmplitude(short[] buffer, int offset, int len) {
-        double sum = 0;
-        for (int i = offset; i < offset + len; i++) {
-            sum += buffer[i] * buffer[i];
-        }
-        return Math.sqrt(sum / len);
-    }
-
-    public static double getDB(short[] buffer, int offset, int len) {
-        return getDB(getAmplitude(buffer, offset, len));
-    }
-
-    public static double getDB(double amplitude) {
-        // https://en.wikipedia.org/wiki/Sound_pressure
-        return 20.0 * Math.log10(amplitude / 0x7FFF);
     }
 
     public void close() {
