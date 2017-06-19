@@ -4,11 +4,10 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.os.Build;
 
-import com.github.axet.androidlibrary.app.Native;
 import com.github.axet.audiolibrary.R;
-import com.github.axet.audiolibrary.app.RawSamples;
 import com.github.axet.audiolibrary.app.Sound;
 import com.github.axet.lamejni.Lame;
+import com.github.axet.opusjni.Opus;
 import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
@@ -41,6 +40,13 @@ public class Factory {
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             ll.remove(".mp3");
         }
+//        try {
+//            FormatOPUS.natives(context);
+//            Opus v = new Opus();
+//            ll.add(".opus");
+//        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//            ll.remove(".opus");
+//        }
         return ll.toArray(new String[]{});
     }
 
@@ -65,6 +71,13 @@ public class Factory {
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             ll.remove("mp3");
         }
+//        try {
+//            FormatOPUS.natives(context);
+//            Opus v = new Opus();
+//            ll.add("opus");
+//        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//            ll.remove("opus");
+//        }
         return ll.toArray(new String[]{});
     }
 
@@ -89,6 +102,9 @@ public class Factory {
         }
         if (ext.equals("flac")) {
             return new FormatFLAC(info, out);
+        }
+        if (ext.equals("opus")) {
+            return new FormatOPUS(context, info, out);
         }
         return null;
     }
@@ -138,6 +154,16 @@ public class Factory {
             long y1 = 1060832; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
             long y2 = 1296766; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.equals("opus")) {
+            long y1 = 531558; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 1093718; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;

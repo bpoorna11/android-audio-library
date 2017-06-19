@@ -171,7 +171,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                     }
                 });
             }
-        });
+        }, "Recordings scan");
         thread.start();
     }
 
