@@ -31,12 +31,8 @@ public class Factory {
             ll.remove(".ogg");
         if (FormatMP3.supported(context))
             ll.add(".mp3");
-        else
-            ll.remove(".mp3");
-        if (FormatOPUS.supported(context))
-            ll.add(".opus");
-        else
-            ll.remove(".opus");
+//        if (FormatOPUS.supported(context))
+//            ll.add(".opus");
         return ll.toArray(new String[]{});
     }
 
@@ -52,12 +48,8 @@ public class Factory {
             ll.remove("ogg");
         if (FormatMP3.supported(context))
             ll.add("mp3");
-        else
-            ll.remove("mp3");
-        if (FormatOPUS.supported(context))
-            ll.add("opus");
-        else
-            ll.remove("opus");
+//        if (FormatOPUS.supported(context))
+//            ll.add("opus");
         return ll.toArray(new String[]{});
     }
 

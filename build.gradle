@@ -126,7 +126,7 @@ dependencies {
     compile 'com.github.axet:vorbis:1.0.0-4' // debugCompile project(path:':android-vorbis', configuration:'libraryDebug')
     compile 'com.github.axet:lame:1.0.0-1' // compile project(':android-lame')
     compile 'com.github.axet:java-flac-encoder:0.3.8'
-    compile 'com.github.axet:opus:1.0.0-1' // compile project(':android-opus')
+    compile 'com.github.axet:opus:1.0.0-2' // compile project(':android-opus')
     compile 'com.github.axet:jssrc:1.0.2-1'
     testCompile 'junit:junit:4.12'
 }
