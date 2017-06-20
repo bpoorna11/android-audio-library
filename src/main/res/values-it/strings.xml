@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Audio Library</string>
+
+    <string-array name="encodings_text">
+        <item>.ogg (predefinito)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="title_header">%1$s liberi ~ %2$s rimanenti</string>
+    <string name="db">dB</string>
+    <string name="no">No</string>
+    <string name="yes">Sì</string>
+    <string name="are_you_sure">"Sei sicuro ? "</string>
+    <string name="delete_recording">Elimina la Registrazione</string>
+    <string name="rename_recording">Rinomina la Registrazione</string>
+    <string name="shared_via">"Condivisa tramite %1$s"</string>
+    <string name="file_not_found">File non trovato</string>
+    <string name="rename">Rinomina</string>
+    <string name="delete">Elimina</string>
+</resources>
