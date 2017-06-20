@@ -4,12 +4,8 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.os.Build;
 
-import com.github.axet.androidlibrary.app.Native;
 import com.github.axet.audiolibrary.R;
-import com.github.axet.audiolibrary.app.RawSamples;
 import com.github.axet.audiolibrary.app.Sound;
-import com.github.axet.lamejni.Lame;
-import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,20 +22,15 @@ public class Factory {
         ll.add(".flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add(".m4a");
-        if (Build.VERSION.SDK_INT >= 16)
-            ll.add(".mka");
-        try {
-            FormatOGG.natives(context);
-            Vorbis v = new Vorbis();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//        if (Build.VERSION.SDK_INT >= 16)
+//            ll.add(".mka");
+        if (!FormatOGG.supported(context))
             ll.remove(".ogg");
-        }
-        try {
-            FormatMP3.natives(context);
-            Lame v = new Lame();
+        if (FormatMP3.supported(context))
             ll.add(".mp3");
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
-            ll.remove(".mp3");
+        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+            if (FormatOPUS_OGG.supported(context))
+                ll.add(".opus");
         }
         return ll.toArray(new String[]{});
     }
@@ -50,20 +41,15 @@ public class Factory {
         ll.add("flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add("m4a");
-        if (Build.VERSION.SDK_INT >= 16)
-            ll.add("mka");
-        try {
-            FormatOGG.natives(context);
-            Vorbis v = new Vorbis();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//        if (Build.VERSION.SDK_INT >= 16)
+//            ll.add("mka");
+        if (!FormatOGG.supported(context))
             ll.remove("ogg");
-        }
-        try {
-            FormatMP3.natives(context);
-            Lame v = new Lame();
+        if (FormatMP3.supported(context))
             ll.add("mp3");
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
-            ll.remove("mp3");
+        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+            if (FormatOPUS_OGG.supported(context))
+                ll.add("opus");
         }
         return ll.toArray(new String[]{});
     }
@@ -79,7 +65,7 @@ public class Factory {
             return new FormatM4A(info, out);
         }
         if (ext.equals("mka")) {
-            return new FormatMKA(info, out);
+            return new FormatMKA_AAC(info, out);
         }
         if (ext.equals("ogg")) {
             return new FormatOGG(context, info, out);
@@ -89,6 +75,9 @@ public class Factory {
         }
         if (ext.equals("flac")) {
             return new FormatFLAC(info, out);
+        }
+        if (ext.equals("opus")) {
+            return new FormatOPUS_OGG(context, info, out); // android6+ supports ogg/opus
         }
         return null;
     }
@@ -138,6 +127,16 @@ public class Factory {
             long y1 = 1060832; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
             long y2 = 1296766; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.equals("opus")) {
+            long y1 = 531558; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 1093718; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;

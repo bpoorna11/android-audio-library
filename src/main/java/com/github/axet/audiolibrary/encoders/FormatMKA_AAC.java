@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @TargetApi(16) // mp4/aac codec
-public class FormatMKA implements Encoder {
+public class FormatMKA_AAC implements Encoder {
     public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode"; // MediaFormat.KEY_AAC_SBR_MODE
 
     EncoderInfo info;
@@ -30,7 +30,7 @@ public class FormatMKA implements Encoder {
 
     MatroskaFileFrame old;
 
-    public FormatMKA(EncoderInfo info, File out) {
+    public FormatMKA_AAC(EncoderInfo info, File out) {
         MediaFormat format = new MediaFormat();
         format.setString(MediaFormat.KEY_MIME, Factory.MP4A);
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.sampleRate);
@@ -87,7 +87,7 @@ public class FormatMKA implements Encoder {
         if (input == null)
             return;
         encoder.queueInputBuffer(inputIndex, 0, input.position(), getCurrentTimeStamp(), 0);
-        NumSamples += input.position() / info.channels / (Short.SIZE / 8);
+        NumSamples += input.position() / info.channels / (Short.SIZE / Byte.SIZE);
         input = null;
         while (encode())
             ;// do encode()

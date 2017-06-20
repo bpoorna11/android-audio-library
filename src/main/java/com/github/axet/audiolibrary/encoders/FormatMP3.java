@@ -17,10 +17,8 @@ public class FormatMP3 implements Encoder {
     File out;
     Lame lame;
 
-    static boolean natives = true;
-
     public static void natives(Context context) {
-        if (natives) {
+        if (Config.natives) {
             try {
                 System.loadLibrary("lame"); // API16 failed to find ogg dependency
                 System.loadLibrary("lamejni");
@@ -29,7 +27,16 @@ public class FormatMP3 implements Encoder {
                 Native.loadLibrary(context, "lamejni");
             }
             Config.natives = false;
-            natives = false;
+        }
+    }
+
+    public static boolean supported(Context context) {
+        try {
+            FormatMP3.natives(context);
+            Lame v = new Lame();
+            return true;
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            return false;
         }
     }
 

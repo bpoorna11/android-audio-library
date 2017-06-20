@@ -78,7 +78,7 @@ public class FileEncoder {
                     handler.post(error);
                 }
             }
-        });
+        }, "FileEncoder");
         thread.start();
     }
 
