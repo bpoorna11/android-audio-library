@@ -41,13 +41,7 @@ public class FormatOPUS_OGG implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            try {
-                System.loadLibrary("opus"); // API16 failed to find ogg dependency
-                System.loadLibrary("opusjni");
-            } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
-                Native.loadLibrary(context, "opus");
-                Native.loadLibrary(context, "opusjni");
-            }
+            Native.loadLibraries(context, new String[]{"opus", "opusjni"});
             Config.natives = false;
         }
     }
@@ -111,28 +105,6 @@ public class FormatOPUS_OGG implements Encoder {
             }
             opus = new Opus();
             opus.open(info.channels, hz, b);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // https://tools.ietf.org/html/rfc7845#page-12
-    ByteBuffer opusHead() {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream os = new DataOutputStream(bos);
-
-            // head
-            os.write(new byte[]{'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}); // Magic Signature, This is an 8-octet (64-bit) field
-            os.writeByte(1); // Version (8 bits, unsigned)
-            os.writeByte(info.channels); // Output Channel Count 'C' (8 bits, unsigned):
-            os.writeShort(0); // Pre-skip (16 bits, unsigned, little endian)
-            os.write(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ByteOrder.LITTLE_ENDIAN).putInt(info.sampleRate).array()); // Input Sample Rate (32 bits, unsigned, little endian)
-            os.writeShort(0); // Output Gain (16 bits, signed, little endian)
-            os.writeByte(0); // Channel Mapping Family (8 bits, unsigned)
-
-            os.close();
-            return ByteBuffer.wrap(bos.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

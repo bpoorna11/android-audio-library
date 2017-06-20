@@ -18,15 +18,7 @@ public class FormatOGG implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            try {
-                System.loadLibrary("ogg"); // API16 failed to find ogg dependency
-                System.loadLibrary("vorbis"); // API16 failed to find vorbis dependency
-                System.loadLibrary("vorbisjni");
-            } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
-                Native.loadLibrary(context, "ogg");
-                Native.loadLibrary(context, "vorbis");
-                Native.loadLibrary(context, "vorbisjni");
-            }
+            Native.loadLibraries(context, new String[]{"ogg", "vorbis", "vorbisjni"});
             Config.natives = false;
         }
     }

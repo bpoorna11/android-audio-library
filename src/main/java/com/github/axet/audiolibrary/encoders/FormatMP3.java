@@ -19,13 +19,7 @@ public class FormatMP3 implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            try {
-                System.loadLibrary("lame"); // API16 failed to find ogg dependency
-                System.loadLibrary("lamejni");
-            } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
-                Native.loadLibrary(context, "lame");
-                Native.loadLibrary(context, "lamejni");
-            }
+            Native.loadLibraries(context, new String[]{"lame", "lamejni"});
             Config.natives = false;
         }
     }

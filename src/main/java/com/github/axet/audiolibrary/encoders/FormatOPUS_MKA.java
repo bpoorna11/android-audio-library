@@ -38,13 +38,7 @@ public class FormatOPUS_MKA implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            try {
-                System.loadLibrary("opus"); // API16 failed to find ogg dependency
-                System.loadLibrary("opusjni");
-            } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
-                Native.loadLibrary(context, "opus");
-                Native.loadLibrary(context, "opusjni");
-            }
+            Native.loadLibraries(context, new String[]{"opus", "opusjni"});
             Config.natives = false;
         }
     }
