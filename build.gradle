@@ -128,5 +128,6 @@ dependencies {
     compile 'com.github.axet:java-flac-encoder:0.3.8'
     compile 'com.github.axet:opus:1.0.0-2' // compile project(':android-opus')
     compile 'com.github.axet:jssrc:1.0.2-1'
+    compile 'org.gagravarr:vorbis-java-core:0.8'
     testCompile 'junit:junit:4.12'
 }

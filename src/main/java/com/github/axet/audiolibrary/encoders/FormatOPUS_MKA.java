@@ -2,12 +2,8 @@ package com.github.axet.audiolibrary.encoders;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.media.AudioFormat;
-import android.util.Log;
 
-import com.github.axet.androidlibrary.app.MainApplication;
 import com.github.axet.androidlibrary.app.Native;
-import com.github.axet.androidlibrary.sound.Sound;
 import com.github.axet.opusjni.Config;
 import com.github.axet.opusjni.Opus;
 
@@ -16,23 +12,18 @@ import org.ebml.matroska.MatroskaFileFrame;
 import org.ebml.matroska.MatroskaFileTrack;
 import org.ebml.matroska.MatroskaFileWriter;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-import vavi.sound.pcm.resampling.ssrc.SSRC;
-
 // https://wiki.xiph.org/MatroskaOpus
 @TargetApi(21)
-public class FormatOPUS implements Encoder {
-    public static final String TAG = FormatOPUS.class.getSimpleName();
+public class FormatOPUS_MKA implements Encoder {
+    public static final String TAG = FormatOPUS_MKA.class.getSimpleName();
 
     EncoderInfo info;
     Opus opus;
@@ -60,7 +51,7 @@ public class FormatOPUS implements Encoder {
 
     public static boolean supported(Context context) {
         try {
-            FormatOPUS.natives(context);
+            FormatOPUS_MKA.natives(context);
             Opus v = new Opus();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
@@ -68,7 +59,7 @@ public class FormatOPUS implements Encoder {
         }
     }
 
-    public FormatOPUS(Context context, EncoderInfo info, File out) {
+    public FormatOPUS_MKA(Context context, EncoderInfo info, File out) {
         natives(context);
         create(info, out);
     }

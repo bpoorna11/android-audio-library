@@ -6,9 +6,6 @@ import android.os.Build;
 
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.app.Sound;
-import com.github.axet.lamejni.Lame;
-import com.github.axet.opusjni.Opus;
-import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,8 +28,10 @@ public class Factory {
             ll.remove(".ogg");
         if (FormatMP3.supported(context))
             ll.add(".mp3");
-//        if (FormatOPUS.supported(context))
-//            ll.add(".opus");
+        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+            if (FormatOPUS_OGG.supported(context))
+                ll.add(".opus");
+        }
         return ll.toArray(new String[]{});
     }
 
@@ -48,8 +47,10 @@ public class Factory {
             ll.remove("ogg");
         if (FormatMP3.supported(context))
             ll.add("mp3");
-//        if (FormatOPUS.supported(context))
-//            ll.add("opus");
+        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+            if (FormatOPUS_OGG.supported(context))
+                ll.add("opus");
+        }
         return ll.toArray(new String[]{});
     }
 
@@ -64,7 +65,7 @@ public class Factory {
             return new FormatM4A(info, out);
         }
         if (ext.equals("mka")) {
-            return new FormatMKA(info, out);
+            return new FormatMKA_AAC(info, out);
         }
         if (ext.equals("ogg")) {
             return new FormatOGG(context, info, out);
@@ -76,7 +77,7 @@ public class Factory {
             return new FormatFLAC(info, out);
         }
         if (ext.equals("opus")) {
-            return new FormatOPUS(context, info, out);
+            return new FormatOPUS_OGG(context, info, out); // android6+ supports ogg/opus
         }
         return null;
     }
