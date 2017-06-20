@@ -58,6 +58,16 @@ public class FormatOPUS implements Encoder {
         }
     }
 
+    public static boolean supported(Context context) {
+        try {
+            FormatOPUS.natives(context);
+            Opus v = new Opus();
+            return true;
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            return false;
+        }
+    }
+
     public FormatOPUS(Context context, EncoderInfo info, File out) {
         natives(context);
         create(info, out);
@@ -86,7 +96,6 @@ public class FormatOPUS implements Encoder {
     public void create(final EncoderInfo info, File out) {
         this.info = info;
         try {
-            writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
             audio.setSamplingFrequency(info.sampleRate);
             audio.setOutputSamplingFrequency(info.sampleRate);
@@ -96,6 +105,11 @@ public class FormatOPUS implements Encoder {
             track.setCodecID("A_OPUS");
             track.setAudio(audio);
             track.setTrackType(MatroskaFileTrack.TrackType.AUDIO);
+            track.setFlagDefault(true);
+            track.setFlagEnabled(true);
+            track.setTrackNo(1);
+            track.setFlagForced(true);
+            writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
             writer.addTrack(track);
 
             hz = match(info.sampleRate);
@@ -133,11 +147,6 @@ public class FormatOPUS implements Encoder {
             os.write(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ByteOrder.LITTLE_ENDIAN).putInt(info.sampleRate).array()); // Input Sample Rate (32 bits, unsigned, little endian)
             os.writeShort(0); // Output Gain (16 bits, signed, little endian)
             os.writeByte(0); // Channel Mapping Family (8 bits, unsigned)
-
-            // tags
-            os.write(new byte[]{'O', 'p', 'u', 's', 'T', 'a', 'g', 's'}); // Magic Signature, This is an 8-octet (64-bit)
-            os.writeShort(0); // Vendor String Length (32 bits, unsigned, little endian)
-            os.writeShort(0); // User Comment List Length (32 bits, unsigned, little endian)
 
             os.close();
             return ByteBuffer.wrap(bos.toByteArray());

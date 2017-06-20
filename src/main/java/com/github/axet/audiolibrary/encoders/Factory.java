@@ -25,28 +25,18 @@ public class Factory {
         ll.add(".flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add(".m4a");
-        if (Build.VERSION.SDK_INT >= 16)
-            ll.add(".mka");
-        try {
-            FormatOGG.natives(context);
-            Vorbis v = new Vorbis();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//        if (Build.VERSION.SDK_INT >= 16)
+//            ll.add(".mka");
+        if (!FormatOGG.supported(context))
             ll.remove(".ogg");
-        }
-        try {
-            FormatMP3.natives(context);
-            Lame v = new Lame();
+        if (FormatMP3.supported(context))
             ll.add(".mp3");
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+        else
             ll.remove(".mp3");
-        }
-//        try {
-//            FormatOPUS.natives(context);
-//            Opus v = new Opus();
-//            ll.add(".opus");
-//        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
-//            ll.remove(".opus");
-//        }
+        if (FormatOPUS.supported(context))
+            ll.add(".opus");
+        else
+            ll.remove(".opus");
         return ll.toArray(new String[]{});
     }
 
@@ -56,28 +46,18 @@ public class Factory {
         ll.add("flac");
         if (Build.VERSION.SDK_INT >= 18)
             ll.add("m4a");
-        if (Build.VERSION.SDK_INT >= 16)
-            ll.add("mka");
-        try {
-            FormatOGG.natives(context);
-            Vorbis v = new Vorbis();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+//        if (Build.VERSION.SDK_INT >= 16)
+//            ll.add("mka");
+        if (!FormatOGG.supported(context))
             ll.remove("ogg");
-        }
-        try {
-            FormatMP3.natives(context);
-            Lame v = new Lame();
+        if (FormatMP3.supported(context))
             ll.add("mp3");
-        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+        else
             ll.remove("mp3");
-        }
-//        try {
-//            FormatOPUS.natives(context);
-//            Opus v = new Opus();
-//            ll.add("opus");
-//        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
-//            ll.remove("opus");
-//        }
+        if (FormatOPUS.supported(context))
+            ll.add("opus");
+        else
+            ll.remove("opus");
         return ll.toArray(new String[]{});
     }
 

@@ -31,6 +31,16 @@ public class FormatOGG implements Encoder {
         }
     }
 
+    public static boolean supported(Context context) {
+        try {
+            FormatOGG.natives(context);
+            Vorbis v = new Vorbis();
+            return true;
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            return false;
+        }
+    }
+
     public FormatOGG(Context context, EncoderInfo info, File out) {
         natives(context);
         vorbis = new Vorbis();

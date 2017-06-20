@@ -30,6 +30,16 @@ public class FormatMP3 implements Encoder {
         }
     }
 
+    public static boolean supported(Context context) {
+        try {
+            FormatMP3.natives(context);
+            Lame v = new Lame();
+            return true;
+        } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
+            return false;
+        }
+    }
+
     public FormatMP3(Context context, EncoderInfo info, File out) {
         natives(context);
         this.out = out;
