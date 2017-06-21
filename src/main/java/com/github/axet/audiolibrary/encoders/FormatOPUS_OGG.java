@@ -41,13 +41,7 @@ public class FormatOPUS_OGG implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            try {
-                System.loadLibrary("opus"); // API16 failed to find ogg dependency
-                System.loadLibrary("opusjni");
-            } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
-                Native.loadLibrary(context, "opus");
-                Native.loadLibrary(context, "opusjni");
-            }
+            Native.loadLibraries(context, new String[]{"opus", "opusjni"});
             Config.natives = false;
         }
     }
@@ -116,40 +110,11 @@ public class FormatOPUS_OGG implements Encoder {
         }
     }
 
-    // https://tools.ietf.org/html/rfc7845#page-12
-    ByteBuffer opusHead() {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream os = new DataOutputStream(bos);
-
-            // head
-            os.write(new byte[]{'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}); // Magic Signature, This is an 8-octet (64-bit) field
-            os.writeByte(1); // Version (8 bits, unsigned)
-            os.writeByte(info.channels); // Output Channel Count 'C' (8 bits, unsigned):
-            os.writeShort(0); // Pre-skip (16 bits, unsigned, little endian)
-            os.write(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ByteOrder.LITTLE_ENDIAN).putInt(info.sampleRate).array()); // Input Sample Rate (32 bits, unsigned, little endian)
-            os.writeShort(0); // Output Gain (16 bits, signed, little endian)
-            os.writeByte(0); // Channel Mapping Family (8 bits, unsigned)
-
-            os.close();
-            return ByteBuffer.wrap(bos.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public void encode(short[] buf, int len) {
         if (resample != null) {
             resample.write(buf, len);
-            ByteBuffer bb;
-            while ((bb = resample.read()) != null) {
-                len = bb.position() / (Short.SIZE / Byte.SIZE);
-                short[] b = new short[len];
-                bb.flip();
-                bb.asShortBuffer().get(b, 0, len);
-                encode2(b, len);
-            }
+            resample();
             return;
         }
         encode2(buf, len);
@@ -195,10 +160,21 @@ public class FormatOPUS_OGG implements Encoder {
         }
     }
 
+    void resample() {
+        ByteBuffer bb;
+        while ((bb = resample.read()) != null) {
+            int len = bb.position() / (Short.SIZE / Byte.SIZE);
+            short[] b = new short[len];
+            bb.flip();
+            bb.asShortBuffer().get(b, 0, len);
+            encode2(b, len);
+        }
+    }
+
     void encode(ByteBuffer bb, long dur) {
         OpusAudioData frame = new OpusAudioData(bb.array());
         long gr = NumSamples + dur;
-        gr = 48000 / info.sampleRate * gr; // gr always at 48000hz
+        gr = 48000 * gr / info.sampleRate; // gr always at 48000hz
         frame.setGranulePosition(gr);
         writer.writeAudioData(frame);
     }
@@ -206,14 +182,7 @@ public class FormatOPUS_OGG implements Encoder {
     public void close() {
         if (resample != null) {
             resample.end();
-            ByteBuffer bb;
-            while ((bb = resample.read()) != null) {
-                int len = bb.position() / (Short.SIZE / Byte.SIZE);
-                short[] buf = new short[len];
-                bb.flip();
-                bb.asShortBuffer().get(buf, 0, len);
-                encode2(buf, len);
-            }
+            resample();
             resample.close();
             resample = null;
         }
