@@ -89,8 +89,9 @@ public class MuxerMP4 implements Encoder {
     }
 
     @Override
-    public void encode(short[] buf, int len) {
-        for (int offset = 0; offset < len; offset++) {
+    public void encode(short[] buf, int pos, int len) {
+        int end = pos + len;
+        for (int offset = pos; offset < end; offset++) {
             if (input == null) {
                 inputIndex = encoder.dequeueInputBuffer(-1);
                 if (inputIndex < 0)
@@ -152,7 +153,7 @@ public class MuxerMP4 implements Encoder {
     }
 
     long getCurrentTimeStamp() {
-        return NumSamples * 1000 * 1000 / info.sampleRate;
+        return NumSamples * 1000 * 1000 / info.hz;
     }
 
     public void end() {
@@ -178,5 +179,4 @@ public class MuxerMP4 implements Encoder {
     public EncoderInfo getInfo() {
         return info;
     }
-
 }

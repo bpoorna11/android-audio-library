@@ -44,7 +44,7 @@ public class FormatOPUS_OGG extends FormatOPUS {
             o.setNumChannels(info.channels);
             o.setOutputGain(0);
             o.setPreSkip(0);
-            o.setSampleRate(info.sampleRate);
+            o.setSampleRate(info.hz);
             writer = new OpusFile(new FileOutputStream(out), o, new OpusTags());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -55,7 +55,7 @@ public class FormatOPUS_OGG extends FormatOPUS {
     void encode(ByteBuffer bb, long dur) {
         OpusAudioData frame = new OpusAudioData(bb.array());
         long gr = NumSamples + dur;
-        gr = 48000 * gr / info.sampleRate; // Ogg gr always at 48000hz
+        gr = 48000 * gr / info.hz; // Ogg gr always at 48000hz
         frame.setGranulePosition(gr);
         writer.writeAudioData(frame);
     }
@@ -69,5 +69,4 @@ public class FormatOPUS_OGG extends FormatOPUS {
             throw new RuntimeException(e);
         }
     }
-
 }

@@ -14,10 +14,14 @@ import org.ebml.matroska.MatroskaFileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @TargetApi(16) // mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
     public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode"; // MediaFormat.KEY_AAC_SBR_MODE
+
+    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final int BUFFER_FLAG_KEY_FRAME = 1; // MediaCodec.BUFFER_FLAG_KEY_FRAME
 
     EncoderInfo info;
     MediaCodec encoder;
@@ -33,9 +37,9 @@ public class FormatMKA_AAC implements Encoder {
     public FormatMKA_AAC(EncoderInfo info, File out) {
         MediaFormat format = new MediaFormat();
         format.setString(MediaFormat.KEY_MIME, Factory.MP4A);
-        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.sampleRate);
+        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz);
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, Factory.getBitrate(info.hz));
         format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectHE);
         format.setInteger(KEY_AAC_SBR_MODE, 0);
         create(info, format, out);
@@ -49,8 +53,8 @@ public class FormatMKA_AAC implements Encoder {
             encoder.start();
             writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
-            audio.setSamplingFrequency(info.sampleRate);
-            audio.setOutputSamplingFrequency(info.sampleRate);
+            audio.setSamplingFrequency(info.hz);
+            audio.setOutputSamplingFrequency(info.hz);
             audio.setBitDepth(info.bps);
             audio.setChannels((short) info.channels);
             track = new MatroskaFileTrack();
@@ -64,8 +68,9 @@ public class FormatMKA_AAC implements Encoder {
     }
 
     @Override
-    public void encode(short[] buf, int len) {
-        for (int offset = 0; offset < len; offset++) {
+    public void encode(short[] buf, int pos, int len) {
+        int end = pos + len;
+        for (int offset = pos; offset < end; offset++) {
             if (input == null) {
                 inputIndex = encoder.dequeueInputBuffer(-1);
                 if (inputIndex < 0)
@@ -87,7 +92,7 @@ public class FormatMKA_AAC implements Encoder {
         if (input == null)
             return;
         encoder.queueInputBuffer(inputIndex, 0, input.position(), getCurrentTimeStamp(), 0);
-        NumSamples += input.position() / info.channels / (Short.SIZE / Byte.SIZE);
+        NumSamples += input.position() / info.channels / SHORT_BYTES;
         input = null;
         while (encode())
             ;// do encode()
@@ -101,8 +106,6 @@ public class FormatMKA_AAC implements Encoder {
         clone.flip();
         return clone;
     }
-
-    public static final int BUFFER_FLAG_KEY_FRAME = 1; // MediaCodec.BUFFER_FLAG_KEY_FRAME
 
     boolean encode() {
         MediaCodec.BufferInfo outputInfo = new MediaCodec.BufferInfo();
@@ -157,7 +160,7 @@ public class FormatMKA_AAC implements Encoder {
     }
 
     long getCurrentTimeStamp() {
-        return NumSamples * 1000 * 1000 / info.sampleRate;
+        return NumSamples * 1000 * 1000 / info.hz;
     }
 
     public void end() {

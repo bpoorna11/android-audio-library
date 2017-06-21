@@ -12,9 +12,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Factory {
-
     public static String MP4 = "audio/mp4";
     public static String MP4A = "audio/mp4a-latm";
+
+    public static int getBitrate(int hz) {
+        int b = 128000;
+        if (hz < 16000) {
+            b = 32000;
+        } else if (hz < 44100) {
+            b = 64000;
+        }
+        return b;
+    }
 
     public static CharSequence[] getEncodingTexts(Context context) {
         String[] aa = context.getResources().getStringArray(R.array.encodings_text);

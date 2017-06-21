@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ShortBuffer;
 
 public class FormatMP3 implements Encoder {
     RandomAccessFile writer;
@@ -38,13 +39,8 @@ public class FormatMP3 implements Encoder {
         natives(context);
         this.out = out;
         lame = new Lame();
-        int b = 128;
-        if (info.sampleRate < 16000) {
-            b = 32;
-        } else if (info.sampleRate < 44100) {
-            b = 64;
-        }
-        lame.open(info.channels, info.sampleRate, b);
+        int b = Factory.getBitrate(info.hz) / 1000;
+        lame.open(info.channels, info.hz, b);
         try {
             writer = new RandomAccessFile(out, "rw");
         } catch (IOException e) {
@@ -53,8 +49,10 @@ public class FormatMP3 implements Encoder {
     }
 
     @Override
-    public void encode(short[] buf, int len) {
-        byte[] bb = lame.encode(buf, len);
+    public void encode(short[] buf, int pos, int len) {
+        ShortBuffer s = ShortBuffer.allocate(len);
+        s.put(buf, pos, len);
+        byte[] bb = lame.encode(s.array(), len);
         try {
             writer.write(bb);
         } catch (IOException e) {

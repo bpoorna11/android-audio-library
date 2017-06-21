@@ -25,6 +25,8 @@ import java.nio.ShortBuffer;
 public class FormatOPUS_MKA extends FormatOPUS {
     public static final String TAG = FormatOPUS_MKA.class.getSimpleName();
 
+    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+
     MatroskaFileWriter writer;
     MatroskaFileTrack track;
     MatroskaFileTrack.MatroskaAudioTrack audio;
@@ -37,8 +39,8 @@ public class FormatOPUS_MKA extends FormatOPUS {
         super.create(info, out);
         try {
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
-            audio.setSamplingFrequency(info.sampleRate);
-            audio.setOutputSamplingFrequency(info.sampleRate);
+            audio.setSamplingFrequency(info.hz);
+            audio.setOutputSamplingFrequency(info.hz);
             audio.setBitDepth(info.bps);
             audio.setChannels((short) info.channels);
             track = new MatroskaFileTrack();
@@ -69,7 +71,7 @@ public class FormatOPUS_MKA extends FormatOPUS {
             os.writeByte(1); // Version (8 bits, unsigned)
             os.writeByte(info.channels); // Output Channel Count 'C' (8 bits, unsigned):
             os.writeShort(0); // Pre-skip (16 bits, unsigned, little endian)
-            os.write(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ByteOrder.LITTLE_ENDIAN).putInt(info.sampleRate).array()); // Input Sample Rate (32 bits, unsigned, little endian)
+            os.write(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ORDER).putInt(info.hz).array()); // Input Sample Rate (32 bits, unsigned, little endian)
             os.writeShort(0); // Output Gain (16 bits, signed, little endian)
             os.writeByte(0); // Channel Mapping Family (8 bits, unsigned)
 
@@ -96,5 +98,4 @@ public class FormatOPUS_MKA extends FormatOPUS {
         writer.setDuration(getCurrentTimeStamp());
         writer.close();
     }
-
 }

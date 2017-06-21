@@ -60,7 +60,7 @@ public class FileEncoder {
                         if (len <= 0) {
                             break;
                         } else {
-                            encoder.encode(buf, len);
+                            encoder.encode(buf, 0, len);
                             handler.post(progress);
                             synchronized (thread) {
                                 cur += len;

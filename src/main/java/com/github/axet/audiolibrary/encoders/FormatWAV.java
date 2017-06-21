@@ -5,6 +5,7 @@ package com.github.axet.audiolibrary.encoders;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 
 public class FormatWAV implements Encoder {
     int NumSamples;
@@ -12,7 +13,8 @@ public class FormatWAV implements Encoder {
     int BytesPerSample;
     RandomAccessFile outFile;
 
-    ByteOrder order = ByteOrder.LITTLE_ENDIAN;
+    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     public FormatWAV(EncoderInfo info, File out) {
         this.info = info;
@@ -35,24 +37,24 @@ public class FormatWAV implements Encoder {
         int ChunkSize = 4 + (8 + SubChunk1Size) + (8 + SubChunk2Size);
 
         write("RIFF", ByteOrder.BIG_ENDIAN);
-        write(ChunkSize, order);
+        write(ChunkSize, ORDER);
         write("WAVE", ByteOrder.BIG_ENDIAN);
 
-        int ByteRate = info.sampleRate * info.channels * BytesPerSample;
+        int ByteRate = info.hz * info.channels * BytesPerSample;
         short AudioFormat = 1; // PCM = 1 (i.e. Linear quantization)
         int BlockAlign = BytesPerSample * info.channels;
 
         write("fmt ", ByteOrder.BIG_ENDIAN);
-        write(SubChunk1Size, order);
-        write((short)AudioFormat, order); //short
-        write((short) info.channels, order); // short
-        write(info.sampleRate, order);
-        write(ByteRate, order);
-        write((short)BlockAlign, order); // short
-        write((short)info.bps, order); // short
+        write(SubChunk1Size, ORDER);
+        write((short) AudioFormat, ORDER); //short
+        write((short) info.channels, ORDER); // short
+        write(info.hz, ORDER);
+        write(ByteRate, ORDER);
+        write((short) BlockAlign, ORDER); // short
+        write((short) info.bps, ORDER); // short
 
         write("data", ByteOrder.BIG_ENDIAN);
-        write(SubChunk2Size, order);
+        write(SubChunk2Size, ORDER);
     }
 
     void write(String str, ByteOrder order) {
@@ -74,7 +76,6 @@ public class FormatWAV implements Encoder {
         bb.order(order);
         bb.putInt(i);
         bb.flip();
-
         try {
             outFile.write(bb.array());
         } catch (IOException e) {
@@ -83,11 +84,10 @@ public class FormatWAV implements Encoder {
     }
 
     void write(short i, ByteOrder order) {
-        ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
+        ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
         bb.order(order);
         bb.putShort(i);
         bb.flip();
-
         try {
             outFile.write(bb.array());
         } catch (IOException e) {
@@ -95,13 +95,13 @@ public class FormatWAV implements Encoder {
         }
     }
 
-    public void encode(short[] buf, int buflen) {
+    @Override
+    public void encode(short[] buf, int pos, int buflen) {
         NumSamples += buflen / info.channels;
         try {
-            ByteBuffer bb = ByteBuffer.allocate(buflen * (Short.SIZE / Byte.SIZE));
-            bb.order(order);
-            for (int i = 0; i < buflen; i++)
-                bb.putShort(buf[i]);
+            ByteBuffer bb = ByteBuffer.allocate(buflen * SHORT_BYTES);
+            bb.order(ORDER);
+            bb.asShortBuffer().put(buf, pos, buflen);
             bb.flip();
             outFile.write(bb.array());
         } catch (IOException e) {
@@ -130,5 +130,4 @@ public class FormatWAV implements Encoder {
     public EncoderInfo getInfo() {
         return info;
     }
-
 }
