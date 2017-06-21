@@ -1,16 +1,15 @@
 package com.github.axet.audiolibrary.encoders;
 
 import android.content.Context;
-import android.os.Build;
 
 import com.github.axet.androidlibrary.app.Native;
-import com.github.axet.vorbisjni.Vorbis;
 import com.github.axet.vorbisjni.Config;
+import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.nio.ShortBuffer;
 
 public class FormatOGG implements Encoder {
     FileOutputStream writer;
@@ -36,7 +35,7 @@ public class FormatOGG implements Encoder {
     public FormatOGG(Context context, EncoderInfo info, File out) {
         natives(context);
         vorbis = new Vorbis();
-        vorbis.open(info.channels, info.sampleRate, 0.4f);
+        vorbis.open(info.channels, info.hz, 0.4f);
         try {
             writer = new FileOutputStream(out);
         } catch (IOException e) {
@@ -45,8 +44,8 @@ public class FormatOGG implements Encoder {
     }
 
     @Override
-    public void encode(short[] buf, int len) {
-        byte[] bb = vorbis.encode(buf, len);
+    public void encode(short[] buf, int pos, int len) {
+        byte[] bb = vorbis.encode(buf, pos, len);
         try {
             writer.write(bb);
         } catch (IOException e) {
@@ -57,7 +56,7 @@ public class FormatOGG implements Encoder {
     @Override
     public void close() {
         try {
-            byte[] bb = vorbis.encode(null, 0);
+            byte[] bb = vorbis.encode(null, 0, 0);
             writer.write(bb);
             writer.close();
         } catch (IOException e) {

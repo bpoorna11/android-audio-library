@@ -15,9 +15,9 @@ public class FormatM4A extends MuxerMP4 {
         if (map.isEmpty())
             throw new RuntimeException("mp4 not supported");
         MediaFormat format = MuxerMP4.getDefault(Factory.MP4A, map);
-        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.sampleRate);
+        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz);
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, Factory.getBitrate(info.hz));
         create(info, format, out);
     }
 

@@ -16,12 +16,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 // https://wiki.xiph.org/MatroskaOpus
 @TargetApi(21)
 public class FormatOPUS implements Encoder {
     public static final String TAG = FormatOPUS.class.getSimpleName();
+
+    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     EncoderInfo info;
     Opus opus;
@@ -75,39 +78,35 @@ public class FormatOPUS implements Encoder {
 
     public void create(final EncoderInfo info, File out) {
         this.info = info;
-        this.hz = match(info.sampleRate);
+        this.hz = match(info.hz);
 
-        if (hz != info.sampleRate) {
-            resample = new Resample(info.sampleRate, info.channels, hz);
+        if (hz != info.hz) {
+            resample = new Resample(info.hz, info.channels, hz);
         }
 
-        int b = 128000;
-        if (info.sampleRate < 16000) {
-            b = 32000;
-        } else if (info.sampleRate < 44100) {
-            b = 64000;
-        }
+        int b = Factory.getBitrate(info.hz);
         opus = new Opus();
         opus.open(info.channels, hz, b);
     }
 
     @Override
-    public void encode(short[] buf, int len) {
+    public void encode(short[] buf, int pos, int len) {
         if (resample != null) {
-            resample.write(buf, len);
+            resample.write(buf, pos, len);
             resample();
             return;
         }
-        encode2(buf, len);
+        encode2(buf, pos, len);
     }
 
-    void encode2(short[] buf, int len) {
+    void encode2(short[] buf, int pos, int len) {
         if (left != null) {
             ShortBuffer ss = ShortBuffer.allocate(left.position() + len);
             left.flip();
             ss.put(left);
-            ss.put(buf, 0, len);
+            ss.put(buf, pos, len);
             buf = ss.array();
+            pos = 0;
             len = ss.position();
         }
         if (frameSize == 0) {
@@ -127,15 +126,16 @@ public class FormatOPUS implements Encoder {
         }
         int frameSizeStereo = frameSize * info.channels;
         int lenEncode = len / frameSizeStereo * frameSizeStereo;
-        for (int pos = 0; pos < lenEncode; pos += frameSizeStereo) {
-            byte[] bb = opus.encode(buf, pos, frameSizeStereo);
+        int end = pos + lenEncode;
+        for (int p = pos; p < end; p += frameSizeStereo) {
+            byte[] bb = opus.encode(buf, p, frameSizeStereo);
             encode(ByteBuffer.wrap(bb), frameSize);
             NumSamples += frameSizeStereo / info.channels;
         }
         int diff = len - lenEncode;
         if (diff > 0) {
             left = ShortBuffer.allocate(diff);
-            left.put(buf, lenEncode, diff);
+            left.put(buf, end, diff);
         } else {
             left = null;
         }
@@ -144,11 +144,11 @@ public class FormatOPUS implements Encoder {
     void resample() {
         ByteBuffer bb;
         while ((bb = resample.read()) != null) {
-            int len = bb.position() / (Short.SIZE / Byte.SIZE);
+            int len = bb.position() / SHORT_BYTES;
             short[] b = new short[len];
             bb.flip();
             bb.asShortBuffer().get(b, 0, len);
-            encode2(b, len);
+            encode2(b, 0, len);
         }
     }
 
@@ -166,7 +166,7 @@ public class FormatOPUS implements Encoder {
     }
 
     long getCurrentTimeStamp() {
-        return NumSamples * 1000 / info.sampleRate;
+        return NumSamples * 1000 / info.hz;
     }
 
     public EncoderInfo getInfo() {

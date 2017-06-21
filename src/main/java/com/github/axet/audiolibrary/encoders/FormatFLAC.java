@@ -6,26 +6,19 @@ import net.sourceforge.javaflacencoder.StreamConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class FormatFLAC implements Encoder {
     int NumSamples;
     EncoderInfo info;
-    int BytesPerSample;
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;
 
-    ByteOrder order = ByteOrder.LITTLE_ENDIAN;
-
     public FormatFLAC(EncoderInfo info, File out) {
         this.info = info;
-        NumSamples = 0;
-        BytesPerSample = info.bps / 8;
+        this.NumSamples = 0;
 
         StreamConfiguration streamConfiguration = new StreamConfiguration();
-        streamConfiguration.setSampleRate(info.sampleRate);
+        streamConfiguration.setSampleRate(info.hz);
         streamConfiguration.setBitsPerSample(info.bps);
         streamConfiguration.setChannelCount(info.channels);
 
@@ -40,10 +33,12 @@ public class FormatFLAC implements Encoder {
         }
     }
 
-    public void encode(short[] buf, int buflen) {
+    @Override
+    public void encode(short[] buf, int pos, int buflen) {
         try {
             int[] ii = new int[buflen];
-            for (int i = 0; i < buflen; i++)
+            int end = pos + buflen;
+            for (int i = pos; i < end; i++)
                 ii[i] = buf[i];
             int count = buflen / info.channels;
             flacEncoder.addSamples(ii, count);
@@ -53,6 +48,7 @@ public class FormatFLAC implements Encoder {
         }
     }
 
+    @Override
     public void close() {
         try {
             flacEncoder.encodeSamples(flacEncoder.samplesAvailableToEncode(), true);
@@ -61,5 +57,4 @@ public class FormatFLAC implements Encoder {
             throw new RuntimeException(e);
         }
     }
-
 }

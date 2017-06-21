@@ -12,8 +12,10 @@ import java.nio.ByteOrder;
 import vavi.sound.pcm.resampling.ssrc.SSRC;
 
 public class Resample {
-
     public static String TAG = Resample.class.getSimpleName();
+
+    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     Thread thread = null;
     PipedOutputStream is;
@@ -55,13 +57,13 @@ public class Resample {
         }
     }
 
-    public void write(short[] buf, int len) {
+    public void write(short[] buf, int pos, int len) {
         if (delayed != null)
             throw delayed;
         try {
-            ByteBuffer bb = ByteBuffer.allocate(len * (Short.SIZE / Byte.SIZE));
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-            bb.asShortBuffer().put(buf, 0, len);
+            ByteBuffer bb = ByteBuffer.allocate(len * SHORT_BYTES);
+            bb.order(ORDER);
+            bb.asShortBuffer().put(buf, pos, len);
             is.write(bb.array());
             is.flush();
         } catch (IOException e) {
@@ -79,7 +81,7 @@ public class Resample {
             byte[] b = new byte[blen];
             int read = os.read(b);
             ByteBuffer bb = ByteBuffer.allocate(read);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.order(ORDER);
             bb.put(b, 0, read);
             return bb;
         } catch (IOException e) {
@@ -98,5 +100,4 @@ public class Resample {
             thread = null;
         }
     }
-
 }

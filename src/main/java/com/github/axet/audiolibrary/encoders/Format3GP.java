@@ -26,7 +26,7 @@ public class Format3GP extends MuxerMP4 {
 //            final int kBitRates[] = {4750, 5150, 5900, 6700, 7400, 7950, 10200, 12200};
 
             format.setString(MediaFormat.KEY_MIME, "audio/3gpp");
-            format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.sampleRate); // 8000 only supported
+            format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz); // 8000 only supported
             format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
             format.setInteger(MediaFormat.KEY_BIT_RATE, 12200); // set maximum
         }
