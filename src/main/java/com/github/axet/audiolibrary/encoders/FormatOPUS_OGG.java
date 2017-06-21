@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-// https://wiki.xiph.org/MatroskaOpus
+// https://wiki.xiph.org/MatroskaOpus | https://wiki.xiph.org/OggOpus
 @TargetApi(21)
 public class FormatOPUS_OGG extends FormatOPUS {
     public static final String TAG = FormatOPUS_OGG.class.getSimpleName();
