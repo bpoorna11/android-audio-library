@@ -1,8 +1,10 @@
 package com.github.axet.audiolibrary.app;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -28,6 +30,7 @@ import android.widget.Toast;
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
+import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
 import com.github.axet.audiolibrary.encoders.Factory;
@@ -275,6 +278,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         String ext = Storage.getExt(f);
                         String s = String.format("%s.%s", e.getText(), ext);
                         File ff = new File(f.getParent(), s);
+                        if (ff.exists())
+                            ff = Storage.getNextFile(ff);
                         f.renameTo(ff);
                         load(null);
                     }
@@ -335,13 +340,23 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                 }
             });
 
-            View trash = convertView.findViewById(R.id.recording_player_trash);
-            trash.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    delete.run();
-                }
-            });
+            KeyguardManager myKM = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
+            final boolean locked = myKM.inKeyguardRestrictedInputMode();
+
+            ImageView trash = (ImageView) convertView.findViewById(R.id.recording_player_trash);
+            if (locked) {
+                trash.setOnClickListener(null);
+                trash.setClickable(true);
+                trash.setColorFilter(Color.GRAY);
+            } else {
+                trash.setColorFilter(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent));
+                trash.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        delete.run();
+                    }
+                });
+            }
 
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
