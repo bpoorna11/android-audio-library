@@ -114,14 +114,7 @@ public class FormatOPUS_OGG implements Encoder {
     public void encode(short[] buf, int len) {
         if (resample != null) {
             resample.write(buf, len);
-            ByteBuffer bb;
-            while ((bb = resample.read()) != null) {
-                len = bb.position() / (Short.SIZE / Byte.SIZE);
-                short[] b = new short[len];
-                bb.flip();
-                bb.asShortBuffer().get(b, 0, len);
-                encode2(b, len);
-            }
+            resample();
             return;
         }
         encode2(buf, len);
@@ -167,10 +160,21 @@ public class FormatOPUS_OGG implements Encoder {
         }
     }
 
+    void resample() {
+        ByteBuffer bb;
+        while ((bb = resample.read()) != null) {
+            int len = bb.position() / (Short.SIZE / Byte.SIZE);
+            short[] b = new short[len];
+            bb.flip();
+            bb.asShortBuffer().get(b, 0, len);
+            encode2(b, len);
+        }
+    }
+
     void encode(ByteBuffer bb, long dur) {
         OpusAudioData frame = new OpusAudioData(bb.array());
         long gr = NumSamples + dur;
-        gr = 48000 / info.sampleRate * gr; // gr always at 48000hz
+        gr = 48000 * gr / info.sampleRate; // gr always at 48000hz
         frame.setGranulePosition(gr);
         writer.writeAudioData(frame);
     }
@@ -178,14 +182,7 @@ public class FormatOPUS_OGG implements Encoder {
     public void close() {
         if (resample != null) {
             resample.end();
-            ByteBuffer bb;
-            while ((bb = resample.read()) != null) {
-                int len = bb.position() / (Short.SIZE / Byte.SIZE);
-                short[] buf = new short[len];
-                bb.flip();
-                bb.asShortBuffer().get(buf, 0, len);
-                encode2(buf, len);
-            }
+            resample();
             resample.close();
             resample = null;
         }
