@@ -50,9 +50,7 @@ public class FormatMP3 implements Encoder {
 
     @Override
     public void encode(short[] buf, int pos, int len) {
-        ShortBuffer s = ShortBuffer.allocate(len);
-        s.put(buf, pos, len);
-        byte[] bb = lame.encode(s.array(), len);
+        byte[] bb = lame.encode(buf, pos, len);
         try {
             writer.write(bb);
         } catch (IOException e) {
@@ -63,7 +61,7 @@ public class FormatMP3 implements Encoder {
     @Override
     public void close() {
         try {
-            byte[] bb = lame.encode(null, 0);
+            byte[] bb = lame.encode(null, 0, 0);
             writer.write(bb);
             bb = lame.close();
             writer.seek(0);

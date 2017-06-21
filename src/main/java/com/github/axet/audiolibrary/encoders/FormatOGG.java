@@ -45,9 +45,7 @@ public class FormatOGG implements Encoder {
 
     @Override
     public void encode(short[] buf, int pos, int len) {
-        ShortBuffer s = ShortBuffer.allocate(len);
-        s.put(buf, pos, len);
-        byte[] bb = vorbis.encode(s.array(), len);
+        byte[] bb = vorbis.encode(buf, pos, len);
         try {
             writer.write(bb);
         } catch (IOException e) {
@@ -58,7 +56,7 @@ public class FormatOGG implements Encoder {
     @Override
     public void close() {
         try {
-            byte[] bb = vorbis.encode(null, 0);
+            byte[] bb = vorbis.encode(null, 0, 0);
             writer.write(bb);
             writer.close();
         } catch (IOException e) {
