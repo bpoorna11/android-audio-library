@@ -3,34 +3,27 @@ package com.github.axet.audiolibrary.encoders;
 import android.annotation.TargetApi;
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Native;
-import com.github.axet.opusjni.Config;
-import com.github.axet.opusjni.Opus;
-
-import org.ebml.io.FileDataWriter;
-import org.ebml.matroska.MatroskaFileFrame;
-import org.ebml.matroska.MatroskaFileTrack;
-import org.ebml.matroska.MatroskaFileWriter;
+import org.gagravarr.ogg.OggFile;
+import org.gagravarr.ogg.OggPacketWriter;
 import org.gagravarr.opus.OpusAudioData;
-import org.gagravarr.opus.OpusFile;
 import org.gagravarr.opus.OpusInfo;
 import org.gagravarr.opus.OpusTags;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 // https://wiki.xiph.org/MatroskaOpus | https://wiki.xiph.org/OggOpus
 @TargetApi(21)
 public class FormatOPUS_OGG extends FormatOPUS {
     public static final String TAG = FormatOPUS_OGG.class.getSimpleName();
 
-    OpusFile writer;
+    OggFile file; // example: OpusFile
+    OggPacketWriter writer;
+    OpusInfo oinfo;
+    OpusTags otags;
+    long lastGranule = 0;
 
     public FormatOPUS_OGG(Context context, EncoderInfo info, File out) {
         super(context, info, out);
@@ -40,12 +33,16 @@ public class FormatOPUS_OGG extends FormatOPUS {
     public void create(final EncoderInfo info, File out) {
         super.create(info, out);
         try {
-            OpusInfo o = new OpusInfo();
-            o.setNumChannels(info.channels);
-            o.setOutputGain(0);
-            o.setPreSkip(0);
-            o.setSampleRate(info.hz);
-            writer = new OpusFile(new FileOutputStream(out), o, new OpusTags());
+            oinfo = new OpusInfo();
+            oinfo.setNumChannels(info.channels);
+            oinfo.setOutputGain(0);
+            oinfo.setPreSkip(0);
+            oinfo.setSampleRate(info.hz);
+            otags = new OpusTags();
+            file = new OggFile(new FileInputStream(out));
+            writer = file.getPacketWriter();
+            writer.bufferPacket(oinfo.write(), true);
+            writer.bufferPacket(otags.write(), false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -54,10 +51,26 @@ public class FormatOPUS_OGG extends FormatOPUS {
     @Override
     void encode(ByteBuffer bb, long dur) {
         OpusAudioData frame = new OpusAudioData(bb.array());
-        long gr = NumSamples + dur;
-        gr = 48000 * gr / info.hz; // Ogg gr always at 48000hz
+        long end = NumSamples + dur;
+        long gr = OpusAudioData.OPUS_GRANULE_RATE * end / info.hz; // Ogg gr always at 48000hz
         frame.setGranulePosition(gr);
-        writer.writeAudioData(frame);
+        try {
+            // Update the granule position as we go
+            if (frame.getGranulePosition() >= 0 &&
+                    lastGranule != frame.getGranulePosition()) {
+                writer.flush();
+                lastGranule = frame.getGranulePosition();
+                writer.setGranulePosition(lastGranule);
+            }
+
+            // Write the data, flushing if needed
+            writer.bufferPacket(frame.write());
+            if (writer.getSizePendingFlush() > 16384) {
+                writer.flush();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -65,6 +78,9 @@ public class FormatOPUS_OGG extends FormatOPUS {
         super.close();
         try {
             writer.close();
+            writer = null;
+            file.close();
+            file = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
