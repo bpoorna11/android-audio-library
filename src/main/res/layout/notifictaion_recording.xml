@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="64dp"
@@ -56,7 +57,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_fiber_manual_record_black_24dp"
-                android:tint="#ff0000" />
+                android:tint="#ff0000"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/notification_pause"
