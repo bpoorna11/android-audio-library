@@ -4,13 +4,15 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.StatFs;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -33,15 +34,19 @@ import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
-import com.github.axet.audiolibrary.encoders.Factory;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -52,7 +57,44 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     static final int TYPE_EXPANDED = 1;
     static final int TYPE_DELETED = 2;
 
-    public static class SortFiles implements Comparator<File> {
+    Handler handler;
+    Storage storage;
+    MediaPlayer player;
+    Runnable updatePlayer;
+    int selected = -1;
+    ListView list;
+    int scrollState;
+    Thread thread;
+
+    ViewGroup toolbar;
+    View toolbar_a;
+    View toolbar_s;
+    View toolbar_n;
+    View toolbar_d;
+    boolean toolbarFilterAll = true; // all or stars
+    boolean toolbarSortName = true; // name or date
+
+    Map<File, FileStats> cache = new TreeMap<>();
+
+    Map<File, Integer> durations = new TreeMap<>();
+
+    public static FileStats getFileStats(Map<String, ?> prefs, File f) {
+        String json = (String) prefs.get(MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS);
+        if (json != null && !json.isEmpty()) {
+            return new FileStats(json);
+        }
+        return null;
+    }
+
+    public static void setFileStats(Context context, File f, Recordings.FileStats fs) {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS;
+        SharedPreferences.Editor editor = shared.edit();
+        editor.putString(p, fs.save().toString());
+        editor.commit();
+    }
+
+    public static class SortName implements Comparator<File> {
         @Override
         public int compare(File file, File file2) {
             if (file.isDirectory() && file2.isFile())
@@ -64,24 +106,50 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         }
     }
 
+    public static class SortDate implements Comparator<File> {
+        @Override
+        public int compare(File file, File file2) {
+            if (file.isDirectory() && file2.isFile())
+                return -1;
+            else if (file.isFile() && file2.isDirectory())
+                return 1;
+            else
+                return Long.valueOf(file.lastModified()).compareTo(file2.lastModified());
+        }
+    }
+
     public static class FileStats {
         public int duration;
         public long size;
         public long last;
+
+        public FileStats() {
+
+        }
+
+        public FileStats(String json) {
+            try {
+                JSONObject j = new JSONObject(json);
+                duration = j.getInt("duration");
+                size = j.getLong("size");
+                last = j.getLong("last");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public JSONObject save() {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("duration", duration);
+                o.put("size", size);
+                o.put("last", last);
+                return o;
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
-
-    Handler handler;
-    Storage storage;
-    MediaPlayer player;
-    Runnable updatePlayer;
-    int selected = -1;
-    ListView list;
-    int scrollState;
-    Thread thread;
-
-    Map<File, FileStats> cache = new TreeMap<>();
-
-    Map<File, Integer> durations = new TreeMap<>();
 
     public Recordings(Context context, ListView list) {
         super(context, 0);
@@ -89,6 +157,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         this.handler = new Handler();
         this.storage = new Storage(context);
         this.list.setOnScrollListener(this);
+        load();
     }
 
     @Override
@@ -102,6 +171,9 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
 
     public void scan(File dir, final Runnable done) {
         final List<File> ff = storage.scan(dir);
+
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final Map<String, ?> prefs = shared.getAll();
 
         final Thread old = thread;
 
@@ -125,6 +197,9 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         return;
                     if (f.isFile()) {
                         FileStats fs = cache.get(f);
+                        if (fs == null) {
+                            fs = getFileStats(prefs, f);
+                        }
                         if (fs != null) {
                             long last = f.lastModified();
                             long size = f.length();
@@ -139,6 +214,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                                 MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(f));
                                 fs.duration = mp.getDuration();
                                 cache.put(f, fs);
+                                setFileStats(getContext(), f, fs);
                                 durations.put(f, fs.duration);
                                 all.add(f);
                                 mp.release();
@@ -164,9 +240,28 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         setNotifyOnChange(false);
                         clear();
                         Recordings.this.durations = durations;
-                        for (File f : all) {
-                            add(f);
+                        TreeSet<String> delete = new TreeSet<>();
+                        for (String k : prefs.keySet()) {
+                            if (k.startsWith(MainApplication.PREFERENCE_DETAILS_PREFIX))
+                                delete.add(k);
                         }
+                        for (File f : all) {
+                            if (toolbarFilterAll) {
+                                add(f);
+                            } else {
+                                if (MainApplication.getStar(getContext(), f))
+                                    add(f);
+                            }
+                            String p = MainApplication.getFilePref(f);
+                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_FS);
+                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_CONTACT);
+                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
+                        }
+                        SharedPreferences.Editor editor = shared.edit();
+                        for (String s : delete) {
+                            editor.remove(s);
+                        }
+                        editor.commit();
                         sort();
                         notifyDataSetChanged();
                         if (done != null)
@@ -174,12 +269,17 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                     }
                 });
             }
-        }, "Recordings scan");
+        }, "Recordings Scan");
         thread.start();
     }
 
     public void sort() {
-        sort(new SortFiles());
+        Comparator<File> sort;
+        if (toolbarSortName)
+            sort = new SortName();
+        else
+            sort = new SortDate();
+        sort(Collections.reverseOrder(sort));
     }
 
     public void close() {
@@ -212,6 +312,18 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         }
 
         final File f = getItem(position);
+
+        final boolean starb = MainApplication.getStar(getContext(), f);
+        final ImageView star = (ImageView) convertView.findViewById(R.id.recording_star);
+        starUpdate(star, starb);
+        star.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean b = !MainApplication.getStar(getContext(), f);
+                MainApplication.setStar(getContext(), f, b);
+                starUpdate(star, b);
+            }
+        });
 
         TextView title = (TextView) convertView.findViewById(R.id.recording_title);
         title.setText(f.getName());
@@ -281,6 +393,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         if (ff.exists())
                             ff = Storage.getNextFile(ff);
                         f.renameTo(ff);
+                        boolean star = MainApplication.getStar(getContext(), f);
+                        MainApplication.setStar(getContext(), ff, star); // copy star to new name
                         load(null);
                     }
                 });
@@ -404,6 +518,13 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         return convertView;
     }
 
+    void starUpdate(ImageView star, boolean starb) {
+        if (starb)
+            star.setImageResource(R.drawable.ic_star_black_24dp);
+        else
+            star.setImageResource(R.drawable.ic_star_border_black_24dp);
+    }
+
     void playerPlay(View v, File f) {
         if (player == null)
             player = MediaPlayer.create(getContext(), Uri.fromFile(f));
@@ -523,5 +644,102 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
 
     public int getSelected() {
         return selected;
+    }
+
+    AppCompatImageButton getCheckBox(View v) {
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                View c = getCheckBox(g.getChildAt(i));
+                if (c != null) {
+                    return (AppCompatImageButton) c;
+                }
+            }
+        }
+        if (v instanceof AppCompatImageButton) {
+            return (AppCompatImageButton) v;
+        }
+        return null;
+    }
+
+    void selectToolbar(View v, boolean pressed) {
+        AppCompatImageButton cc = getCheckBox(v);
+        if (pressed) {
+            int[] states = new int[]{
+                    android.R.attr.state_checked,
+            };
+            cc.setImageState(states, false);
+        } else {
+            int[] states = new int[]{
+                    -android.R.attr.state_checked,
+            };
+            cc.setImageState(states, false);
+        }
+    }
+
+    void selectToolbar() {
+        selectToolbar(toolbar_a, toolbarFilterAll);
+        selectToolbar(toolbar_s, !toolbarFilterAll);
+        selectToolbar(toolbar_n, toolbarSortName);
+        selectToolbar(toolbar_d, !toolbarSortName);
+    }
+
+    public void setToolbar(ViewGroup v) {
+        this.toolbar = v;
+        toolbar_a = v.findViewById(R.id.toolbar_all);
+        toolbar_a.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbarFilterAll = true;
+                selectToolbar();
+                load(null);
+                save();
+            }
+        });
+        toolbar_s = v.findViewById(R.id.toolbar_stars);
+        toolbar_s.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbarFilterAll = false;
+                selectToolbar();
+                load(null);
+                save();
+            }
+        });
+        toolbar_n = v.findViewById(R.id.toolbar_name);
+        toolbar_n.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbarSortName = true;
+                sort();
+                selectToolbar();
+                save();
+            }
+        });
+        toolbar_d = v.findViewById(R.id.toolbar_date);
+        toolbar_d.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbarSortName = false;
+                sort();
+                selectToolbar();
+                save();
+            }
+        });
+        selectToolbar();
+    }
+
+    void save() {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor edit = shared.edit();
+        edit.putBoolean(MainApplication.PREFERENCE_SORT, toolbarSortName);
+        edit.putBoolean(MainApplication.PREFERENCE_FILTER, toolbarFilterAll);
+        edit.commit();
+    }
+
+    void load() {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        toolbarSortName = shared.getBoolean(MainApplication.PREFERENCE_SORT, true);
+        toolbarFilterAll = shared.getBoolean(MainApplication.PREFERENCE_FILTER, true);
     }
 }
