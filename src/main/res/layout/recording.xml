@@ -16,25 +16,40 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
-                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="left"
                 android:orientation="vertical">
 
-                <com.github.axet.androidlibrary.widgets.PathMax
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/recording_title"
+                    <ImageView
+                        android:id="@+id/recording_star"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:text="2016-02-01.wav"
-                        android:textColor="?attr/titleColor"
-                        android:textSize="20dp" />
-                </com.github.axet.androidlibrary.widgets.PathMax>
+                        android:layout_gravity="center"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_star_border_black_24dp"
+                        android:tint="?attr/colorAccent" />
+
+                    <com.github.axet.androidlibrary.widgets.PathMax
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center">
+
+                        <TextView
+                            android:id="@+id/recording_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:text="2016-02-01.wav"
+                            android:textColor="?attr/titleColor"
+                            android:textSize="20dp" />
+                    </com.github.axet.androidlibrary.widgets.PathMax>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/recording_time"
@@ -124,9 +139,9 @@
                         android:tint="?attr/colorAccent" />
 
                     <View
-                        android:layout_weight="1"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
                     <ImageView
                         android:id="@+id/recording_player_edit"
@@ -136,9 +151,9 @@
                         android:tint="?attr/colorAccent" />
 
                     <View
-                        android:layout_weight="1"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
 
                     <ImageView
@@ -149,9 +164,9 @@
                         android:tint="?attr/colorAccent" />
 
                     <View
-                        android:layout_weight="1"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
                     <ImageView
                         android:id="@+id/recording_player_trash"

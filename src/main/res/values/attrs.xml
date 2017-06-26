@@ -3,4 +3,5 @@
     <attr name="titleColor" format="color" />
     <attr name="secondBackground" format="color" />
     <attr name="roundButton" format="reference" />
+    <attr name="search_rating_bg" format="reference" />
 </resources>

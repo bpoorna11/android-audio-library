@@ -25,8 +25,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 69
-        versionName "0.0.69"
+        versionCode 70
+        versionName "0.1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -121,7 +121,7 @@ dependencies {
     })
     compile 'com.android.support:design:25.3.1'
     compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'com.github.axet:android-library:1.12.44' // compile project(':android-library')
+    compile 'com.github.axet:android-library:1.12.45' // compile project(':android-library')
     compile 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
     compile 'com.github.axet:vorbis:1.0.1' // debugCompile project(path:':android-vorbis', configuration:'libraryDebug')
     compile 'com.github.axet:lame:1.0.1' // compile project(':android-lame')

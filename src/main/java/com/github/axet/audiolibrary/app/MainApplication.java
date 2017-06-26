@@ -7,6 +7,8 @@ import android.preference.PreferenceManager;
 
 import com.github.axet.audiolibrary.R;
 
+import java.io.File;
+
 public class MainApplication extends com.github.axet.androidlibrary.app.MainApplication {
     public static final String PREFERENCE_STORAGE = "storage_path";
     public static final String PREFERENCE_RATE = "sample_rate";
@@ -17,6 +19,12 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_THEME = "theme";
     public static final String PREFERENCE_CHANNELS = "channels";
     public static final String PREFERENCE_FORMAT = "format";
+    public static final String PREFERENCE_SORT = "sort";
+    public static final String PREFERENCE_FILTER = "filter";
+    public static final String PREFERENCE_DETAILS_PREFIX = "details_";
+    public static final String PREFERENCE_DETAILS_CONTACT = "_contact";
+    public static final String PREFERENCE_DETAILS_STAR = "_star";
+    public static final String PREFERENCE_DETAILS_FS = "_fs";
 
     @Override
     public void onCreate() {
@@ -89,4 +97,31 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
                 throw new RuntimeException("unknown mode");
         }
     }
+
+    public static String getHexString(int l) {
+        return String.format("%04X", l);
+    }
+
+    public static String getHexString(long l) {
+        return String.format("%08X", l);
+    }
+
+    public static String getFilePref(File f) {
+        return PREFERENCE_DETAILS_PREFIX + getHexString(f.getPath().hashCode());
+    }
+
+    public static boolean getStar(Context context, File f) {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = getFilePref(f) + PREFERENCE_DETAILS_STAR;
+        return shared.getBoolean(p, false);
+    }
+
+    public static void setStar(Context context, File f, boolean b) {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = getFilePref(f) + PREFERENCE_DETAILS_STAR;
+        SharedPreferences.Editor editor = shared.edit();
+        editor.putBoolean(p, b);
+        editor.commit();
+    }
+
 }
