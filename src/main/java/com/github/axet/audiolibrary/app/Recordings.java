@@ -1,6 +1,7 @@
 package com.github.axet.audiolibrary.app;
 
 import android.app.KeyguardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,18 +40,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScrollListener {
+public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener {
     public static String TAG = Recordings.class.getSimpleName();
 
     static final int TYPE_COLLAPSED = 0;
@@ -74,11 +73,11 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     boolean toolbarFilterAll = true; // all or stars
     boolean toolbarSortName = true; // name or date
 
-    Map<File, FileStats> cache = new TreeMap<>();
+    Map<Uri, FileStats> cache = new TreeMap<>();
 
-    Map<File, Integer> durations = new TreeMap<>();
+    Map<Uri, Integer> durations = new TreeMap<>();
 
-    public static FileStats getFileStats(Map<String, ?> prefs, File f) {
+    public static FileStats getFileStats(Map<String, ?> prefs, Uri f) {
         String json = (String) prefs.get(MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS);
         if (json != null && !json.isEmpty()) {
             return new FileStats(json);
@@ -86,7 +85,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         return null;
     }
 
-    public static void setFileStats(Context context, File f, Recordings.FileStats fs) {
+    public static void setFileStats(Context context, Uri f, Recordings.FileStats fs) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String p = MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS;
         SharedPreferences.Editor editor = shared.edit();
@@ -94,27 +93,19 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         editor.commit();
     }
 
-    public static class SortName implements Comparator<File> {
+    public class SortName implements Comparator<Uri> {
         @Override
-        public int compare(File file, File file2) {
-            if (file.isDirectory() && file2.isFile())
-                return -1;
-            else if (file.isFile() && file2.isDirectory())
-                return 1;
-            else
-                return file.getPath().compareTo(file2.getPath());
+        public int compare(Uri file, Uri file2) {
+            return file.getPath().compareTo(file2.getPath());
         }
     }
 
-    public static class SortDate implements Comparator<File> {
+    public class SortDate implements Comparator<Uri> {
         @Override
-        public int compare(File file, File file2) {
-            if (file.isDirectory() && file2.isFile())
-                return -1;
-            else if (file.isFile() && file2.isDirectory())
-                return 1;
-            else
-                return Long.valueOf(file.lastModified()).compareTo(file2.lastModified());
+        public int compare(Uri file, Uri file2) {
+            long l1 = cache.get(file).last;
+            long l2 = cache.get(file2).last;
+            return Long.valueOf(l1).compareTo(l2);
         }
     }
 
@@ -124,7 +115,6 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         public long last;
 
         public FileStats() {
-
         }
 
         public FileStats(String json) {
@@ -169,9 +159,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
     }
 
-    public void scan(File dir, final Runnable done) {
-        final List<File> ff = storage.scan(dir);
-
+    public void scan(final List<Uri> ff, final Runnable done) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         final Map<String, ?> prefs = shared.getAll();
 
@@ -190,46 +178,40 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                     }
                 }
                 final Thread t = Thread.currentThread();
-                final Map<File, Integer> durations = new TreeMap<>();
-                final ArrayList<File> all = new ArrayList<>();
-                for (File f : ff) {
+                final Map<Uri, Integer> durations = new TreeMap<>();
+                final ArrayList<Uri> all = new ArrayList<>();
+                for (Uri f : ff) {
                     if (t.isInterrupted())
                         return;
-                    if (f.isFile()) {
-                        FileStats fs = cache.get(f);
-                        if (fs == null) {
-                            fs = getFileStats(prefs, f);
-                        }
-                        if (fs != null) {
-                            long last = f.lastModified();
-                            long size = f.length();
-                            if (last != fs.last || size != fs.size)
-                                fs = null;
-                        }
-                        if (fs == null) {
-                            fs = new FileStats();
-                            fs.size = f.length();
-                            fs.last = f.lastModified();
-                            try {
-                                MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(f));
-                                fs.duration = mp.getDuration();
-                                cache.put(f, fs);
-                                setFileStats(getContext(), f, fs);
-                                durations.put(f, fs.duration);
-                                all.add(f);
-                                mp.release();
-                            } catch (Exception e) {
-                                Log.d(TAG, f.toString(), e);
-                            }
-                        } else {
+                    FileStats fs = cache.get(f);
+                    if (fs == null) {
+                        fs = getFileStats(prefs, f);
+                        cache.put(f, fs);
+                    }
+                    if (fs != null) {
+                        long last = storage.getLast(f);
+                        long size = storage.getLength(f);
+                        if (last != fs.last || size != fs.size)
+                            fs = null;
+                    }
+                    if (fs == null) {
+                        fs = new FileStats();
+                        fs.size = storage.getLength(f);
+                        fs.last = storage.getLast(f);
+                        try {
+                            MediaPlayer mp = MediaPlayer.create(getContext(), f);
+                            fs.duration = mp.getDuration();
+                            cache.put(f, fs);
+                            setFileStats(getContext(), f, fs);
                             durations.put(f, fs.duration);
                             all.add(f);
+                            mp.release();
+                        } catch (Exception e) {
+                            Log.d(TAG, f.toString(), e);
                         }
-                    }
-                }
-                for (File f : new TreeSet<>(cache.keySet())) {
-                    if (!f.exists()) {
-                        cache.remove(f);
+                    } else {
+                        durations.put(f, fs.duration);
+                        all.add(f);
                     }
                 }
                 handler.post(new Runnable() {
@@ -245,7 +227,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                             if (k.startsWith(MainApplication.PREFERENCE_DETAILS_PREFIX))
                                 delete.add(k);
                         }
-                        for (File f : all) {
+                        TreeSet<Uri> delete2 = new TreeSet<>(cache.keySet());
+                        for (Uri f : all) {
                             if (toolbarFilterAll) {
                                 add(f);
                             } else {
@@ -256,10 +239,14 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                             delete.remove(p + MainApplication.PREFERENCE_DETAILS_FS);
                             delete.remove(p + MainApplication.PREFERENCE_DETAILS_CONTACT);
                             delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
+                            delete2.remove(f);
                         }
                         SharedPreferences.Editor editor = shared.edit();
                         for (String s : delete) {
                             editor.remove(s);
+                        }
+                        for (Uri f : delete2) {
+                            cache.remove(f);
                         }
                         editor.commit();
                         sort();
@@ -274,7 +261,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     }
 
     public void sort() {
-        Comparator<File> sort;
+        Comparator<Uri> sort;
         if (toolbarSortName)
             sort = new SortName();
         else
@@ -291,7 +278,8 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
     }
 
     public void load(Runnable done) {
-        scan(storage.getStoragePath(), done);
+        Uri uri = storage.getStoragePath();
+        scan(storage.scan(uri), done);
     }
 
     @Override
@@ -311,7 +299,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             convertView.setTag(-1);
         }
 
-        final File f = getItem(position);
+        final Uri f = getItem(position);
 
         final boolean starb = MainApplication.getStar(getContext(), f);
         final ImageView star = (ImageView) convertView.findViewById(R.id.recording_star);
@@ -326,16 +314,16 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         });
 
         TextView title = (TextView) convertView.findViewById(R.id.recording_title);
-        title.setText(f.getName());
+        title.setText(storage.getDocumentName(f));
 
         TextView time = (TextView) convertView.findViewById(R.id.recording_time);
-        time.setText(MainApplication.SIMPLE.format(new Date(f.lastModified())));
+        time.setText(MainApplication.SIMPLE.format(new Date(storage.getLast(f))));
 
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
         dur.setText(MainApplication.formatDuration(getContext(), durations.get(f)));
 
         TextView size = (TextView) convertView.findViewById(R.id.recording_size);
-        size.setText(MainApplication.formatSize(getContext(), f.length()));
+        size.setText(MainApplication.formatSize(getContext(), storage.getLength(f)));
 
         final View playerBase = convertView.findViewById(R.id.recording_player);
         playerBase.setOnClickListener(new View.OnClickListener() {
@@ -349,7 +337,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(R.string.delete_recording);
-                builder.setMessage("...\\" + f.getName() + "\n\n" + getContext().getString(R.string.are_you_sure));
+                builder.setMessage("...\\" + storage.getDocumentName(f) + "\n\n" + getContext().getString(R.string.are_you_sure));
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -358,7 +346,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
                         RemoveItemAnimation.apply(list, base, new Runnable() {
                             @Override
                             public void run() {
-                                f.delete();
+                                storage.delete(f);
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
                                 remove(f); // instant remove
@@ -382,17 +370,14 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             public void run() {
                 final OpenFileDialog.EditTextDialog e = new OpenFileDialog.EditTextDialog(getContext());
                 e.setTitle(getContext().getString(R.string.rename_recording));
-                e.setText(Storage.getNameNoExt(f));
+                e.setText(storage.getNameNoExt(f));
                 e.setPositiveButton(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         playerStop();
-                        String ext = Storage.getExt(f);
+                        String ext = storage.getExt(f);
                         String s = String.format("%s.%s", e.getText(), ext);
-                        File ff = new File(f.getParent(), s);
-                        if (ff.exists())
-                            ff = Storage.getNextFile(ff);
-                        f.renameTo(ff);
+                        Uri ff = storage.rename(f, s);
                         boolean star = MainApplication.getStar(getContext(), f);
                         MainApplication.setStar(getContext(), ff, star); // copy star to new name
                         load(null);
@@ -435,13 +420,13 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Uri u = Uri.fromFile(f);
+                    Uri u = f;
 
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("audio/*");
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
                     intent.putExtra(Intent.EXTRA_STREAM, u);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, f.getName());
+                    intent.putExtra(Intent.EXTRA_SUBJECT, storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, getContext().getString(R.string.app_name)));
 
                     if (Build.VERSION.SDK_INT < 11) {
@@ -525,9 +510,9 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
             star.setImageResource(R.drawable.ic_star_border_black_24dp);
     }
 
-    void playerPlay(View v, File f) {
+    void playerPlay(View v, Uri f) {
         if (player == null)
-            player = MediaPlayer.create(getContext(), Uri.fromFile(f));
+            player = MediaPlayer.create(getContext(), f);
         if (player == null) {
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
             return;
@@ -537,7 +522,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         updatePlayerRun(v, f);
     }
 
-    void playerPause(View v, File f) {
+    void playerPause(View v, Uri f) {
         if (player != null) {
             player.pause();
         }
@@ -560,7 +545,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         }
     }
 
-    void updatePlayerRun(final View v, final File f) {
+    void updatePlayerRun(final View v, final Uri f) {
         boolean playing = updatePlayerText(v, f);
 
         if (updatePlayer != null) {
@@ -583,7 +568,7 @@ public class Recordings extends ArrayAdapter<File> implements AbsListView.OnScro
         handler.postDelayed(updatePlayer, 200);
     }
 
-    boolean updatePlayerText(final View v, final File f) {
+    boolean updatePlayerText(final View v, final Uri f) {
         ImageView i = (ImageView) v.findViewById(R.id.recording_player_play);
 
         final boolean playing = player != null && player.isPlaying();

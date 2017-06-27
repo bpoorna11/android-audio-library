@@ -1,16 +1,23 @@
 package com.github.axet.audiolibrary.app;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
-import android.os.StatFs;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
+import android.provider.DocumentsContract;
+import android.webkit.MimeTypeMap;
 
 import com.github.axet.audiolibrary.encoders.Factory;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,20 +56,24 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getTempRecording().exists();
     }
 
-    public File getStoragePath() {
+    public Uri getStoragePath() {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
-        if (!permitted(context, PERMISSIONS)) {
-            return getLocalStorage();
+        return getStoragePath(path);
+    }
+
+    public Uri getStoragePath(String path) {
+        if (path.startsWith(ContentResolver.SCHEME_CONTENT)) {
+            Uri uri = Uri.parse(path);
+            return uri;
+        } else if (!permitted(context, PERMISSIONS)) {
+            return Uri.fromFile(getLocalStorage());
         } else {
-            return super.getStoragePath(new File(path));
+            return Uri.fromFile(super.getStoragePath(new File(path)));
         }
     }
 
     public void migrateLocalStorage() {
-        if (!permitted(context, PERMISSIONS)) {
-            return;
-        }
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir, "recordings")); // old recordings folder
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
         migrateLocalStorage(getLocalInternal());
@@ -73,60 +84,137 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (l == null)
             return;
 
-        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
+        Uri path = getStoragePath();
+        String s = path.getScheme();
 
-        File dir = new File(path);
+        if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
+            File[] ff = l.listFiles();
 
-        if (isSame(l, dir))
-            return;
+            if (ff == null)
+                return;
 
-        if (!dir.exists() && !dir.mkdirs())
-            return;
-
-        File[] ff = l.listFiles();
-
-        if (ff == null)
-            return;
-
-        for (File f : ff) {
-            if (f.isFile()) { // skip directories (we didn't create one)
-                File t = getNextFile(new File(dir, f.getName()));
-                move(f, t);
+            for (File f : ff) {
+                if (f.isFile()) { // skip directories (we didn't create one)
+                    String name = getNameNoExt(f);
+                    String ext = getExt(f);
+                    Uri t = getNextFile(path, name, ext);
+                    String n = getDocumentName(t);
+                    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                    try {
+                        ContentResolver resolver = context.getContentResolver();
+                        InputStream in = new BufferedInputStream(new FileInputStream(f));
+                        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(path, DocumentsContract.getTreeDocumentId(path));
+                        Uri out = DocumentsContract.createDocument(resolver, docUri, mime, n);
+                        OutputStream os = resolver.openOutputStream(out);
+                        IOUtils.copy(in, os);
+                        in.close();
+                        os.close();
+                        f.delete();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
+        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+            if (!permitted(context, PERMISSIONS)) {
+                return;
+            }
+
+            File dir = new File(path.getPath());
+
+            if (isSame(l, dir))
+                return;
+
+            if (!dir.exists() && !dir.mkdirs())
+                return;
+
+            File[] ff = l.listFiles();
+
+            if (ff == null)
+                return;
+
+            for (File f : ff) {
+                if (f.isFile()) { // skip directories (we didn't create one)
+                    File t = getNextFile(new File(dir, f.getName()));
+                    move(f, t);
+                }
+            }
+        } else {
+            throw new RuntimeException("unknown uri");
         }
     }
 
-    public File getNewFile() {
+    public Uri getNewFile() {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
 
-        File parent = getStoragePath();
-        if (!parent.exists() && !parent.mkdirs())
-            throw new RuntimeException("Unable to create: " + parent);
+        Uri parent = getStoragePath();
+
+        String s = parent.getScheme();
+        if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+            File p = new File(parent.getPath());
+            if (!p.exists() && !p.mkdirs())
+                throw new RuntimeException("Unable to create: " + parent);
+        }
 
         return getNextFile(parent, SIMPLE.format(new Date()), ext);
     }
 
-    public List<File> scan(File dir) {
-        ArrayList<File> list = new ArrayList<>();
+    public List<Uri> scan(Uri uri) {
+        String s = uri.getScheme();
+        if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
+            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+            context.getContentResolver().takePersistableUriPermission(uri, takeFlags);
 
-        File[] ff = dir.listFiles();
-        if (ff == null)
+            ArrayList<Uri> list = new ArrayList<>();
+
+            ContentResolver contentResolver = context.getContentResolver();
+            Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
+            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null); // MediaStore.Files.FileColumns.TITLE + " = ?"
+            try {
+                while (childCursor.moveToNext()) {
+                    String id = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID));
+                    String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
+                    long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
+                    if (size > 0) {
+                        String[] ee = Factory.getEncodingValues(context);
+                        String n = t.toLowerCase();
+                        for (String e : ee) {
+                            if (n.endsWith("." + e)) {
+                                Uri d = DocumentsContract.buildDocumentUriUsingTree(uri, id);
+                                list.add(d);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                childCursor.close();
+            }
+
             return list;
+        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+            File dir = new File(uri.getPath());
+            ArrayList<Uri> list = new ArrayList<>();
 
-        for (File f : ff) {
-            if (f.length() > 0) {
-                String[] ee = Factory.getEncodingValues(context);
-                String n = f.getName().toLowerCase();
-                for (String e : ee) {
-                    if (n.endsWith("." + e))
-                        list.add(f);
+            File[] ff = dir.listFiles();
+            if (ff == null)
+                return list;
+
+            for (File f : ff) {
+                if (f.length() > 0) {
+                    String[] ee = Factory.getEncodingValues(context);
+                    String n = f.getName().toLowerCase();
+                    for (String e : ee) {
+                        if (n.endsWith("." + e))
+                            list.add(Uri.fromFile(f));
+                    }
                 }
             }
-        }
 
-        return list;
+            return list;
+        } else {
+            throw new RuntimeException("unknow uri");
+        }
     }
 
     // get average recording miliseconds based on compression format
@@ -175,21 +263,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return internal;
         else
             return external;
-    }
-
-    public FileOutputStream open(File f) {
-        File tmp = f;
-        File parent = tmp.getParentFile();
-        if (!parent.exists() && !parent.mkdirs()) {
-            throw new RuntimeException("unable to create: " + parent);
-        }
-        if (!parent.isDirectory())
-            throw new RuntimeException("target is not a dir: " + parent);
-        try {
-            return new FileOutputStream(tmp, true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
