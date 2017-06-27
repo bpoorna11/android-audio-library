@@ -31,6 +31,7 @@ import java.util.List;
 
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String TMP_REC = "recording.data";
+    public static final String TMP_ENC = "encoding.data";
 
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
@@ -265,4 +266,33 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return external;
     }
 
+    public File getTempEncoding() {
+        File internal = new File(context.getCacheDir(), TMP_ENC);
+        if (internal.exists())
+            return internal;
+
+        // Starting in KITKAT, no permissions are required to read or write to the returned path;
+        // it's always accessible to the calling app.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            if (!permitted(context, PERMISSIONS))
+                return internal;
+        }
+
+        File c = context.getExternalCacheDir();
+        if (c == null) // some old phones <15API with disabled sdcard return null
+            return internal;
+
+        File external = new File(c, TMP_ENC);
+
+        if (external.exists())
+            return external;
+
+        long freeI = getFree(internal);
+        long freeE = getFree(external);
+
+        if (freeI > freeE)
+            return internal;
+        else
+            return external;
+    }
 }
