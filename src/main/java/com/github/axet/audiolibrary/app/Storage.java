@@ -87,61 +87,23 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         Uri path = getStoragePath();
         String s = path.getScheme();
-
-        if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
-            File[] ff = l.listFiles();
-
-            if (ff == null)
+        if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+            if (!permitted(context, PERMISSIONS))
                 return;
+        }
 
-            for (File f : ff) {
-                if (f.isFile()) { // skip directories (we didn't create one)
-                    String name = getNameNoExt(f);
-                    String ext = getExt(f);
-                    Uri t = getNextFile(path, name, ext);
-                    String n = getDocumentName(t);
-                    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
-                    try {
-                        ContentResolver resolver = context.getContentResolver();
-                        InputStream in = new BufferedInputStream(new FileInputStream(f));
-                        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(path, DocumentsContract.getTreeDocumentId(path));
-                        Uri out = DocumentsContract.createDocument(resolver, docUri, mime, n);
-                        OutputStream os = resolver.openOutputStream(out);
-                        IOUtils.copy(in, os);
-                        in.close();
-                        os.close();
-                        f.delete();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+        File[] ff = l.listFiles();
+
+        if (ff == null)
+            return;
+
+        for (File f : ff) {
+            if (f.isFile()) { // skip directories (we didn't create one)
+                String name = getNameNoExt(f);
+                String ext = getExt(f);
+                Uri t = getNextFile(path, name, ext);
+                move(f, t);
             }
-        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            if (!permitted(context, PERMISSIONS)) {
-                return;
-            }
-
-            File dir = new File(path.getPath());
-
-            if (isSame(l, dir))
-                return;
-
-            if (!dir.exists() && !dir.mkdirs())
-                return;
-
-            File[] ff = l.listFiles();
-
-            if (ff == null)
-                return;
-
-            for (File f : ff) {
-                if (f.isFile()) { // skip directories (we didn't create one)
-                    File t = getNextFile(new File(dir, f.getName()));
-                    move(f, t);
-                }
-            }
-        } else {
-            throw new RuntimeException("unknown uri");
         }
     }
 
