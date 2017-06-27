@@ -1,8 +1,10 @@
 package com.github.axet.audiolibrary.app;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 
 import com.github.axet.audiolibrary.R;
@@ -106,17 +108,25 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         return String.format("%08X", l);
     }
 
-    public static String getFilePref(File f) {
-        return PREFERENCE_DETAILS_PREFIX + getHexString(f.getPath().hashCode());
+    public static String getFilePref(Uri f) {
+        String s = f.getScheme();
+        if (s.startsWith(ContentResolver.SCHEME_CONTENT)) {
+            return PREFERENCE_DETAILS_PREFIX + getHexString(f.toString().hashCode());
+        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+            File ff = new File(f.getPath());
+            return PREFERENCE_DETAILS_PREFIX + getHexString(ff.toString().hashCode());
+        } else {
+            throw new RuntimeException("unknown uri");
+        }
     }
 
-    public static boolean getStar(Context context, File f) {
+    public static boolean getStar(Context context, Uri f) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String p = getFilePref(f) + PREFERENCE_DETAILS_STAR;
         return shared.getBoolean(p, false);
     }
 
-    public static void setStar(Context context, File f, boolean b) {
+    public static void setStar(Context context, Uri f, boolean b) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String p = getFilePref(f) + PREFERENCE_DETAILS_STAR;
         SharedPreferences.Editor editor = shared.edit();

@@ -64,7 +64,6 @@ public class FormatWAV implements Encoder {
             bb.order(order);
             bb.put(cc);
             bb.flip();
-
             outFile.write(bb.array());
         } catch (IOException e) {
             throw new RuntimeException(e);
