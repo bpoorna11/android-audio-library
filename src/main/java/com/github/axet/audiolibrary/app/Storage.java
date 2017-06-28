@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.webkit.MimeTypeMap;
@@ -63,11 +64,19 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getStoragePath(path);
     }
 
+    @Override
     public Uri getStoragePath(String path) {
-        if (path.startsWith(ContentResolver.SCHEME_CONTENT)) {
+        if (Build.VERSION.SDK_INT >= 21 && path.startsWith(ContentResolver.SCHEME_CONTENT)) {
             Uri uri = Uri.parse(path);
-            return uri;
-        } else if (!permitted(context, PERMISSIONS)) {
+            ContentResolver resolver = context.getContentResolver();
+            Uri doc = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
+            Cursor c = resolver.query(doc, null, null, null, null);
+            if (c != null) {
+                c.close();
+                return uri;
+            }
+        }
+        if (!permitted(context, PERMISSIONS)) {
             return Uri.fromFile(getLocalStorage());
         } else {
             return Uri.fromFile(super.getStoragePath(new File(path)));
@@ -102,7 +111,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 String name = getNameNoExt(f);
                 String ext = getExt(f);
                 Uri t = getNextFile(path, name, ext);
+                boolean star = MainApplication.getStar(context, Uri.fromFile(f));
                 move(f, t);
+                MainApplication.setStar(context, t, star);
             }
         }
     }
@@ -134,24 +145,26 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             ContentResolver contentResolver = context.getContentResolver();
             Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
             Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null); // MediaStore.Files.FileColumns.TITLE + " = ?"
-            try {
-                while (childCursor.moveToNext()) {
-                    String id = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID));
-                    String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
-                    long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
-                    if (size > 0) {
-                        String[] ee = Factory.getEncodingValues(context);
-                        String n = t.toLowerCase();
-                        for (String e : ee) {
-                            if (n.endsWith("." + e)) {
-                                Uri d = DocumentsContract.buildDocumentUriUsingTree(uri, id);
-                                list.add(d);
+            if (childCursor != null) {
+                try {
+                    while (childCursor.moveToNext()) {
+                        String id = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID));
+                        String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
+                        long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
+                        if (size > 0) {
+                            String[] ee = Factory.getEncodingValues(context);
+                            String n = t.toLowerCase();
+                            for (String e : ee) {
+                                if (n.endsWith("." + e)) {
+                                    Uri d = DocumentsContract.buildDocumentUriUsingTree(uri, id);
+                                    list.add(d);
+                                }
                             }
                         }
                     }
+                } finally {
+                    childCursor.close();
                 }
-            } finally {
-                childCursor.close();
             }
 
             return list;
