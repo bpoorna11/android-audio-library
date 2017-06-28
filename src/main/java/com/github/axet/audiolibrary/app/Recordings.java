@@ -276,10 +276,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                                 if (MainApplication.getStar(getContext(), f))
                                     add(f);
                             }
-                            String p = MainApplication.getFilePref(f);
-                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_FS);
-                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_CONTACT);
-                            delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
+                            cleanDelete(delete, f);
                             delete2.remove(f);
                         }
                         if (clean) {
@@ -301,6 +298,12 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             }
         }, "Recordings Scan");
         thread.start();
+    }
+
+    public void cleanDelete(TreeSet<String> delete, Uri f) { // file exists, prevent it from cleaning
+        String p = MainApplication.getFilePref(f);
+        delete.remove(p + MainApplication.PREFERENCE_DETAILS_FS);
+        delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
     }
 
     public void sort() {
@@ -439,11 +442,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         playerStop();
                         String ext = storage.getExt(f);
                         String s = String.format("%s.%s", e.getText(), ext);
-                        Uri ff = storage.rename(f, s);
-                        boolean star = MainApplication.getStar(getContext(), f);
-                        MainApplication.setStar(getContext(), ff, star); // copy star to renamed name
-                        String c = MainApplication.getContact(getContext(), f);
-                        MainApplication.setContact(getContext(), ff, c); // copy contact to new name
+                        storage.rename(f, s);
                         load(true, null);
                     }
                 });

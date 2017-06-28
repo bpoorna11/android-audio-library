@@ -24,7 +24,6 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_SORT = "sort";
     public static final String PREFERENCE_FILTER = "filter";
     public static final String PREFERENCE_DETAILS_PREFIX = "details_";
-    public static final String PREFERENCE_DETAILS_CONTACT = "_contact";
     public static final String PREFERENCE_DETAILS_STAR = "_star";
     public static final String PREFERENCE_DETAILS_FS = "_fs";
 
@@ -131,20 +130,6 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         String p = getFilePref(f) + PREFERENCE_DETAILS_STAR;
         SharedPreferences.Editor editor = shared.edit();
         editor.putBoolean(p, b);
-        editor.commit();
-    }
-
-    public static String getContact(Context context, Uri f) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        String p = getFilePref(f) + PREFERENCE_DETAILS_CONTACT;
-        return shared.getString(p, null);
-    }
-
-    public static void setContact(Context context, Uri f, String id) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        String p = getFilePref(f) + PREFERENCE_DETAILS_CONTACT;
-        SharedPreferences.Editor editor = shared.edit();
-        editor.putString(p, id);
         editor.commit();
     }
 }

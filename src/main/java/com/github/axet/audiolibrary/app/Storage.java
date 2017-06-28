@@ -130,13 +130,29 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 String name = getNameNoExt(f);
                 String ext = getExt(f);
                 Uri t = getNextFile(path, name, ext);
-                boolean star = MainApplication.getStar(context, Uri.fromFile(f));
-                String  c = MainApplication.getContact(context, Uri.fromFile(f));
                 move(f, t);
-                MainApplication.setStar(context, t, star); // copy star to migrated file
-                MainApplication.setContact(context, t, c); // copy contact to migrated file
             }
         }
+    }
+
+    @Override
+    public Uri move(File f, Uri t) {
+        Uri u = super.move(f, t);
+        if (u == null)
+            return null;
+        boolean star = MainApplication.getStar(context, Uri.fromFile(f));
+        MainApplication.setStar(context, u, star); // copy star to migrated file
+        return u;
+    }
+
+    @Override
+    public Uri rename(Uri f, String t) {
+        Uri u = super.rename(f, t);
+        if (u == null)
+            return null;
+        boolean star = MainApplication.getStar(context, f);
+        MainApplication.setStar(context, u, star); // copy star to renamed name
+        return u;
     }
 
     public Uri getNewFile() {
