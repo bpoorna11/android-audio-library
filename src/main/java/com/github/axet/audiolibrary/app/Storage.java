@@ -111,7 +111,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 String name = getNameNoExt(f);
                 String ext = getExt(f);
                 Uri t = getNextFile(path, name, ext);
+                boolean star = MainApplication.getStar(context, Uri.fromFile(f));
                 move(f, t);
+                MainApplication.setStar(context, t, star);
             }
         }
     }

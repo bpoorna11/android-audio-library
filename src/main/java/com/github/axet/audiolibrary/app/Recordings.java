@@ -327,8 +327,21 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     }
 
     public void load(boolean clean, Runnable done) {
-        Uri uri = storage.getStoragePath();
-        scan(storage.scan(uri), clean, done);
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
+
+        Uri user;
+        if (path.startsWith(ContentResolver.SCHEME_CONTENT))
+            user = Uri.parse(path);
+        else
+            user = Uri.fromFile(new File(path));
+
+        Uri mount = storage.getStoragePath(path);
+
+        if (!user.equals(mount))
+            clean = false; // do not clean if we failed to mount user selected folder
+
+        scan(storage.scan(mount), clean, done);
     }
 
     @Override
