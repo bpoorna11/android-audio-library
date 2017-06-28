@@ -174,14 +174,11 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public List<Uri> scan(Uri uri) {
         String s = uri.getScheme();
         if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
-            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-            context.getContentResolver().takePersistableUriPermission(uri, takeFlags);
-
             ArrayList<Uri> list = new ArrayList<>();
 
             ContentResolver contentResolver = context.getContentResolver();
             Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null); // MediaStore.Files.FileColumns.TITLE + " = ?"
+            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null);
             if (childCursor != null) {
                 try {
                     while (childCursor.moveToNext()) {
