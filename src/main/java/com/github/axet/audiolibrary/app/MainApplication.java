@@ -134,4 +134,17 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         editor.commit();
     }
 
+    public static String getContact(Context context, Uri f) {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = getFilePref(f) + PREFERENCE_DETAILS_CONTACT;
+        return shared.getString(p, null);
+    }
+
+    public static void setContact(Context context, Uri f, String id) {
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = getFilePref(f) + PREFERENCE_DETAILS_CONTACT;
+        SharedPreferences.Editor editor = shared.edit();
+        editor.putString(p, id);
+        editor.commit();
+    }
 }
