@@ -1,10 +1,12 @@
 package com.github.axet.audiolibrary.app;
 
 import android.app.KeyguardManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -49,7 +51,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener {
+public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
 
     static final int TYPE_COLLAPSED = 0;
@@ -64,6 +66,38 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     ListView list;
     int scrollState;
     Thread thread;
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive()");
+            String a = intent.getAction();
+            if (a.equals(Intent.ACTION_MEDIA_EJECT)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+            if (a.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+            if (a.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+        }
+    };
 
     ViewGroup toolbar;
     View toolbar_a;
@@ -148,6 +182,13 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         this.storage = new Storage(context);
         this.list.setOnScrollListener(this);
         load();
+        IntentFilter ff = new IntentFilter();
+        ff.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        ff.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        ff.addAction(Intent.ACTION_MEDIA_EJECT);
+        context.registerReceiver(receiver, ff);
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        shared.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -159,7 +200,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
     }
 
-    public void scan(final List<Uri> ff, final Runnable done) {
+    public void scan(final List<Uri> ff, final boolean clean, final Runnable done) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         final Map<String, ?> prefs = shared.getAll();
 
@@ -241,14 +282,16 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                             delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
                             delete2.remove(f);
                         }
-                        SharedPreferences.Editor editor = shared.edit();
-                        for (String s : delete) {
-                            editor.remove(s);
+                        if (clean) {
+                            SharedPreferences.Editor editor = shared.edit();
+                            for (String s : delete) {
+                                editor.remove(s);
+                            }
+                            for (Uri f : delete2) {
+                                cache.remove(f);
+                            }
+                            editor.commit();
                         }
-                        for (Uri f : delete2) {
-                            cache.remove(f);
-                        }
-                        editor.commit();
                         sort();
                         notifyDataSetChanged();
                         if (done != null)
@@ -275,11 +318,17 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             thread.interrupt();
             thread = null;
         }
+        if (receiver != null) {
+            getContext().unregisterReceiver(receiver);
+            receiver = null;
+        }
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        shared.unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    public void load(Runnable done) {
+    public void load(boolean clean, Runnable done) {
         Uri uri = storage.getStoragePath();
-        scan(storage.scan(uri), done);
+        scan(storage.scan(uri), clean, done);
     }
 
     @Override
@@ -350,7 +399,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
                                 remove(f); // instant remove
-                                load(null); // thread load
+                                load(true, null); // thread load
                             }
                         });
                     }
@@ -380,7 +429,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         Uri ff = storage.rename(f, s);
                         boolean star = MainApplication.getStar(getContext(), f);
                         MainApplication.setStar(getContext(), ff, star); // copy star to new name
-                        load(null);
+                        load(true, null);
                     }
                 });
                 e.show();
@@ -677,7 +726,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             public void onClick(View v) {
                 toolbarFilterAll = true;
                 selectToolbar();
-                load(null);
+                load(false, null);
                 save();
             }
         });
@@ -687,7 +736,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             public void onClick(View v) {
                 toolbarFilterAll = false;
                 selectToolbar();
-                load(null);
+                load(false, null);
                 save();
             }
         });
@@ -726,5 +775,12 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         toolbarSortName = shared.getBoolean(MainApplication.PREFERENCE_SORT, true);
         toolbarFilterAll = shared.getBoolean(MainApplication.PREFERENCE_FILTER, true);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(MainApplication.PREFERENCE_STORAGE)) {
+            load(true, null);
+        }
     }
 }
