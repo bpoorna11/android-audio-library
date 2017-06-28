@@ -64,6 +64,24 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getStoragePath(path);
     }
 
+    public File fallbackStorage() {
+        File internal = getLocalInternal();
+
+        // Starting in KITKAT, no permissions are required to read or write to the returned path;
+        // it's always accessible to the calling app.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            if (!permitted(context, PERMISSIONS))
+                return internal;
+        }
+
+        File external = getLocalExternal();
+
+        if (external == null)
+            return internal;
+
+        return external;
+    }
+
     @Override
     public Uri getStoragePath(String path) {
         if (Build.VERSION.SDK_INT >= 21 && path.startsWith(ContentResolver.SCHEME_CONTENT)) {
@@ -75,6 +93,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 c.close();
                 return uri;
             }
+            path = fallbackStorage().getAbsolutePath(); // we need to fallback to local storage internal or exernal
         }
         if (!permitted(context, PERMISSIONS)) {
             return Uri.fromFile(getLocalStorage());
