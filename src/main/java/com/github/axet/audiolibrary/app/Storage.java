@@ -131,8 +131,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 String ext = getExt(f);
                 Uri t = getNextFile(path, name, ext);
                 boolean star = MainApplication.getStar(context, Uri.fromFile(f));
+                String  c = MainApplication.getContact(context, Uri.fromFile(f));
                 move(f, t);
-                MainApplication.setStar(context, t, star);
+                MainApplication.setStar(context, t, star); // copy star to migrated file
+                MainApplication.setContact(context, t, c); // copy contact to migrated file
             }
         }
     }

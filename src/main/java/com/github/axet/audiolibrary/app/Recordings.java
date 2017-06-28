@@ -441,7 +441,9 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         String s = String.format("%s.%s", e.getText(), ext);
                         Uri ff = storage.rename(f, s);
                         boolean star = MainApplication.getStar(getContext(), f);
-                        MainApplication.setStar(getContext(), ff, star); // copy star to new name
+                        MainApplication.setStar(getContext(), ff, star); // copy star to renamed name
+                        String c = MainApplication.getContact(getContext(), f);
+                        MainApplication.setContact(getContext(), ff, c); // copy contact to new name
                         load(true, null);
                     }
                 });
