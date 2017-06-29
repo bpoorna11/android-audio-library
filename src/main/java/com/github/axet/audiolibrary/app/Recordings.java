@@ -54,20 +54,21 @@ import java.util.TreeSet;
 public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
 
-    static final int TYPE_COLLAPSED = 0;
-    static final int TYPE_EXPANDED = 1;
-    static final int TYPE_DELETED = 2;
+    protected static final int TYPE_COLLAPSED = 0;
+    protected static final int TYPE_EXPANDED = 1;
+    protected static final int TYPE_DELETED = 2;
 
-    Handler handler;
-    Storage storage;
-    MediaPlayer player;
-    Runnable updatePlayer;
-    int selected = -1;
-    ListView list;
-    int scrollState;
-    Thread thread;
+    protected Handler handler;
+    protected Storage storage;
+    protected MediaPlayer player;
+    protected Runnable updatePlayer;
+    protected int selected = -1;
+    protected ListView list;
+    protected int scrollState;
+    protected Thread thread;
+    protected LayoutInflater inflater;
 
-    BroadcastReceiver receiver = new BroadcastReceiver() {
+    protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive()");
@@ -99,17 +100,17 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         }
     };
 
-    ViewGroup toolbar;
-    View toolbar_a;
-    View toolbar_s;
-    View toolbar_n;
-    View toolbar_d;
-    boolean toolbarFilterAll = true; // all or stars
-    boolean toolbarSortName = true; // name or date
+    protected ViewGroup toolbar;
+    protected View toolbar_a;
+    protected View toolbar_s;
+    protected View toolbar_n;
+    protected View toolbar_d;
+    protected boolean toolbarFilterAll = true; // all or stars
+    protected boolean toolbarSortName = true; // name or date
 
-    Map<Uri, FileStats> cache = new TreeMap<>();
+    protected Map<Uri, FileStats> cache = new TreeMap<>();
 
-    Map<Uri, Integer> durations = new TreeMap<>();
+    protected Map<Uri, Integer> durations = new TreeMap<>();
 
     public static FileStats getFileStats(Map<String, ?> prefs, Uri f) {
         String json = (String) prefs.get(MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS);
@@ -187,6 +188,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         ff.addAction(Intent.ACTION_MEDIA_MOUNTED);
         ff.addAction(Intent.ACTION_MEDIA_EJECT);
         context.registerReceiver(receiver, ff);
+        inflater = LayoutInflater.from(getContext());
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         shared.registerOnSharedPreferenceChangeListener(this);
     }
@@ -198,6 +200,17 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+    }
+
+    // true - include
+    protected boolean filter(Uri f) {
+        if (toolbarFilterAll) {
+            return true;
+        } else {
+            if (MainApplication.getStar(getContext(), f))
+                return true;
+        }
+        return false;
     }
 
     public void scan(final List<Uri> ff, final boolean clean, final Runnable done) {
@@ -270,12 +283,8 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         }
                         TreeSet<Uri> delete2 = new TreeSet<>(cache.keySet());
                         for (Uri f : all) {
-                            if (toolbarFilterAll) {
+                            if (filter(f))
                                 add(f);
-                            } else {
-                                if (MainApplication.getStar(getContext(), f))
-                                    add(f);
-                            }
                             cleanDelete(delete, f);
                             delete2.remove(f);
                         }
@@ -347,12 +356,14 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         scan(storage.scan(mount), clean, done);
     }
 
+    public View inflate(int id, ViewGroup parent) {
+        return inflater.inflate(id, parent, false);
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.recording, parent, false);
+            convertView = inflate(R.layout.recording, parent);
             convertView.setTag(-1);
         }
 
@@ -566,14 +577,14 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         return convertView;
     }
 
-    void starUpdate(ImageView star, boolean starb) {
+    protected void starUpdate(ImageView star, boolean starb) {
         if (starb)
             star.setImageResource(R.drawable.ic_star_black_24dp);
         else
             star.setImageResource(R.drawable.ic_star_border_black_24dp);
     }
 
-    void playerPlay(View v, Uri f) {
+    protected void playerPlay(View v, Uri f) {
         if (player == null)
             player = MediaPlayer.create(getContext(), f);
         if (player == null) {
@@ -585,7 +596,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         updatePlayerRun(v, f);
     }
 
-    void playerPause(View v, Uri f) {
+    protected void playerPause(View v, Uri f) {
         if (player != null) {
             player.pause();
         }
@@ -596,7 +607,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         updatePlayerText(v, f);
     }
 
-    void playerStop() {
+    protected void playerStop() {
         if (updatePlayer != null) {
             handler.removeCallbacks(updatePlayer);
             updatePlayer = null;
@@ -608,7 +619,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         }
     }
 
-    void updatePlayerRun(final View v, final Uri f) {
+    protected void updatePlayerRun(final View v, final Uri f) {
         boolean playing = updatePlayerText(v, f);
 
         if (updatePlayer != null) {
@@ -631,7 +642,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         handler.postDelayed(updatePlayer, 200);
     }
 
-    boolean updatePlayerText(final View v, final Uri f) {
+    protected boolean updatePlayerText(final View v, final Uri f) {
         ImageView i = (ImageView) v.findViewById(R.id.recording_player_play);
 
         final boolean playing = player != null && player.isPlaying();
@@ -694,7 +705,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         return selected;
     }
 
-    AppCompatImageButton getCheckBox(View v) {
+    protected AppCompatImageButton getCheckBox(View v) {
         if (v instanceof ViewGroup) {
             ViewGroup g = (ViewGroup) v;
             for (int i = 0; i < g.getChildCount(); i++) {
@@ -710,7 +721,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         return null;
     }
 
-    void selectToolbar(View v, boolean pressed) {
+    protected void selectToolbar(View v, boolean pressed) {
         AppCompatImageButton cc = getCheckBox(v);
         if (pressed) {
             int[] states = new int[]{
@@ -725,7 +736,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         }
     }
 
-    void selectToolbar() {
+    protected void selectToolbar() {
         selectToolbar(toolbar_a, toolbarFilterAll);
         selectToolbar(toolbar_s, !toolbarFilterAll);
         selectToolbar(toolbar_n, toolbarSortName);
@@ -777,7 +788,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         selectToolbar();
     }
 
-    void save() {
+    protected void save() {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor edit = shared.edit();
         edit.putBoolean(MainApplication.PREFERENCE_SORT, toolbarSortName);
@@ -785,7 +796,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         edit.commit();
     }
 
-    void load() {
+    protected void load() {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         toolbarSortName = shared.getBoolean(MainApplication.PREFERENCE_SORT, true);
         toolbarFilterAll = shared.getBoolean(MainApplication.PREFERENCE_FILTER, true);
