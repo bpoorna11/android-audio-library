@@ -10,11 +10,14 @@
     <string name="db">dB</string>
     <string name="no">いいえ</string>
     <string name="yes">はい</string>
-    <string name="are_you_sure">"よろしいですか ? "</string>
     <string name="delete_recording">録音を削除</string>
     <string name="rename_recording">録音の名前を変更</string>
     <string name="shared_via">"%1$s で共有しました"</string>
     <string name="file_not_found">ファイルが見つかりません</string>
     <string name="rename">名前を変更</string>
     <string name="delete">削除</string>
+    <string name="tolbar_all">All</string>
+    <string name="tolbar_stars">Stars</string>
+    <string name="tolbar_sort_name">Name</string>
+    <string name="tolbar_sort_date">Date</string>
 </resources>

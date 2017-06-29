@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.github.axet.audiolibrary.encoders.Factory;
@@ -31,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
+    public static String TAG = Storage.class.getSimpleName();
+
     public static final String TMP_REC = "recording.data";
     public static final String TMP_ENC = "encoding.data";
 
@@ -86,12 +89,18 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public Uri getStoragePath(String path) {
         if (Build.VERSION.SDK_INT >= 21 && path.startsWith(ContentResolver.SCHEME_CONTENT)) {
             Uri uri = Uri.parse(path);
-            ContentResolver resolver = context.getContentResolver();
             Uri doc = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            Cursor c = resolver.query(doc, null, null, null, null);
-            if (c != null) {
-                c.close();
-                return uri;
+            ContentResolver resolver = context.getContentResolver();
+            try {
+                final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                resolver.takePersistableUriPermission(uri, takeFlags);
+                Cursor c = resolver.query(doc, null, null, null, null);
+                if (c != null) {
+                    c.close();
+                    return uri;
+                }
+            } catch (SecurityException e) {
+                Log.d(TAG, "open SAF failed", e);
             }
             path = fallbackStorage().getAbsolutePath(); // we need to fallback to local storage internal or exernal
         }
@@ -174,14 +183,11 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public List<Uri> scan(Uri uri) {
         String s = uri.getScheme();
         if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
-            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-            context.getContentResolver().takePersistableUriPermission(uri, takeFlags);
-
             ArrayList<Uri> list = new ArrayList<>();
 
             ContentResolver contentResolver = context.getContentResolver();
             Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null); // MediaStore.Files.FileColumns.TITLE + " = ?"
+            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null);
             if (childCursor != null) {
                 try {
                     while (childCursor.moveToNext()) {

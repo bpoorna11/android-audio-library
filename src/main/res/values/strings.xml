@@ -15,11 +15,14 @@
     <string name="db">dB</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="are_you_sure">"Are you sure ? "</string>
     <string name="delete_recording">Delete Recording</string>
     <string name="rename_recording">Rename Recording</string>
     <string name="shared_via">"Shared via %1$s"</string>
     <string name="file_not_found">File not found</string>
     <string name="rename">Rename</string>
     <string name="delete">Delete</string>
+    <string name="tolbar_all">All</string>
+    <string name="tolbar_stars">Stars</string>
+    <string name="tolbar_sort_name">Name</string>
+    <string name="tolbar_sort_date">Date</string>
 </resources>

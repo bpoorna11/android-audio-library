@@ -8,11 +8,14 @@
     <string name="db">дБ</string>
     <string name="no">Нет</string>
     <string name="yes">Да</string>
-    <string name="are_you_sure">Вы уверены?</string>
     <string name="delete_recording">Удалить запись</string>
     <string name="rename_recording">Переименовать запись</string>
     <string name="shared_via">"Создано с помощью: %1$s"</string>
     <string name="file_not_found">Файл не найден</string>
     <string name="rename">Переименовать</string>
     <string name="delete">Удалить</string>
+    <string name="tolbar_all">Все</string>
+    <string name="tolbar_stars">Отметки</string>
+    <string name="tolbar_sort_name">Имя</string>
+    <string name="tolbar_sort_date">Дата</string>
 </resources>
