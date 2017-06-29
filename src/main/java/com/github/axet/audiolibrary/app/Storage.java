@@ -104,10 +104,16 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             }
             path = fallbackStorage().getAbsolutePath(); // we need to fallback to local storage internal or exernal
         }
+        File f;
+        if (path.startsWith(ContentResolver.SCHEME_FILE)) {
+            f = new File(Uri.parse(path).getPath());
+        } else {
+            f = new File(path);
+        }
         if (!permitted(context, PERMISSIONS)) {
             return Uri.fromFile(getLocalStorage());
         } else {
-            return Uri.fromFile(super.getStoragePath(new File(path)));
+            return Uri.fromFile(super.getStoragePath(f));
         }
     }
 
