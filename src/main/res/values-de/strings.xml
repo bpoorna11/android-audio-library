@@ -15,11 +15,14 @@
     <string name="db">dB</string>
     <string name="no">Nein</string>
     <string name="yes">Ja</string>
-    <string name="are_you_sure">"Bist du sicher? "</string>
     <string name="delete_recording">Lösche Aufnahme</string>
     <string name="rename_recording">Benenne Aufnahme um</string>
     <string name="shared_via">"Teile via %1$s"</string>
     <string name="file_not_found">Datei nicht gefunden</string>
     <string name="rename">Umbenennen</string>
     <string name="delete">Löschen</string>
+    <string name="tolbar_all">All</string>
+    <string name="tolbar_stars">Stars</string>
+    <string name="tolbar_sort_name">Name</string>
+    <string name="tolbar_sort_date">Date</string>
 </resources>
