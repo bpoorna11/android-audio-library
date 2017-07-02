@@ -14,8 +14,8 @@
     <string name="rename_recording">Rinomina la Registrazione</string>
     <string name="shared_via">"Condivisa tramite %1$s"</string>
     <string name="file_not_found">File non trovato</string>
-    <string name="rename">Rinomina</string>
-    <string name="delete">Elimina</string>
+    <string name="menu_rename">Rinomina</string>
+    <string name="menu_delete">Elimina</string>
     <string name="tolbar_all">All</string>
     <string name="tolbar_stars">Stars</string>
     <string name="tolbar_sort_name">Name</string>

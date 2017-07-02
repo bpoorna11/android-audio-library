@@ -14,8 +14,8 @@
     <string name="rename_recording">録音の名前を変更</string>
     <string name="shared_via">"%1$s で共有しました"</string>
     <string name="file_not_found">ファイルが見つかりません</string>
-    <string name="rename">名前を変更</string>
-    <string name="delete">削除</string>
+    <string name="menu_rename">名前を変更</string>
+    <string name="menu_delete">削除</string>
     <string name="tolbar_all">All</string>
     <string name="tolbar_stars">Stars</string>
     <string name="tolbar_sort_name">Name</string>

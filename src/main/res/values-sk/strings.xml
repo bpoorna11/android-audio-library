@@ -14,8 +14,8 @@
     <string name="rename_recording">Premenovať nahrávku</string>
     <string name="shared_via">"Zdieľané cez %1$s"</string>
     <string name="file_not_found">Súbor nebol nájdený</string>
-    <string name="rename">Premenovať</string>
-    <string name="delete">Odstrániť</string>
+    <string name="menu_rename">Premenovať</string>
+    <string name="menu_delete">Odstrániť</string>
     <string name="tolbar_all">Všetko</string>
     <string name="tolbar_stars">Obľúbené</string>
     <string name="tolbar_sort_name">Podľa názvu</string>
