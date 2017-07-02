@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Audio Library</string>
+
+    <string-array name="encodings_text">
+        <item>.ogg (predvolené)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="title_header">Voľné %1$s ~ Zostáva %2$s</string>
+    <string name="db">dB</string>
+    <string name="no">Nie</string>
+    <string name="yes">Áno</string>
+    <string name="delete_recording">Odstrániť nahrávku</string>
+    <string name="rename_recording">Premenovať nahrávku</string>
+    <string name="shared_via">"Zdieľané cez %1$s"</string>
+    <string name="file_not_found">Súbor nebol nájdený</string>
+    <string name="menu_rename">Premenovať</string>
+    <string name="menu_delete">Odstrániť</string>
+    <string name="tolbar_all">Všetko</string>
+    <string name="tolbar_stars">Obľúbené</string>
+    <string name="tolbar_sort_name">Podľa názvu</string>
+    <string name="tolbar_sort_date">Podľa dátumu</string>
+    <string name="starred">Obľúbené</string>
+    <string name="not_starred">Nie obľúbené</string>
+    <string name="pause_button">Pozastaviť</string>
+    <string name="play_button">Prehrať</string>
+    <string name="edit_button">Upraviť</string>
+    <string name="share_button">Zdieľať</string>
+    <string name="trash_button">Odstrániť</string>
+</resources>
