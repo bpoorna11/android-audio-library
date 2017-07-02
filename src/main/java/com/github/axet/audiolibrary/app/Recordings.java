@@ -578,10 +578,13 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     }
 
     protected void starUpdate(ImageView star, boolean starb) {
-        if (starb)
+        if (starb) {
             star.setImageResource(R.drawable.ic_star_black_24dp);
-        else
+            star.setContentDescription(getString(R.string.starred));
+        { else {
             star.setImageResource(R.drawable.ic_star_border_black_24dp);
+            star.setContentDescription(getString(R.string.not_starred));
+        }
     }
 
     protected void playerPlay(View v, Uri f) {
@@ -648,6 +651,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         final boolean playing = player != null && player.isPlaying();
 
         i.setImageResource(playing ? R.drawable.ic_pause_black_24dp : R.drawable.ic_play_arrow_black_24dp);
+        i.setContentDescription(getString(playing ? R.string.pause_button : R.string.play_button));
 
         TextView start = (TextView) v.findViewById(R.id.recording_player_start);
         SeekBar bar = (SeekBar) v.findViewById(R.id.recording_player_seek);
