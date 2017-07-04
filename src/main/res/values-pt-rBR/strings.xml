@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Lib de Áudio</string>
-
     <string-array name="encodings_text">
         <item>.ogg (padrão)</item>
         <item>.wav</item>
