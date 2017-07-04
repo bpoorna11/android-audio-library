@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -496,12 +498,21 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                 public void onClick(View v) {
                     Uri u = f;
 
+                    String name = "Recordings";
+                    try {
+                        PackageManager pm = getContext().getPackageManager();
+                        ApplicationInfo info = pm.getApplicationInfo(getContext().getPackageName(), 0);
+                        name = info.loadLabel(pm).toString();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        ;
+                    }
+
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("audio/*");
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
                     intent.putExtra(Intent.EXTRA_STREAM, u);
                     intent.putExtra(Intent.EXTRA_SUBJECT, storage.getDocumentName(f));
-                    intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, getContext().getString(R.string.app_name)));
+                    intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
 
                     if (Build.VERSION.SDK_INT < 11) {
                         getContext().startActivity(intent);
