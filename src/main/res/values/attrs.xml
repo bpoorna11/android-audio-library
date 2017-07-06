@@ -4,4 +4,9 @@
     <attr name="secondBackground" format="color" />
     <attr name="roundButton" format="reference" />
     <attr name="search_rating_bg" format="reference" />
+
+    <declare-styleable name="PitchView">
+        <attr name="recColor" format="color" />
+        <attr name="cutColor" format="color" />
+    </declare-styleable>
 </resources>
