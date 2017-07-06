@@ -33,7 +33,6 @@ public class FFTView extends View {
 
     public FFTView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
         create();
     }
 

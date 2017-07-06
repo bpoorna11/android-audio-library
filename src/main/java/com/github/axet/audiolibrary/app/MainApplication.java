@@ -112,7 +112,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         if (s.startsWith(ContentResolver.SCHEME_CONTENT)) {
             return PREFERENCE_DETAILS_PREFIX + getHexString(f.toString().hashCode());
         } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            File ff = new File(f.getPath());
+            File ff = Storage.getFile(f);
             return PREFERENCE_DETAILS_PREFIX + getHexString(ff.toString().hashCode());
         } else {
             throw new RuntimeException("unknown uri");

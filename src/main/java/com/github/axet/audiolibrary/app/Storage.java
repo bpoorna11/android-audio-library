@@ -8,24 +8,13 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
 import com.github.axet.audiolibrary.encoders.Factory;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -106,7 +95,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         }
         File f;
         if (path.startsWith(ContentResolver.SCHEME_FILE)) {
-            f = new File(Uri.parse(path).getPath());
+            f = Storage.getFile(Uri.parse(path));
         } else {
             f = new File(path);
         }
@@ -178,7 +167,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         String s = parent.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            File p = new File(parent.getPath());
+            File p = getFile(parent);
             if (!p.exists() && !p.mkdirs())
                 throw new RuntimeException("Unable to create: " + parent);
         }
@@ -218,7 +207,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
             return list;
         } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            File dir = new File(uri.getPath());
+            File dir = getFile(uri);
             ArrayList<Uri> list = new ArrayList<>();
 
             File[] ff = dir.listFiles();
@@ -319,4 +308,5 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         else
             return external;
     }
+
 }

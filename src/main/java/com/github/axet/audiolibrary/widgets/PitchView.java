@@ -1,6 +1,7 @@
 package com.github.axet.audiolibrary.widgets;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -31,6 +32,9 @@ public class PitchView extends ViewGroup {
 
     // edit update time
     public static final int EDIT_UPDATE_SPEED = 250;
+
+    int recColor;
+    int cutColor;
 
     // 'pitch length' in milliseconds (100ms)
     //
@@ -167,7 +171,7 @@ public class PitchView extends ViewGroup {
             super(context, attrs, defStyleAttr);
 
             paint = new Paint();
-            paint.setColor(getThemeColor(R.attr.colorPrimaryDark));
+            paint.setColor(PitchView.this.recColor);
             paint.setStrokeWidth(pitchWidth);
 
             paintRed = new Paint();
@@ -175,15 +179,15 @@ public class PitchView extends ViewGroup {
             paintRed.setStrokeWidth(pitchWidth);
 
             cutColor = new Paint();
-            cutColor.setColor(getThemeColor(android.R.attr.textColorHint));
+            cutColor.setColor(PitchView.this.cutColor);
             cutColor.setStrokeWidth(pitchWidth);
 
             editPaint = new Paint();
-            editPaint.setColor(getThemeColor(R.attr.colorPrimary));
+            editPaint.setColor(PitchView.this.recColor);
             editPaint.setStrokeWidth(pitchWidth);
 
             playPaint = new Paint();
-            playPaint.setColor(getThemeColor(R.attr.colorPrimary));
+            playPaint.setColor(PitchView.this.recColor);
             playPaint.setStrokeWidth(pitchWidth / 2);
         }
 
@@ -311,7 +315,7 @@ public class PitchView extends ViewGroup {
             textPaint.setTextSize(20f);
 
             paint = new Paint();
-            paint.setColor(getThemeColor(R.attr.colorPrimaryDark));
+            paint.setColor(recColor);
             paint.setStrokeWidth(pitchWidth);
         }
 
@@ -384,6 +388,13 @@ public class PitchView extends ViewGroup {
     public PitchView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PitchView, defStyleAttr, 0);
+
+        recColor = a.getColor(R.styleable.PitchView_recColor, getThemeColor(R.attr.colorPrimaryDark));
+        cutColor = a.getColor(R.styleable.PitchView_cutColor, getThemeColor(android.R.attr.textColorHint));
+
+        a.recycle();
+
         create();
     }
 
@@ -423,6 +434,7 @@ public class PitchView extends ViewGroup {
             for (int i = 0; i < 3000; i++) {
                 data.add(-Math.sin(i) * Sound.MAXIMUM_DB);
             }
+            edit(150);
         }
 
         time = System.currentTimeMillis();
