@@ -56,56 +56,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getStoragePath(path);
     }
 
-    public File fallbackStorage() {
-        File internal = getLocalInternal();
-
-        // Starting in KITKAT, no permissions are required to read or write to the returned path;
-        // it's always accessible to the calling app.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            if (!permitted(context, PERMISSIONS))
-                return internal;
-        }
-
-        File external = getLocalExternal();
-
-        if (external == null)
-            return internal;
-
-        return external;
-    }
-
-    @Override
-    public Uri getStoragePath(String path) {
-        if (Build.VERSION.SDK_INT >= 21 && path.startsWith(ContentResolver.SCHEME_CONTENT)) {
-            Uri uri = Uri.parse(path);
-            Uri doc = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            ContentResolver resolver = context.getContentResolver();
-            try {
-                final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                resolver.takePersistableUriPermission(uri, takeFlags);
-                Cursor c = resolver.query(doc, null, null, null, null);
-                if (c != null) {
-                    c.close();
-                    return uri;
-                }
-            } catch (SecurityException e) {
-                Log.d(TAG, "open SAF failed", e);
-            }
-            path = fallbackStorage().getAbsolutePath(); // we need to fallback to local storage internal or exernal
-        }
-        File f;
-        if (path.startsWith(ContentResolver.SCHEME_FILE)) {
-            f = Storage.getFile(Uri.parse(path));
-        } else {
-            f = new File(path);
-        }
-        if (!permitted(context, PERMISSIONS)) {
-            return Uri.fromFile(getLocalStorage());
-        } else {
-            return Uri.fromFile(super.getStoragePath(f));
-        }
-    }
-
     public void migrateLocalStorage() {
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir, "recordings")); // old recordings folder
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
