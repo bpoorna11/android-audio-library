@@ -347,6 +347,8 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         Uri user;
         if (path.startsWith(ContentResolver.SCHEME_CONTENT))
             user = Uri.parse(path);
+        else if (path.startsWith(ContentResolver.SCHEME_FILE))
+            user = Uri.parse(path);
         else
             user = Uri.fromFile(new File(path));
 
