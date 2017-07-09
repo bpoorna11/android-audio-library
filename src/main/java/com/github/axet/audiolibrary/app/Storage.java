@@ -68,11 +68,20 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return;
 
         Uri path = getStoragePath();
+
+        if (isLocalStorage(path))
+            return;
+
         String s = path.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_FILE)) {
             if (!permitted(context, PERMISSIONS))
                 return;
         }
+
+        Uri u = Uri.fromFile(l);
+
+        if (u.equals(path)) // same storage
+            return;
 
         File[] ff = l.listFiles();
 
@@ -81,17 +90,14 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         for (File f : ff) {
             if (f.isFile()) { // skip directories (we didn't create one)
-                String name = getNameNoExt(f);
-                String ext = getExt(f);
-                Uri t = getNextFile(path, name, ext);
-                move(f, t);
+                migrate(f, path);
             }
         }
     }
 
     @Override
-    public Uri move(File f, Uri t) {
-        Uri u = super.move(f, t);
+    public Uri migrate(File f, Uri t) {
+        Uri u = super.migrate(f, t);
         if (u == null)
             return null;
         boolean star = MainApplication.getStar(context, Uri.fromFile(f));
