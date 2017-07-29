@@ -221,6 +221,9 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
 
         final Thread old = thread;
 
+        if (old != null) // prevent handler.post to trigger
+            old.interrupt();
+
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
