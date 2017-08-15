@@ -245,7 +245,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         cache.put(f, fs);
                     }
                     if (fs != null) {
-                        long last = storage.getLast(f);
+                        long last = storage.getLastModified(f);
                         long size = storage.getLength(f);
                         if (last != fs.last || size != fs.size)
                             fs = null;
@@ -253,7 +253,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     if (fs == null) {
                         fs = new FileStats();
                         fs.size = storage.getLength(f);
-                        fs.last = storage.getLast(f);
+                        fs.last = storage.getLastModified(f);
                         try {
                             MediaPlayer mp = MediaPlayer.create(getContext(), f);
                             fs.duration = mp.getDuration();
@@ -394,10 +394,10 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         });
 
         TextView title = (TextView) convertView.findViewById(R.id.recording_title);
-        title.setText(storage.getDocumentName(f));
+        title.setText(Storage.getDocumentName(f));
 
         TextView time = (TextView) convertView.findViewById(R.id.recording_time);
-        time.setText(MainApplication.SIMPLE.format(new Date(storage.getLast(f))));
+        time.setText(MainApplication.SIMPLE.format(new Date(storage.getLastModified(f))));
 
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
         dur.setText(MainApplication.formatDuration(getContext(), durations.get(f)));
@@ -417,7 +417,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(R.string.delete_recording);
-                builder.setMessage("...\\" + storage.getDocumentName(f) + "\n\n" + getContext().getString(R.string.are_you_sure));
+                builder.setMessage("...\\" + Storage.getDocumentName(f) + "\n\n" + getContext().getString(R.string.are_you_sure));
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
