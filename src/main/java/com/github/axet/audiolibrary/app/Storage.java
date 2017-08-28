@@ -223,16 +223,20 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         File external = new File(c, TMP_REC);
 
-        if (external.exists())
+        if (external.exists()) // external already been used as tmp storage, keep using it
             return external;
 
-        long freeI = getFree(internal);
-        long freeE = getFree(external);
+        try {
+            long freeI = getFree(internal);
+            long freeE = getFree(external);
 
-        if (freeI > freeE)
+            if (freeI > freeE)
+                return internal;
+            else
+                return external;
+        } catch (RuntimeException e) { // samsung devices unable to determine external folders
             return internal;
-        else
-            return external;
+        }
     }
 
     public File getTempEncoding() {
@@ -256,13 +260,16 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (external.exists())
             return external;
 
-        long freeI = getFree(internal);
-        long freeE = getFree(external);
+        try {
+            long freeI = getFree(internal);
+            long freeE = getFree(external);
 
-        if (freeI > freeE)
+            if (freeI > freeE)
+                return internal;
+            else
+                return external;
+        } catch (RuntimeException e) { // samsung devices unable to determine external folders
             return internal;
-        else
-            return external;
+        }
     }
-
 }
