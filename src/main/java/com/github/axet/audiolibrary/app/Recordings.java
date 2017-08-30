@@ -513,7 +513,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     intent.setType("audio/*");
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
                     intent.putExtra(Intent.EXTRA_STREAM, u);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, storage.getDocumentName(f));
+                    intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
 
                     if (Build.VERSION.SDK_INT < 11) {
