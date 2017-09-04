@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,7 +19,7 @@ import io.nayuki.flac.encode.SubframeEncoder;
 // compile 'com.github.axet:FLAC-library-Java:0.0.4-SNAPSHOT'
 //
 // https://www.nayuki.io/page/simple-flac-implementation
-public class FormatFLAC_nayuki implements Encoder {
+public class FormatFLAC implements Encoder {
     EncoderInfo info;
     RandomAccessFile raf;
     BitOutputStream bo;
@@ -27,7 +28,7 @@ public class FormatFLAC_nayuki implements Encoder {
     SubframeEncoder.SearchOptions opt = SubframeEncoder.SearchOptions.SUBSET_BEST;
     MessageDigest hasher;
 
-    public FormatFLAC_nayuki(EncoderInfo info, File out) {
+    public FormatFLAC(EncoderInfo info, File out) {
         this.info = info;
         try {
             raf = new RandomAccessFile(out, "rw");
@@ -55,25 +56,26 @@ public class FormatFLAC_nayuki implements Encoder {
     }
 
     @Override
-    public void encode(short[] buf, int pos, int buflen) {
+    public void encode(short[] buf, int pos, int len) {
         try {
             sinfo.minBlockSize = blockSize;
             sinfo.maxBlockSize = blockSize;
             sinfo.minFrameSize = 0;
             sinfo.maxFrameSize = 0;
 
-            ByteBuffer bb = ByteBuffer.allocate(buflen * Short.SIZE / Byte.SIZE);
-            bb.asShortBuffer().put(buf, pos, buflen);
+            ByteBuffer bb = ByteBuffer.allocate(len * Short.SIZE / Byte.SIZE);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.asShortBuffer().put(buf, pos, len);
             hasher.update(bb);
 
-            int cc = buflen / sinfo.numChannels;
+            int cc = len / sinfo.numChannels;
 
             sinfo.numSamples += cc;
 
             long[][] subsamples = new long[sinfo.numChannels][cc];
             for (int c = 0; c < sinfo.numChannels; c++) {
                 for (int i = 0; i < cc; i++) {
-                    subsamples[c][i] = buf[c * i];
+                    subsamples[c][i] = buf[c + sinfo.numChannels * i];
                 }
             }
             FrameEncoder enc = FrameEncoder.computeBest(pos, subsamples, info.bps, info.hz, opt).encoder;

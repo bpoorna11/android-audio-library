@@ -7,15 +7,14 @@ import net.sourceforge.javaflacencoder.StreamConfiguration;
 import java.io.File;
 import java.io.IOException;
 
+// compile 'com.github.axet:java-flac-encoder:0.3.8'
 public class FormatFLAC implements Encoder {
-    int NumSamples;
     EncoderInfo info;
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;
 
     public FormatFLAC(EncoderInfo info, File out) {
         this.info = info;
-        this.NumSamples = 0;
 
         StreamConfiguration streamConfiguration = new StreamConfiguration();
         streamConfiguration.setSampleRate(info.hz);

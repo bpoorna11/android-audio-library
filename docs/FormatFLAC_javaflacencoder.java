@@ -8,12 +8,12 @@ import java.io.File;
 import java.io.IOException;
 
 // compile 'com.github.axet:java-flac-encoder:0.3.8'
-public class FormatFLAC_javaflacencoder implements Encoder {
+public class FormatFLAC implements Encoder {
     EncoderInfo info;
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;
 
-    public FormatFLAC_javaflacencoder(EncoderInfo info, File out) {
+    public FormatFLAC(EncoderInfo info, File out) {
         this.info = info;
 
         StreamConfiguration streamConfiguration = new StreamConfiguration();

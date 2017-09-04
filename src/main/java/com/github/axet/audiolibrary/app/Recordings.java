@@ -243,7 +243,8 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     FileStats fs = cache.get(f);
                     if (fs == null) {
                         fs = getFileStats(prefs, f);
-                        cache.put(f, fs);
+                        if (fs != null)
+                            cache.put(f, fs);
                     }
                     if (fs != null) {
                         long last = storage.getLastModified(f);
@@ -517,7 +518,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
                     PopupShareActionProvider.show(getContext(), share, intent);
-                 }
+                }
             });
 
             KeyguardManager myKM = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
