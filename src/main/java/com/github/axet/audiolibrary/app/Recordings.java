@@ -516,15 +516,8 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     intent.putExtra(Intent.EXTRA_STREAM, u);
                     intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
-
-                    if (Build.VERSION.SDK_INT < 11) {
-                        getContext().startActivity(intent);
-                    } else {
-                        PopupShareActionProvider shareProvider = new PopupShareActionProvider(getContext(), share);
-                        shareProvider.setShareIntent(intent);
-                        shareProvider.show();
-                    }
-                }
+                    PopupShareActionProvider.show(getContext(), share, intent);
+                 }
             });
 
             KeyguardManager myKM = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
