@@ -15,6 +15,9 @@ import io.nayuki.flac.encode.FrameEncoder;
 import io.nayuki.flac.encode.RandomAccessFileOutputStream;
 import io.nayuki.flac.encode.SubframeEncoder;
 
+// compile 'com.github.axet:FLAC-library-Java:0.0.4-SNAPSHOT'
+//
+// https://www.nayuki.io/page/simple-flac-implementation
 public class FormatFLAC_nayuki implements Encoder {
     EncoderInfo info;
     RandomAccessFile raf;
