@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
@@ -110,7 +111,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     protected boolean toolbarFilterAll = true; // all or stars
     protected boolean toolbarSortName = true; // name or date
 
-    protected Map<Uri, FileStats> cache = new TreeMap<>();
+    protected Map<Uri, FileStats> cache = new ConcurrentHashMap<>();
 
     protected Map<Uri, Integer> durations = new TreeMap<>();
 
