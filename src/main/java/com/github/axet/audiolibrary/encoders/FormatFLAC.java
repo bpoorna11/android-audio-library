@@ -1,5 +1,6 @@
 package com.github.axet.audiolibrary.encoders;
 
+import net.sourceforge.javaflacencoder.EncodingConfiguration;
 import net.sourceforge.javaflacencoder.FLACEncoder;
 import net.sourceforge.javaflacencoder.FLACFileOutputStream;
 import net.sourceforge.javaflacencoder.StreamConfiguration;
@@ -7,25 +8,28 @@ import net.sourceforge.javaflacencoder.StreamConfiguration;
 import java.io.File;
 import java.io.IOException;
 
+// compile 'com.github.axet:java-flac-encoder:0.3.8'
 public class FormatFLAC implements Encoder {
-    int NumSamples;
     EncoderInfo info;
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;
 
     public FormatFLAC(EncoderInfo info, File out) {
         this.info = info;
-        this.NumSamples = 0;
 
-        StreamConfiguration streamConfiguration = new StreamConfiguration();
-        streamConfiguration.setSampleRate(info.hz);
-        streamConfiguration.setBitsPerSample(info.bps);
-        streamConfiguration.setChannelCount(info.channels);
+        StreamConfiguration sc = new StreamConfiguration();
+        sc.setSampleRate(info.hz);
+        sc.setBitsPerSample(info.bps);
+        sc.setChannelCount(info.channels);
+
+        EncodingConfiguration ec = new EncodingConfiguration();
+        ec.setSubframeType(EncodingConfiguration.SubframeType.LPC);
 
         try {
             flacEncoder = new FLACEncoder();
             flacOutputStream = new FLACFileOutputStream(out);
-            flacEncoder.setStreamConfiguration(streamConfiguration);
+            flacEncoder.setStreamConfiguration(sc);
+            flacEncoder.setEncodingConfiguration(ec);
             flacEncoder.setOutputStream(flacOutputStream);
             flacEncoder.openFLACStream();
         } catch (IOException e) {

@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
@@ -110,7 +111,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
     protected boolean toolbarFilterAll = true; // all or stars
     protected boolean toolbarSortName = true; // name or date
 
-    protected Map<Uri, FileStats> cache = new TreeMap<>();
+    protected Map<Uri, FileStats> cache = new ConcurrentHashMap<>();
 
     protected Map<Uri, Integer> durations = new TreeMap<>();
 
@@ -242,7 +243,8 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     FileStats fs = cache.get(f);
                     if (fs == null) {
                         fs = getFileStats(prefs, f);
-                        cache.put(f, fs);
+                        if (fs != null)
+                            cache.put(f, fs);
                     }
                     if (fs != null) {
                         long last = storage.getLastModified(f);
@@ -515,14 +517,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     intent.putExtra(Intent.EXTRA_STREAM, u);
                     intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
-
-                    if (Build.VERSION.SDK_INT < 11) {
-                        getContext().startActivity(intent);
-                    } else {
-                        PopupShareActionProvider shareProvider = new PopupShareActionProvider(getContext(), share);
-                        shareProvider.setShareIntent(intent);
-                        shareProvider.show();
-                    }
+                    PopupShareActionProvider.show(getContext(), share, intent);
                 }
             });
 
