@@ -67,15 +67,20 @@ public class FileEncoder {
                             }
                         }
                     }
-                    encoder.close();
-                    encoder = null;
-                    rs.close();
-                    rs = null;
                     handler.post(done);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "Exception", e);
                     t = e;
                     handler.post(error);
+                } finally {
+                    if (encoder != null) {
+                        encoder.close();
+                        encoder = null;
+                    }
+                    if (rs != null) {
+                        rs.close();
+                        rs = null;
+                    }
                 }
             }
         }, "FileEncoder");

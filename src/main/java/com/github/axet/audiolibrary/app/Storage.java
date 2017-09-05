@@ -47,7 +47,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public boolean recordingPending() {
-        return getTempRecording().exists();
+        File tmp = getTempRecording();
+        return tmp.exists() && tmp.length() > 0;
     }
 
     public Uri getStoragePath() {
