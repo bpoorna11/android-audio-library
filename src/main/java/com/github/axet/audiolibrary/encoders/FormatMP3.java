@@ -40,7 +40,7 @@ public class FormatMP3 implements Encoder {
         this.out = out;
         lame = new Lame();
         int b = Factory.getBitrate(info.hz) / 1000;
-        lame.open(info.channels, info.hz, b);
+        lame.open(info.channels, info.hz, b, 4);
         try {
             writer = new RandomAccessFile(out, "rw");
         } catch (IOException e) {
