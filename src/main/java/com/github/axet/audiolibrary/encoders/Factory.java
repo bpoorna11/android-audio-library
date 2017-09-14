@@ -123,9 +123,9 @@ public class Factory {
         }
 
         if (ext.equals("mp3")) {
-            long y1 = 485568; // one minute sample 16000Hz
+            long y1 = 376344; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
-            long y2 = 965902; // one minute sample
+            long y2 = 464437; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
