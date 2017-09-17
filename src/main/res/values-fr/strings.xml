@@ -4,11 +4,6 @@
         <item>.wav</item>
     </string-array>
 
-    <string-array name="encodings_values" translatable="false">
-        <item>ogg</item>
-        <item>wav</item>
-    </string-array>
-
     <string name="title_header">%1$s libre ~ %2$s restant</string>
     <string name="db">dB</string>
     <string name="no">Non</string>
@@ -23,4 +18,11 @@
     <string name="tolbar_stars">Stars</string>
     <string name="tolbar_sort_name">Name</string>
     <string name="tolbar_sort_date">Date</string>
+    <string name="starred">Starred</string>
+    <string name="not_starred">Not starred</string>
+    <string name="pause_button">Pause</string>
+    <string name="play_button">Play</string>
+    <string name="edit_button">Edit</string>
+    <string name="share_button">Share</string>
+    <string name="trash_button">Delete</string>
 </resources>
