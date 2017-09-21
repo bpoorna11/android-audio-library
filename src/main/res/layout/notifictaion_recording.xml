@@ -52,6 +52,24 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/notification_rename"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_create_black_24dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageButton
+                android:id="@+id/notification_fav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_star_border_black_24dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageButton
                 android:id="@+id/notification_record"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
