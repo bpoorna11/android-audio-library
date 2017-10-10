@@ -46,7 +46,7 @@ public class FileEncoder {
                 rs.open(buf.length);
 
                 try {
-                    while (!Thread.currentThread().isInterrupted()) {
+                    while (true) {
                         try {
                             synchronized (pause) {
                                 if (pause.get()) {
