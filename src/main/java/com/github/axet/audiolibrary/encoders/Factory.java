@@ -16,13 +16,13 @@ public class Factory {
     public static String MP4A = "audio/mp4a-latm";
 
     public static int getBitrate(int hz) {
-        int b = 128000;
         if (hz < 16000) {
-            b = 32000;
+            return 32000;
         } else if (hz < 44100) {
-            b = 64000;
+            return 64000;
+        } else {
+            return 128000;
         }
-        return b;
     }
 
     public static CharSequence[] getEncodingTexts(Context context) {
