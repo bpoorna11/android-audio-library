@@ -25,4 +25,5 @@
     <string name="edit_button">Upraviť</string>
     <string name="share_button">Zdieľať</string>
     <string name="trash_button">Odstrániť</string>
+    <string name="migrating_data">Migrating data</string>
 </resources>
