@@ -44,9 +44,6 @@ android {
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { variant ->
-        classpath += files(variant.javaCompile.classpath.files)
-    }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
