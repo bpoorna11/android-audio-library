@@ -25,4 +25,5 @@
     <string name="edit_button">Edit</string>
     <string name="share_button">Share</string>
     <string name="trash_button">Delete</string>
+    <string name="migrating_data">Migrating data</string>
 </resources>

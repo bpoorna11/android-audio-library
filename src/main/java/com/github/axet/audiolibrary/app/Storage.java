@@ -3,15 +3,18 @@ package com.github.axet.audiolibrary.app;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
+import android.widget.ProgressBar;
 
+import com.github.axet.androidlibrary.widgets.ThemeUtils;
+import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.encoders.Factory;
 
 import java.io.File;
@@ -28,6 +31,32 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+    public static void migrateLocalStorageDialog(Context context, final Handler handler, final Storage storage) {
+        int dp10 = ThemeUtils.dp2px(context, 10);
+        ProgressBar progress = new ProgressBar(context);
+        progress.setIndeterminate(true);
+        progress.setPadding(dp10, dp10, dp10, dp10);
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle(R.string.migrating_data);
+        b.setView(progress);
+        b.setCancelable(false);
+        final AlertDialog dialog = b.create();
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                storage.migrateLocalStorage();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.cancel();
+                    }
+                });
+            }
+        });
+        dialog.show();
+        thread.start();
+    }
 
     public Storage(Context context) {
         super(context);

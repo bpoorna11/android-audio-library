@@ -30,7 +30,7 @@ public class FormatOPUS implements Encoder {
     Opus opus;
     long NumSamples;
     ShortBuffer left;
-    int frameSize;
+    int frameSize = 960; // default 20ms
     int hz;
     Resample resample;
 
@@ -48,6 +48,16 @@ public class FormatOPUS implements Encoder {
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;
+        }
+    }
+
+    public static int getBitrate(int hz) {
+        if (hz < 16000) {
+            return 16000;
+        } else if (hz < 44100) {
+            return 24000;
+        } else {
+            return 32000;
         }
     }
 
@@ -84,7 +94,7 @@ public class FormatOPUS implements Encoder {
             resample = new Resample(info.hz, info.channels, hz);
         }
 
-        int b = Factory.getBitrate(info.hz);
+        int b = getBitrate(info.hz);
         opus = new Opus();
         opus.open(info.channels, hz, b);
     }
