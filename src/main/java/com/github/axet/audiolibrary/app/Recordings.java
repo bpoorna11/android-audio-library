@@ -39,6 +39,7 @@ import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
+import com.github.axet.audiolibrary.services.RecordingContentProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -500,8 +501,6 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Uri u = f;
-
                     String name = "Recordings";
                     try {
                         PackageManager pm = getContext().getPackageManager();
@@ -514,7 +513,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("audio/*");
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
-                    intent.putExtra(Intent.EXTRA_STREAM, u);
+                    intent.putExtra(Intent.EXTRA_STREAM, RecordingContentProvider.share(f));
                     intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
                     PopupShareActionProvider.show(getContext(), share, intent);
