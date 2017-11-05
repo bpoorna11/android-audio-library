@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -34,12 +33,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
+import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
-import com.github.axet.audiolibrary.services.RecordingContentProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -513,7 +512,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("audio/*");
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
-                    intent.putExtra(Intent.EXTRA_STREAM, RecordingContentProvider.share(f));
+                    intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.share(getContext(), f));
                     intent.putExtra(Intent.EXTRA_SUBJECT, Storage.getDocumentName(f));
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
                     PopupShareActionProvider.show(getContext(), share, intent);
