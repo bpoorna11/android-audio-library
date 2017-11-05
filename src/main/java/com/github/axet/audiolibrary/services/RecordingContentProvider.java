@@ -43,8 +43,8 @@ public class RecordingContentProvider extends ContentProvider {
 
     protected static ProviderInfo info;
 
-    public static HashMap<String, Uri> hashs = new HashMap<>();
-    public static HashMap<Uri, Long> uris = new HashMap<>();
+    public static HashMap<String, Uri> hashs = new HashMap<>(); // hash -> original url
+    public static HashMap<Uri, Long> uris = new HashMap<>(); // original url -> time
 
     Runnable refresh = new Runnable() {
         @Override
@@ -74,13 +74,23 @@ public class RecordingContentProvider extends ContentProvider {
         }
     }
 
-    public static Uri share(Uri u) {
+    public static Uri share(Uri u) { // original uri -> hased uri
         long now = System.currentTimeMillis();
         uris.put(u, now);
         String hash = md5(u.toString());
         hashs.put(hash, u);
         File path = new File(hash, Storage.getDocumentName(u));
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(info.authority).path(path.toString()).build();
+    }
+
+    Uri find(Uri uri) { // hashed uri -> original uri
+        String hash = uri.getPathSegments().get(0);
+        Uri f = hashs.get(hash);
+        if (f == null)
+            return null;
+        long now = System.currentTimeMillis();
+        uris.put(f, now);
+        return f;
     }
 
     public static String getAuthority() {
@@ -135,8 +145,7 @@ public class RecordingContentProvider extends ContentProvider {
             projection = FileProvider.COLUMNS;
         }
 
-        String hash = uri.getPathSegments().get(0);
-        Uri f = hashs.get(hash);
+        Uri f = find(uri);
         if (f == null)
             return null;
 
@@ -163,8 +172,7 @@ public class RecordingContentProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        String hash = uri.getPathSegments().get(0);
-        Uri f = hashs.get(hash);
+        Uri f = find(uri);
         if (f == null)
             return null;
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(storage.getExt(f));
@@ -189,8 +197,7 @@ public class RecordingContentProvider extends ContentProvider {
     @Nullable
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        String hash = uri.getPathSegments().get(0);
-        Uri f = hashs.get(hash);
+        Uri f = find(uri);
         if (f == null)
             return null;
 
