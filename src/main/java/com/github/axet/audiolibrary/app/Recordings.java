@@ -428,6 +428,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         RemoveItemAnimation.apply(list, base, new Runnable() {
                             @Override
                             public void run() {
+                                playerStop(); // in case if playback got started twice during delete animation
                                 storage.delete(f);
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
