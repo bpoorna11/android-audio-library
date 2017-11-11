@@ -11,7 +11,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
@@ -32,7 +34,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
-    public static void migrateLocalStorageDialog(Context context, final Handler handler, final Storage storage) {
+    public static void migrateLocalStorageDialog(final Context context, final Handler handler, final Storage storage) {
         int dp10 = ThemeUtils.dp2px(context, 10);
         ProgressBar progress = new ProgressBar(context);
         progress.setIndeterminate(true);
@@ -45,7 +47,17 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                storage.migrateLocalStorage();
+                try {
+                    storage.migrateLocalStorage();
+                } catch (final RuntimeException e) {
+                    Log.d(TAG, "migrate error", e);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
