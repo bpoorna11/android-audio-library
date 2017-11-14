@@ -22,7 +22,7 @@ apply plugin: 'com.github.dcendents.android-maven' // 'gradle install' task
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "26.0.2"
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         minSdkVersion 9
