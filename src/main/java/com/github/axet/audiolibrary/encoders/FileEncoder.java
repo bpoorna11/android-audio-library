@@ -54,7 +54,6 @@ public class FileEncoder {
                                 }
                             }
                         } catch (InterruptedException e) {
-                            handler.removeCallbacks(progress); // prevent call progress after encoder closed()
                             return;
                         }
                         int len = rs.read(buf);
@@ -129,5 +128,6 @@ public class FileEncoder {
             rs.close();
             rs = null;
         }
+        handler.removeCallbacksAndMessages(null); // prevent call progress/done after encoder closed()
     }
 }
