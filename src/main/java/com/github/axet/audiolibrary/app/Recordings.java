@@ -665,11 +665,13 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         TextView end = (TextView) v.findViewById(R.id.recording_player_end);
 
         int c = 0;
-        int d = durations.get(f);
+        int d;
 
         if (player != null) {
             c = player.getCurrentPosition();
             d = player.getDuration();
+        } else {
+            d = durations.get(f);
         }
 
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
