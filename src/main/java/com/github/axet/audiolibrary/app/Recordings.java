@@ -401,8 +401,11 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         TextView time = (TextView) convertView.findViewById(R.id.recording_time);
         time.setText(MainApplication.SIMPLE.format(new Date(storage.getLastModified(f))));
 
+        Integer d = durations.get(f);
+        if (d == null)
+            d = 0; // dir not yet scanned on first run
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
-        dur.setText(MainApplication.formatDuration(getContext(), durations.get(f)));
+        dur.setText(MainApplication.formatDuration(getContext(), d));
 
         TextView size = (TextView) convertView.findViewById(R.id.recording_size);
         size.setText(MainApplication.formatSize(getContext(), storage.getLength(f)));
@@ -665,11 +668,15 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         TextView end = (TextView) v.findViewById(R.id.recording_player_end);
 
         int c = 0;
-        int d = durations.get(f);
+        Integer d;
 
         if (player != null) {
             c = player.getCurrentPosition();
             d = player.getDuration();
+        } else {
+            d = durations.get(f);
+            if (d == null)
+                d = 0; // dir not yet scanned on first run
         }
 
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
