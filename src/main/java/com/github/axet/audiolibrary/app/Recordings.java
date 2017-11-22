@@ -278,7 +278,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         if (thread != t)
                             return; // replaced with new thread, exit
                         setNotifyOnChange(false);
-                        clear();
+                        clear(); // clear recordings
                         Recordings.this.durations = durations;
                         TreeSet<String> delete = new TreeSet<>();
                         for (String k : prefs.keySet()) {
@@ -288,7 +288,7 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
                         TreeSet<Uri> delete2 = new TreeSet<>(cache.keySet());
                         for (Uri f : all) {
                             if (filter(f))
-                                add(f);
+                                add(f); // add recording
                             cleanDelete(delete, f);
                             delete2.remove(f);
                         }
@@ -402,8 +402,6 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
         time.setText(MainApplication.SIMPLE.format(new Date(storage.getLastModified(f))));
 
         Integer d = durations.get(f);
-        if (d == null)
-            d = 0; // dir not yet scanned on first run
         TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
         dur.setText(MainApplication.formatDuration(getContext(), d));
 
@@ -675,8 +673,6 @@ public class Recordings extends ArrayAdapter<Uri> implements AbsListView.OnScrol
             d = player.getDuration();
         } else {
             d = durations.get(f);
-            if (d == null)
-                d = 0; // dir not yet scanned on first run
         }
 
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
