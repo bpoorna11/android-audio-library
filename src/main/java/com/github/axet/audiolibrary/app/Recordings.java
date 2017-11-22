@@ -631,6 +631,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
         if (player != null) {
             c = player.getCurrentPosition();
+            d = player.getDuration();
         }
 
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
