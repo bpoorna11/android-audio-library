@@ -19,6 +19,9 @@ import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.encoders.Factory;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +36,56 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+
+    public static class RecordingStats {
+        public int duration;
+        public long size;
+        public long last;
+
+        public RecordingStats() {
+        }
+
+        public RecordingStats(RecordingStats fs) {
+            this.duration = fs.duration;
+            this.size = fs.size;
+            this.last = fs.last;
+        }
+
+        public RecordingStats(String json) {
+            try {
+                JSONObject j = new JSONObject(json);
+                duration = j.getInt("duration");
+                size = j.getLong("size");
+                last = j.getLong("last");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public JSONObject save() {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("duration", duration);
+                o.put("size", size);
+                o.put("last", last);
+                return o;
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class RecordingUri extends RecordingStats {
+        public Uri uri;
+        public String name;
+
+        public RecordingUri(Uri f, RecordingStats fs) {
+            super(fs);
+            uri = f;
+            name = Storage.getDocumentName(uri);
+        }
+    }
 
     public static void migrateLocalStorageDialog(final Context context, final Handler handler, final Storage storage) {
         int dp10 = ThemeUtils.dp2px(context, 10);

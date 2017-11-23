@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
     }
 }
@@ -27,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 138
-        versionName "1.0.62"
+        versionCode 139
+        versionName "1.0.63"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -117,7 +117,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.github.axet:android-library:1.14.68' // compile project(':android-library')
+    compile 'com.github.axet:android-library:1.15.0' // compile project(':android-library')
     compile 'com.android.support:design:25.3.1'
     compile 'org.apache.commons:commons-math3:3.6.1'
     compile 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
