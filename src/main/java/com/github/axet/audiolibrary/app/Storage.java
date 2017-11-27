@@ -162,6 +162,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (l == null)
             return;
 
+        if (!canWrite(l))
+            return;
+
         Uri path = getStoragePath();
 
         if (isLocalStorage(path))
@@ -170,6 +173,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         String s = path.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_FILE)) {
             if (!permitted(context, PERMISSIONS))
+                return;
+            File p = new File(path.getPath());
+            if (!canWrite(p))
                 return;
         }
 
