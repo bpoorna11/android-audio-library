@@ -37,8 +37,11 @@ public class Factory {
             ll.remove(".ogg");
         if (FormatMP3.supported(context))
             ll.add(".mp3");
-        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+        if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (has ogg/opus support) https://en.wikipedia.org/wiki/Opus_(audio_format)
             if (FormatOPUS_OGG.supported(context))
+                ll.add(".opus");
+        } else if (Build.VERSION.SDK_INT >= 21) { // android 5.0 (has mka/opus support only)
+            if (FormatOPUS_MKA.supported(context))
                 ll.add(".opus");
         }
         return ll.toArray(new String[]{});
@@ -56,8 +59,11 @@ public class Factory {
             ll.remove("ogg");
         if (FormatMP3.supported(context))
             ll.add("mp3");
-        if (Build.VERSION.SDK_INT >= 23) { // https://en.wikipedia.org/wiki/Opus_(audio_format)
+        if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (has ogg/opus support) https://en.wikipedia.org/wiki/Opus_(audio_format)
             if (FormatOPUS_OGG.supported(context))
+                ll.add("opus");
+        } else if (Build.VERSION.SDK_INT >= 21) { // android 5.0 (has mka/opus support only)
+            if (FormatOPUS_MKA.supported(context))
                 ll.add("opus");
         }
         return ll.toArray(new String[]{});
@@ -86,7 +92,11 @@ public class Factory {
             return new FormatFLAC(info, out);
         }
         if (ext.equals("opus")) {
-            return new FormatOPUS_OGG(context, info, out); // android6+ supports ogg/opus
+            if (Build.VERSION.SDK_INT >= 23) { // Android 6.0 (has ogg/opus support) https://en.wikipedia.org/wiki/Opus_(audio_format)
+                return new FormatOPUS_OGG(context, info, out); // android6+ supports ogg/opus
+            } else if (Build.VERSION.SDK_INT >= 21) { // android 5.0 (has mka/opus support only)
+                return new FormatOPUS_MKA(context, info, out); // android6+ supports ogg/opus
+            }
         }
         return null;
     }
