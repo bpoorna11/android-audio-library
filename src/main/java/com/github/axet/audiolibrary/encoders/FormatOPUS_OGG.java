@@ -40,7 +40,9 @@ public class FormatOPUS_OGG extends FormatOPUS {
             file = new OggFile(new FileOutputStream(out));
             writer = file.getPacketWriter();
             writer.bufferPacket(oinfo.write());
+            writer.flush();
             writer.bufferPacket(otags.write());
+            writer.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
