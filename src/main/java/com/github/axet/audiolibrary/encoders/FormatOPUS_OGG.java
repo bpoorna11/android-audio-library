@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-// https://wiki.xiph.org/MatroskaOpus | https://wiki.xiph.org/OggOpus
+// https://wiki.xiph.org/OggOpus
 @TargetApi(23)
 public class FormatOPUS_OGG extends FormatOPUS {
     public static final String TAG = FormatOPUS_OGG.class.getSimpleName();

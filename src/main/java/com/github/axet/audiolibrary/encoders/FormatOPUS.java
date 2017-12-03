@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-// https://wiki.xiph.org/MatroskaOpus
 @TargetApi(21)
 public class FormatOPUS implements Encoder {
     public static final String TAG = FormatOPUS.class.getSimpleName();
