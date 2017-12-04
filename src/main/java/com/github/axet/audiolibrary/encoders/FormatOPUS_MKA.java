@@ -40,20 +40,20 @@ public class FormatOPUS_MKA extends FormatOPUS {
         try {
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
             audio.setSamplingFrequency(info.hz);
-            audio.setOutputSamplingFrequency(info.hz);
             audio.setBitDepth(info.bps);
             audio.setChannels((short) info.channels);
+            audio.setOutputSamplingFrequency(info.hz);
+
             track = new MatroskaFileTrack();
             track.setCodecID("A_OPUS");
             track.setAudio(audio);
             track.setTrackType(MatroskaFileTrack.TrackType.AUDIO);
-            track.setFlagDefault(true);
-            track.setFlagEnabled(true);
             track.setTrackNo(1);
-            track.setFlagForced(true);
+            track.setTrackUID(1);
+            track.setCodecPrivate(opusHead());
+
             writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
             writer.addTrack(track);
-            track.setCodecPrivate(opusHead());
             writer.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

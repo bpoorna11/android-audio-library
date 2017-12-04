@@ -14,8 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-// https://wiki.xiph.org/MatroskaOpus | https://wiki.xiph.org/OggOpus
-@TargetApi(21)
+// https://wiki.xiph.org/OggOpus
+@TargetApi(23)
 public class FormatOPUS_OGG extends FormatOPUS {
     public static final String TAG = FormatOPUS_OGG.class.getSimpleName();
 
@@ -40,7 +40,9 @@ public class FormatOPUS_OGG extends FormatOPUS {
             file = new OggFile(new FileOutputStream(out));
             writer = file.getPacketWriter();
             writer.bufferPacket(oinfo.write());
+            writer.flush();
             writer.bufferPacket(otags.write());
+            writer.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
