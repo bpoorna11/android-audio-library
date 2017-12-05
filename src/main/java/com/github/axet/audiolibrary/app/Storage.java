@@ -127,8 +127,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         super(context);
     }
 
-    public static final String[] PERMISSIONS = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
     public boolean isLocalStorageEmpty() {
         File[] ff = getLocalStorage().listFiles();
         if (ff == null)
