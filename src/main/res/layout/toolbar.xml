@@ -13,8 +13,8 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/toolbar_button_size"
+            android:layout_height="@dimen/toolbar_button_size"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
             android:button="@android:color/transparent"
@@ -40,8 +40,8 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/toolbar_button_size"
+            android:layout_height="@dimen/toolbar_button_size"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
             android:button="@android:color/transparent"
@@ -68,8 +68,8 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/toolbar_button_size"
+            android:layout_height="@dimen/toolbar_button_size"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
             android:button="@android:color/transparent"
@@ -95,8 +95,8 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/toolbar_button_size"
+            android:layout_height="@dimen/toolbar_button_size"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
             android:button="@android:color/transparent"
