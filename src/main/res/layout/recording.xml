@@ -31,9 +31,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:padding="2dp"
-                        android:src="@drawable/ic_star_border_black_24dp"
                         android:contentDescription="@string/not_starred"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:src="@drawable/ic_star_border_black_24dp"
                         android:tint="?attr/colorAccent" />
 
                     <com.github.axet.androidlibrary.widgets.PathMax
