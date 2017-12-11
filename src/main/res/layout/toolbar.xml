@@ -13,11 +13,10 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="@dimen/toolbar_button_size"
-            android:layout_height="@dimen/toolbar_button_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
-            android:button="@android:color/transparent"
             android:clickable="false"
             android:gravity="center"
             android:src="@drawable/ic_list_black_24dp"
@@ -40,11 +39,10 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="@dimen/toolbar_button_size"
-            android:layout_height="@dimen/toolbar_button_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
-            android:button="@android:color/transparent"
             android:clickable="false"
             android:gravity="center"
             android:src="@drawable/ic_star_black_24dp"
@@ -68,11 +66,10 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="@dimen/toolbar_button_size"
-            android:layout_height="@dimen/toolbar_button_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
-            android:button="@android:color/transparent"
             android:clickable="false"
             android:gravity="center"
             android:src="@drawable/ic_sort_black_24dp"
@@ -95,11 +92,10 @@
         android:clipToPadding="false">
 
         <ImageButton
-            android:layout_width="@dimen/toolbar_button_size"
-            android:layout_height="@dimen/toolbar_button_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/search_rating_bg"
-            android:button="@android:color/transparent"
             android:clickable="false"
             android:gravity="center"
             android:src="@drawable/ic_sort_black_24dp"
