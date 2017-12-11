@@ -135,7 +135,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public boolean isExternalStoragePermitted() {
-        return permitted(context, PERMISSIONS);
+        return permitted(context, PERMISSIONS_RW);
     }
 
     public boolean recordingPending() {
@@ -170,7 +170,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         String s = path.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            if (!permitted(context, PERMISSIONS))
+            if (!permitted(context, PERMISSIONS_RW))
                 return;
             File p = new File(path.getPath());
             if (!canWrite(p))
@@ -312,7 +312,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         // Starting in KITKAT, no permissions are required to read or write to the returned path;
         // it's always accessible to the calling app.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            if (!permitted(context, PERMISSIONS))
+            if (!permitted(context, PERMISSIONS_RW))
                 return internal;
         }
 
@@ -346,7 +346,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         // Starting in KITKAT, no permissions are required to read or write to the returned path;
         // it's always accessible to the calling app.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            if (!permitted(context, PERMISSIONS))
+            if (!permitted(context, PERMISSIONS_RW))
                 return internal;
         }
 
