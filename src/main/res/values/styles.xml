@@ -5,7 +5,6 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccentLight</item>
         <item name="titleColor">@color/colorPrimary</item>
-        <item name="secondBackground">#c2c2c2</item>
         <item name="roundButton">@drawable/round_button_light</item>
         <item name="alertDialogTheme">@style/AppThemeDialogLight</item>
         <item name="search_rating_bg">@drawable/search_rating_bg_light</item>
@@ -37,7 +36,6 @@
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
         <item name="titleColor">@android:color/primary_text_dark</item>
-        <item name="secondBackground">#151515</item>
         <item name="roundButton">@drawable/round_button_dark</item>
         <item name="search_rating_bg">@drawable/search_rating_bg_dark</item>
     </style>

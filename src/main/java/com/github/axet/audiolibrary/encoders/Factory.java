@@ -153,9 +153,9 @@ public class Factory {
         }
 
         if (ext.equals("opus")) {
-            long y1 = 531558; // one minute sample 16000Hz
+            long y1 = 202787; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
-            long y2 = 1093718; // one minute sample
+            long y2 = 319120; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
