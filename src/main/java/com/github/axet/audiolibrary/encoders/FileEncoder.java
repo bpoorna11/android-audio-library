@@ -39,13 +39,13 @@ public class FileEncoder {
 
                 rs = new RawSamples(in);
 
-                samples = rs.getSamples();
-
-                short[] buf = new short[1000];
-
-                rs.open(buf.length);
-
                 try {
+                    samples = rs.getSamples();
+
+                    short[] buf = new short[1000];
+
+                    rs.open(buf.length); // FileNotFoundException if sdcard removed
+
                     while (true) {
                         try {
                             synchronized (pause) {
