@@ -292,7 +292,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         int rate = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_RATE, ""));
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
 
-        int m = MainApplication.getChannels(context);
+        int m = Sound.getChannels(context);
         long perSec = Factory.getEncoderRate(ext, rate) * m;
         return free / perSec * 1000;
     }

@@ -71,34 +71,6 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         return context.getString(R.string.title_header, formatSize(context, free), str);
     }
 
-    public static int getChannels(Context context) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        int i = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_CHANNELS, "1"));
-        return i;
-    }
-
-    public static int getInMode(Context context) {
-        switch (getChannels(context)) {
-            case 1:
-                return AudioFormat.CHANNEL_IN_MONO;
-            case 2:
-                return AudioFormat.CHANNEL_IN_STEREO;
-            default:
-                throw new RuntimeException("unknown mode");
-        }
-    }
-
-    public static int getOutMode(Context context) {
-        switch (getChannels(context)) {
-            case 1:
-                return AudioFormat.CHANNEL_OUT_MONO;
-            case 2:
-                return AudioFormat.CHANNEL_OUT_STEREO;
-            default:
-                throw new RuntimeException("unknown mode");
-        }
-    }
-
     public static String getHexString(int l) {
         return String.format("%04X", l);
     }
