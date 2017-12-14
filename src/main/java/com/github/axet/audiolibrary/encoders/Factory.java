@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Factory {
-    public static String MP4 = "audio/mp4";
-    public static String MP4A = "audio/mp4a-latm";
+    public static final String CONTENTTYPE_MP4 = "audio/mp4";
+    public static final String CONTENTTYPE_MP4A = "audio/mp4a-latm";
+    public static final String EXT_3GP = "3gp";
+    public static final String EXT_3GP16 = "3gp16";
+    public static final String EXT_AAC = "aac";
 
     public static int getBitrate(int hz) {
         if (hz < 16000) {
@@ -44,6 +47,11 @@ public class Factory {
             if (FormatOPUS_MKA.supported(context))
                 ll.add(".opus");
         }
+        ll.add(".3gp (MediaRecorder AMRNB 8kHz)");
+        if (Build.VERSION.SDK_INT >= 10)
+            ll.add(".3gp (MediaRecorder AMRWB 16kHz)");
+        if (Build.VERSION.SDK_INT >= 10)
+            ll.add(".aac (MediaRecorder AAC)");
         return ll.toArray(new String[]{});
     }
 
@@ -66,6 +74,11 @@ public class Factory {
             if (FormatOPUS_MKA.supported(context))
                 ll.add("opus");
         }
+        ll.add("3gp");
+        if (Build.VERSION.SDK_INT >= 10)
+            ll.add("3gp16");
+        if (Build.VERSION.SDK_INT >= 10)
+            ll.add("aac");
         return ll.toArray(new String[]{});
     }
 
