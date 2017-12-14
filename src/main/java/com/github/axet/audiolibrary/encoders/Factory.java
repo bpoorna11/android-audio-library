@@ -47,11 +47,6 @@ public class Factory {
             if (FormatOPUS_MKA.supported(context))
                 ll.add(".opus");
         }
-        ll.add(".3gp (MediaRecorder AMRNB 8kHz)");
-        if (Build.VERSION.SDK_INT >= 10)
-            ll.add(".3gp (MediaRecorder AMRWB 16kHz)");
-        if (Build.VERSION.SDK_INT >= 10)
-            ll.add(".aac (MediaRecorder AAC)");
         return ll.toArray(new String[]{});
     }
 
@@ -74,11 +69,6 @@ public class Factory {
             if (FormatOPUS_MKA.supported(context))
                 ll.add("opus");
         }
-        ll.add("3gp");
-        if (Build.VERSION.SDK_INT >= 10)
-            ll.add("3gp16");
-        if (Build.VERSION.SDK_INT >= 10)
-            ll.add("aac");
         return ll.toArray(new String[]{});
     }
 
