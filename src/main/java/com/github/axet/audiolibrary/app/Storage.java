@@ -230,11 +230,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getNextFile(parent, SIMPLE.format(new Date()), ext);
     }
 
-    public String[] getEncodingValues() {
-        return Factory.getEncodingValues(context);
-    }
-
-    public List<Uri> scan(Uri uri) {
+    public List<Uri> scan(Uri uri, String[] ee) {
         String s = uri.getScheme();
         if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
             ArrayList<Uri> list = new ArrayList<>();
@@ -249,7 +245,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                         String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
                         long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
                         if (size > 0) {
-                            String[] ee = getEncodingValues();
                             String n = t.toLowerCase();
                             for (String e : ee) {
                                 if (n.endsWith("." + e)) {
@@ -275,7 +270,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
             for (File f : ff) {
                 if (f.length() > 0) {
-                    String[] ee = Factory.getEncodingValues(context);
                     String n = f.getName().toLowerCase();
                     for (String e : ee) {
                         if (n.endsWith("." + e))
