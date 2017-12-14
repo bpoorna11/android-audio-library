@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static String TAG = Storage.class.getSimpleName();
@@ -34,9 +35,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final String TMP_REC = "recording.data";
     public static final String TMP_ENC = "encoding.data";
 
-    public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
-    public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-
+    public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss", Locale.US);
+    public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.US);
 
     public static class RecordingStats {
         public int duration;
@@ -230,7 +230,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getNextFile(parent, SIMPLE.format(new Date()), ext);
     }
 
-    public List<Uri> scan(Uri uri) {
+    public List<Uri> scan(Uri uri, String[] ee) {
         String s = uri.getScheme();
         if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
             ArrayList<Uri> list = new ArrayList<>();
@@ -245,7 +245,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                         String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
                         long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
                         if (size > 0) {
-                            String[] ee = Factory.getEncodingValues(context);
                             String n = t.toLowerCase();
                             for (String e : ee) {
                                 if (n.endsWith("." + e)) {
@@ -271,7 +270,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
             for (File f : ff) {
                 if (f.length() > 0) {
-                    String[] ee = Factory.getEncodingValues(context);
                     String n = f.getName().toLowerCase();
                     for (String e : ee) {
                         if (n.endsWith("." + e))
@@ -292,7 +290,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         int rate = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_RATE, ""));
         String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
 
-        int m = MainApplication.getChannels(context);
+        int m = Sound.getChannels(context);
         long perSec = Factory.getEncoderRate(ext, rate) * m;
         return free / perSec * 1000;
     }

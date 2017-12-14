@@ -39,6 +39,7 @@ import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
+import com.github.axet.audiolibrary.encoders.Factory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -304,6 +305,10 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         shared.unregisterOnSharedPreferenceChangeListener(this);
     }
 
+    public String[] getEncodingValues() {
+        return Factory.getEncodingValues(getContext());
+    }
+
     public void load(boolean clean, Runnable done) {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
@@ -321,7 +326,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         if (!user.equals(mount))
             clean = false; // do not clean if we failed to mount user selected folder
 
-        scan(storage.scan(mount), clean, done);
+        scan(storage.scan(mount, getEncodingValues()), clean, done);
     }
 
     public View inflate(int id, ViewGroup parent) {

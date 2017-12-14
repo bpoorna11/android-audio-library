@@ -14,13 +14,12 @@ import org.ebml.matroska.MatroskaFileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 @TargetApi(16) // mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
     public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode"; // MediaFormat.KEY_AAC_SBR_MODE
 
-    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
     public static final int BUFFER_FLAG_KEY_FRAME = 1; // MediaCodec.BUFFER_FLAG_KEY_FRAME
 
     EncoderInfo info;
@@ -36,7 +35,7 @@ public class FormatMKA_AAC implements Encoder {
 
     public FormatMKA_AAC(EncoderInfo info, File out) {
         MediaFormat format = new MediaFormat();
-        format.setString(MediaFormat.KEY_MIME, Factory.MP4A);
+        format.setString(MediaFormat.KEY_MIME, Factory.CONTENTTYPE_MP4A);
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz);
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
         format.setInteger(MediaFormat.KEY_BIT_RATE, Factory.getBitrate(info.hz));
