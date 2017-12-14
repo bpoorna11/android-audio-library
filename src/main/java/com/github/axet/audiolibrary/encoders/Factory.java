@@ -162,6 +162,26 @@ public class Factory {
             return y / 60;
         }
 
+        if (ext.startsWith("3gp")) {
+            long y1 = 119481; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 119481; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.startsWith("aac")) {
+            long y1 = 104276; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 104276; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
         // default raw
         int c = Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
         return c * rate;
