@@ -14,9 +14,6 @@ import java.util.Arrays;
 public class Factory {
     public static final String CONTENTTYPE_MP4 = "audio/mp4";
     public static final String CONTENTTYPE_MP4A = "audio/mp4a-latm";
-    public static final String EXT_3GP = "3gp";
-    public static final String EXT_3GP16 = "3gp16";
-    public static final String EXT_AAC = "aac";
 
     public static int getBitrate(int hz) {
         if (hz < 16000) {
@@ -159,6 +156,26 @@ public class Factory {
             long y1 = 202787; // one minute sample 16000Hz
             long x1 = 16000; // at 16000
             long y2 = 319120; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.startsWith("3gp")) {
+            long y1 = 119481; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 119481; // one minute sample
+            long x2 = 44000; // at 44000
+            long x = rate;
+            long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            return y / 60;
+        }
+
+        if (ext.startsWith("aac")) {
+            long y1 = 104276; // one minute sample 16000Hz
+            long x1 = 16000; // at 16000
+            long y2 = 104276; // one minute sample
             long x2 = 44000; // at 44000
             long x = rate;
             long y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
