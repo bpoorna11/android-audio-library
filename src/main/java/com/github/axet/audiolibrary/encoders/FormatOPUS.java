@@ -23,7 +23,7 @@ import java.nio.ShortBuffer;
 public class FormatOPUS implements Encoder {
     public static final String TAG = FormatOPUS.class.getSimpleName();
 
-    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     EncoderInfo info;
     Opus opus;

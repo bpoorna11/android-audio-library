@@ -15,6 +15,9 @@ import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 
 public class RawSamples {
+    public static final ByteOrder ORDER = ByteOrder.BIG_ENDIAN;
+    public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+
     File in;
 
     InputStream is;
@@ -94,7 +97,7 @@ public class RawSamples {
             int len = is.read(readBuffer);
             if (len <= 0)
                 return len;
-            ByteBuffer.wrap(readBuffer, 0, len).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(buf, 0, (int) getSamples(len));
+            ByteBuffer.wrap(readBuffer, 0, len).order(ORDER).asShortBuffer().get(buf, 0, (int) getSamples(len));
             return (int) getSamples(len);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -103,8 +106,8 @@ public class RawSamples {
 
     public void write(short val) {
         try {
-            ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
-            bb.order(ByteOrder.BIG_ENDIAN);
+            ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
+            bb.order(ORDER);
             bb.putShort(val);
             os.write(bb.array(), 0, bb.limit());
         } catch (IOException e) {
@@ -114,11 +117,19 @@ public class RawSamples {
 
     public void write(short[] buf, int pos, int len) {
         try {
-            ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE * len);
-            bb.order(ByteOrder.BIG_ENDIAN);
+            ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES * len);
+            bb.order(ORDER);
             ShortBuffer ss = bb.asShortBuffer();
             ss.put(buf, pos, len);
             os.write(bb.array(), 0, bb.limit());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void write(ByteBuffer bb, int pos, int len) {
+        try {
+            os.write(bb.array(), pos, len);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
