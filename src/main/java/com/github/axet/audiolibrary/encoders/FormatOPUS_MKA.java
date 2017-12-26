@@ -25,7 +25,7 @@ import java.nio.ShortBuffer;
 public class FormatOPUS_MKA extends FormatOPUS {
     public static final String TAG = FormatOPUS_MKA.class.getSimpleName();
 
-    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+    public static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
 
     MatroskaFileWriter writer;
     MatroskaFileTrack track;

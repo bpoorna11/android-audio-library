@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
+import java.nio.charset.Charset;
 
 public class FormatWAV implements Encoder {
     int NumSamples;
@@ -13,8 +14,9 @@ public class FormatWAV implements Encoder {
     int BytesPerSample;
     RandomAccessFile outFile;
 
-    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
-    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+    public static final int INT_BYTES = Integer.SIZE / Byte.SIZE;
+    public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     public FormatWAV(EncoderInfo info, File out) {
         this.info = info;
@@ -59,7 +61,7 @@ public class FormatWAV implements Encoder {
 
     void write(String str, ByteOrder order) {
         try {
-            byte[] cc = str.getBytes("UTF-8");
+            byte[] cc = str.getBytes(Charset.defaultCharset());
             ByteBuffer bb = ByteBuffer.allocate(cc.length);
             bb.order(order);
             bb.put(cc);
@@ -71,7 +73,7 @@ public class FormatWAV implements Encoder {
     }
 
     void write(int i, ByteOrder order) {
-        ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+        ByteBuffer bb = ByteBuffer.allocate(INT_BYTES);
         bb.order(order);
         bb.putInt(i);
         bb.flip();
