@@ -40,6 +40,7 @@ public class FormatMP3 implements Encoder {
         int b = Factory.getBitrate(info.hz) / 1000;
         lame.open(info.channels, info.hz, b, 4);
         writer = new FileOutputStream(out);
+        fc = writer.getChannel();
     }
 
     @Override

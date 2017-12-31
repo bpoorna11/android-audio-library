@@ -36,6 +36,8 @@ public class FileMuxer {
                 FileInputStream fis = new FileInputStream(out);
                 FileOutputStream fos = new FileOutputStream(fd);
                 IOUtils.copy(fis, fos);
+                fos.close();
+                fis.close();
                 Storage.delete(out);
             } catch (IOException e) {
                 Storage.delete(out); // delete tmp encoding file
