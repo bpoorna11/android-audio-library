@@ -151,13 +151,15 @@ public class RawSamples {
 
     public void close() {
         try {
-            if (is != null)
+            if (is != null) {
                 is.close();
-            is = null;
+                is = null;
+            }
 
-            if (os != null)
+            if (os != null) {
                 os.close();
-            os = null;
+                os = null;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
