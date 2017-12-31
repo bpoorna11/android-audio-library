@@ -53,7 +53,6 @@ public class FormatMKA_AAC implements Encoder {
             try {
                 ByteBuffer bb = ByteBuffer.allocate(1);
                 bb.put(b);
-                bb.flip();
                 return fc.write(bb);
             } catch (final IOException ex) {
                 return 0;

@@ -64,7 +64,6 @@ public class FormatWAV implements Encoder {
             ByteBuffer bb = ByteBuffer.allocate(cc.length);
             bb.order(order);
             bb.put(cc);
-            bb.flip();
             fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,7 +74,6 @@ public class FormatWAV implements Encoder {
         ByteBuffer bb = ByteBuffer.allocate(INT_BYTES);
         bb.order(order);
         bb.putInt(i);
-        bb.flip();
         try {
             fc.write(bb);
         } catch (IOException e) {
@@ -87,7 +85,6 @@ public class FormatWAV implements Encoder {
         ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
         bb.order(order);
         bb.putShort(i);
-        bb.flip();
         try {
             fc.write(bb);
         } catch (IOException e) {
@@ -102,7 +99,6 @@ public class FormatWAV implements Encoder {
             ByteBuffer bb = ByteBuffer.allocate(buflen * SHORT_BYTES);
             bb.order(ORDER);
             bb.asShortBuffer().put(buf, pos, buflen);
-            bb.flip();
             fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
