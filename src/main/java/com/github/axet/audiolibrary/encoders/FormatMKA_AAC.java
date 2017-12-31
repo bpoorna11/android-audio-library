@@ -43,7 +43,7 @@ public class FormatMKA_AAC implements Encoder {
         FileOutputStream file = null;
         FileChannel fc = null;
 
-        public FileDataWriter(FileDescriptor fd) throws FileNotFoundException, IOException {
+        public FileDataWriter(FileDescriptor fd) throws IOException {
             file = new FileOutputStream(fd);
             fc = file.getChannel();
         }
@@ -51,8 +51,10 @@ public class FormatMKA_AAC implements Encoder {
         @Override
         public int write(final byte b) {
             try {
-                file.write(b);
-                return 1;
+                ByteBuffer bb = ByteBuffer.allocate(1);
+                bb.put(b);
+                bb.flip();
+                return fc.write(bb);
             } catch (final IOException ex) {
                 return 0;
             }

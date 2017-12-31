@@ -157,6 +157,7 @@ public class MuxerMP4 extends FileMuxer implements Encoder {
         end();
         encoder.release();
         muxer.release();
+        super.close();
     }
 
     long getCurrentTimeStamp() {
