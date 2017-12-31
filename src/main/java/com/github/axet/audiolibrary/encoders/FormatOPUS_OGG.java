@@ -10,6 +10,7 @@ import org.gagravarr.opus.OpusInfo;
 import org.gagravarr.opus.OpusTags;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,12 +24,12 @@ public class FormatOPUS_OGG extends FormatOPUS {
     OggPacketWriter writer;
     long lastGranule = 0;
 
-    public FormatOPUS_OGG(Context context, EncoderInfo info, File out) {
+    public FormatOPUS_OGG(Context context, EncoderInfo info, FileDescriptor out) {
         super(context, info, out);
     }
 
     @Override
-    public void create(final EncoderInfo info, File out) {
+    public void create(final EncoderInfo info, FileDescriptor out) {
         super.create(info, out);
         try {
             OpusInfo oinfo = new OpusInfo();

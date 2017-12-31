@@ -67,20 +67,12 @@ public class FileEncoder {
                             }
                         }
                     }
+                    closeFiles();
                     handler.post(done);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "Exception", e);
                     t = e;
                     handler.post(error);
-                } finally {
-                    if (encoder != null) {
-                        encoder.close();
-                        encoder = null;
-                    }
-                    if (rs != null) {
-                        rs.close();
-                        rs = null;
-                    }
                 }
             }
         }, "FileEncoder");
@@ -110,6 +102,17 @@ public class FileEncoder {
         }
     }
 
+    public void closeFiles() {
+        if (encoder != null) {
+            encoder.close();
+            encoder = null;
+        }
+        if (rs != null) {
+            rs.close();
+            rs = null;
+        }
+    }
+
     public void close() {
         if (thread != null) {
             thread.interrupt();
@@ -120,14 +123,7 @@ public class FileEncoder {
             }
             thread = null;
         }
-        if (encoder != null) {
-            encoder.close();
-            encoder = null;
-        }
-        if (rs != null) {
-            rs.close();
-            rs = null;
-        }
+        closeFiles();
         handler.removeCallbacksAndMessages(null); // prevent call progress/done after encoder closed()
     }
 }

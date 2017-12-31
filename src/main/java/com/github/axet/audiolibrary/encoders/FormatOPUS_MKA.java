@@ -15,6 +15,7 @@ import org.ebml.matroska.MatroskaFileWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,11 +32,11 @@ public class FormatOPUS_MKA extends FormatOPUS {
     MatroskaFileTrack track;
     MatroskaFileTrack.MatroskaAudioTrack audio;
 
-    public FormatOPUS_MKA(Context context, EncoderInfo info, File out) {
+    public FormatOPUS_MKA(Context context, EncoderInfo info, FileDescriptor out) {
         super(context, info, out);
     }
 
-    public void create(final EncoderInfo info, File out) {
+    public void create(final EncoderInfo info, FileDescriptor out) {
         super.create(info, out);
         try {
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
@@ -52,7 +53,7 @@ public class FormatOPUS_MKA extends FormatOPUS {
             track.setTrackUID(1);
             track.setCodecPrivate(opusHead());
 
-            writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
+            writer = new MatroskaFileWriter(new FormatMKA_AAC.FileDataWriter(out));
             writer.addTrack(track);
             writer.flush();
         } catch (IOException e) {

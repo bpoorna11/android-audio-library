@@ -6,14 +6,20 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
 
+import org.ebml.io.DataWriter;
 import org.ebml.io.FileDataWriter;
 import org.ebml.matroska.MatroskaFileFrame;
 import org.ebml.matroska.MatroskaFileTrack;
 import org.ebml.matroska.MatroskaFileWriter;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 @TargetApi(16) // mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
@@ -33,7 +39,74 @@ public class FormatMKA_AAC implements Encoder {
 
     MatroskaFileFrame old;
 
-    public FormatMKA_AAC(EncoderInfo info, File out) {
+    public static class FileDataWriter implements DataWriter {
+        FileOutputStream file = null;
+        FileChannel fc = null;
+
+        public FileDataWriter(FileDescriptor fd) throws IOException {
+            file = new FileOutputStream(fd);
+            fc = file.getChannel();
+        }
+
+        @Override
+        public int write(final byte b) {
+            try {
+                ByteBuffer bb = ByteBuffer.allocate(1);
+                bb.put(b);
+                return fc.write(bb);
+            } catch (final IOException ex) {
+                return 0;
+            }
+        }
+
+        @Override
+        public int write(final ByteBuffer buff) {
+            try {
+                return fc.write(buff);
+            } catch (final IOException ex) {
+                return 0;
+            }
+        }
+
+        @Override
+        public long length() {
+            try {
+                return fc.size();
+            } catch (final IOException ex) {
+                return -1;
+            }
+        }
+
+        @Override
+        public long getFilePointer() {
+            try {
+                return fc.position();
+            } catch (final IOException ex) {
+                return -1;
+            }
+        }
+
+        @Override
+        public boolean isSeekable() {
+            return true;
+        }
+
+        @Override
+        public long seek(final long pos) {
+            try {
+                fc.position(pos);
+                return fc.position();
+            } catch (final IOException ex) {
+                return -1;
+            }
+        }
+
+        public void close() throws IOException {
+            file.close();
+        }
+    }
+
+    public FormatMKA_AAC(EncoderInfo info, FileDescriptor out) {
         MediaFormat format = new MediaFormat();
         format.setString(MediaFormat.KEY_MIME, Factory.CONTENTTYPE_MP4A);
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz);
@@ -44,13 +117,13 @@ public class FormatMKA_AAC implements Encoder {
         create(info, format, out);
     }
 
-    public void create(EncoderInfo info, MediaFormat format, File out) {
+    public void create(EncoderInfo info, MediaFormat format, FileDescriptor out) {
         this.info = info;
         try {
             encoder = MediaCodec.createEncoderByType(format.getString(MediaFormat.KEY_MIME));
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
-            writer = new MatroskaFileWriter(new FileDataWriter(out.getAbsolutePath()));
+            writer = new MatroskaFileWriter(new FileDataWriter(out));
             audio = new MatroskaFileTrack.MatroskaAudioTrack();
             audio.setSamplingFrequency(info.hz);
             audio.setOutputSamplingFrequency(info.hz);
