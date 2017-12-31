@@ -13,6 +13,7 @@ import org.gagravarr.opus.OpusInfo;
 import org.gagravarr.opus.OpusTags;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -60,7 +61,7 @@ public class FormatOPUS implements Encoder {
         }
     }
 
-    public FormatOPUS(Context context, EncoderInfo info, File out) {
+    public FormatOPUS(Context context, EncoderInfo info, FileDescriptor out) {
         natives(context);
         create(info, out);
     }
@@ -85,7 +86,7 @@ public class FormatOPUS implements Encoder {
         return r;
     }
 
-    public void create(final EncoderInfo info, File out) {
+    public void create(final EncoderInfo info, FileDescriptor out) {
         this.info = info;
         this.hz = match(info.hz);
 

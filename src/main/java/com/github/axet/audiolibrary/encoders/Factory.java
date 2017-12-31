@@ -6,8 +6,10 @@ import android.os.Build;
 
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.app.Sound;
+import com.github.axet.audiolibrary.app.Storage;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -69,15 +71,15 @@ public class Factory {
         return ll.toArray(new String[]{});
     }
 
-    public static Encoder getEncoder(Context context, String ext, EncoderInfo info, File out) {
+    public static Encoder getEncoder(Context context, String ext, EncoderInfo info, FileDescriptor out) {
         if (ext.equals("wav")) {
             return new FormatWAV(info, out);
         }
         if (ext.equals("3gp")) {
-            return new Format3GP(info, out);
+            return new Format3GP(new Storage(context), info, out);
         }
         if (ext.equals("m4a")) {
-            return new FormatM4A(info, out);
+            return new FormatM4A(new Storage(context), info, out);
         }
         if (ext.equals("mka")) {
             return new FormatMKA_AAC(info, out);

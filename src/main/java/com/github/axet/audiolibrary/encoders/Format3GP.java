@@ -3,14 +3,18 @@ package com.github.axet.audiolibrary.encoders;
 import android.annotation.TargetApi;
 import android.media.MediaFormat;
 
+import com.github.axet.audiolibrary.app.Storage;
+
 import java.io.File;
+import java.io.FileDescriptor;
 
 @TargetApi(21)
 public class Format3GP extends MuxerMP4 {
 
     public static final String CONTENTTYPE_3GPP = "audio/3gpp";
 
-    public Format3GP(EncoderInfo info, File out) {
+    public Format3GP(Storage storage, EncoderInfo info, FileDescriptor out) {
+        super(storage, out);
         MediaFormat format = new MediaFormat();
 
         // for high bitrate AMR_WB
@@ -33,6 +37,6 @@ public class Format3GP extends MuxerMP4 {
             format.setInteger(MediaFormat.KEY_BIT_RATE, 12200); // set maximum
         }
 
-        create(info, format, out);
+        create(info, format, this.out);
     }
 }

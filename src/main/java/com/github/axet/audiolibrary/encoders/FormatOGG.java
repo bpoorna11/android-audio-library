@@ -7,6 +7,7 @@ import com.github.axet.vorbisjni.Config;
 import com.github.axet.vorbisjni.Vorbis;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ShortBuffer;
@@ -32,15 +33,11 @@ public class FormatOGG implements Encoder {
         }
     }
 
-    public FormatOGG(Context context, EncoderInfo info, File out) {
+    public FormatOGG(Context context, EncoderInfo info, FileDescriptor out) {
         natives(context);
         vorbis = new Vorbis();
         vorbis.open(info.channels, info.hz, 0.4f);
-        try {
-            writer = new FileOutputStream(out);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        writer = new FileOutputStream(out);
     }
 
     @Override

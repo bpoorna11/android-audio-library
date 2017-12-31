@@ -6,29 +6,28 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 public class FormatWAV implements Encoder {
     int NumSamples;
     EncoderInfo info;
     int BytesPerSample;
-    RandomAccessFile outFile;
+    FileOutputStream outFile;
+    FileChannel fc;
 
     public static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
     public static final int INT_BYTES = Integer.SIZE / Byte.SIZE;
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
-    public FormatWAV(EncoderInfo info, File out) {
+    public FormatWAV(EncoderInfo info, FileDescriptor out) {
         this.info = info;
         NumSamples = 0;
 
         BytesPerSample = info.bps / 8;
 
-        try {
-            outFile = new RandomAccessFile(out, "rw");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        outFile = new FileOutputStream(out);
+        fc = outFile.getChannel();
 
         save();
     }
@@ -66,7 +65,7 @@ public class FormatWAV implements Encoder {
             bb.order(order);
             bb.put(cc);
             bb.flip();
-            outFile.write(bb.array());
+            fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +77,7 @@ public class FormatWAV implements Encoder {
         bb.putInt(i);
         bb.flip();
         try {
-            outFile.write(bb.array());
+            fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +89,7 @@ public class FormatWAV implements Encoder {
         bb.putShort(i);
         bb.flip();
         try {
-            outFile.write(bb.array());
+            fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +103,7 @@ public class FormatWAV implements Encoder {
             bb.order(ORDER);
             bb.asShortBuffer().put(buf, pos, buflen);
             bb.flip();
-            outFile.write(bb.array());
+            fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,7 +111,7 @@ public class FormatWAV implements Encoder {
 
     public void end() {
         try {
-            outFile.seek(0);
+            fc.position(0);
             save();
         } catch (IOException e) {
             throw new RuntimeException(e);

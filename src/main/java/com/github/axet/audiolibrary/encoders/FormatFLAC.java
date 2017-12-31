@@ -6,6 +6,8 @@ import net.sourceforge.javaflacencoder.FLACFileOutputStream;
 import net.sourceforge.javaflacencoder.StreamConfiguration;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 // compile 'com.github.axet:java-flac-encoder:0.3.8'
@@ -14,7 +16,7 @@ public class FormatFLAC implements Encoder {
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;
 
-    public FormatFLAC(EncoderInfo info, File out) {
+    public FormatFLAC(EncoderInfo info, FileDescriptor out) {
         this.info = info;
 
         StreamConfiguration sc = new StreamConfiguration();
@@ -27,7 +29,7 @@ public class FormatFLAC implements Encoder {
 
         try {
             flacEncoder = new FLACEncoder();
-            flacOutputStream = new FLACFileOutputStream(out);
+            flacOutputStream = new FLACFileOutputStream(new FileOutputStream(out));
             flacEncoder.setStreamConfiguration(sc);
             flacEncoder.setEncodingConfiguration(ec);
             flacEncoder.setOutputStream(flacOutputStream);

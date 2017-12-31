@@ -8,7 +8,10 @@ import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
 
+import com.github.axet.audiolibrary.app.Storage;
+
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -16,7 +19,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @TargetApi(18) // depends on MediaMuxer
-public class MuxerMP4 implements Encoder {
+public class MuxerMP4 extends FileMuxer implements Encoder {
     EncoderInfo info;
     MediaCodec encoder;
     MediaMuxer muxer;
@@ -74,6 +77,10 @@ public class MuxerMP4 implements Encoder {
             format.setString(MediaFormat.KEY_MIME, pref);
             return format;
         }
+    }
+
+    public MuxerMP4(Storage storage, FileDescriptor fd) {
+        super(storage, fd);
     }
 
     public void create(EncoderInfo info, MediaFormat format, File out) {
