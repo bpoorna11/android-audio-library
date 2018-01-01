@@ -10,4 +10,5 @@ public class EncoderInfo {
         this.hz = sampleRate;
         this.bps = bps;
     }
+
 }

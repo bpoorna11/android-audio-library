@@ -141,9 +141,10 @@ public class RawSamples {
 
     public void trunk(long pos) {
         try {
-            FileChannel outChan = new FileOutputStream(in, true).getChannel();
+            FileOutputStream fos = new FileOutputStream(in, true);
+            FileChannel outChan = fos.getChannel();
             outChan.truncate(getBufferLen(pos));
-            outChan.close();
+            fos.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

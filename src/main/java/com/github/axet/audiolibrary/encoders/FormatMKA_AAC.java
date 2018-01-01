@@ -23,10 +23,7 @@ import java.nio.channels.FileChannel;
 
 @TargetApi(16) // mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
-    public static final String KEY_AAC_SBR_MODE = "aac-sbr-mode"; // MediaFormat.KEY_AAC_SBR_MODE
-
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
-    public static final int BUFFER_FLAG_KEY_FRAME = 1; // MediaCodec.BUFFER_FLAG_KEY_FRAME
 
     EncoderInfo info;
     MediaCodec encoder;
@@ -113,7 +110,7 @@ public class FormatMKA_AAC implements Encoder {
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
         format.setInteger(MediaFormat.KEY_BIT_RATE, Factory.getBitrate(info.hz));
         format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectHE);
-        format.setInteger(KEY_AAC_SBR_MODE, 0);
+        format.setInteger(MediaFormat.KEY_AAC_SBR_MODE, 0);
         create(info, format, out);
     }
 
@@ -204,7 +201,7 @@ public class FormatMKA_AAC implements Encoder {
                 encoder.releaseOutputBuffer(outputIndex, false);
             } else {
                 MatroskaFileFrame frame = new MatroskaFileFrame();
-                frame.setKeyFrame((outputInfo.flags & BUFFER_FLAG_KEY_FRAME) == BUFFER_FLAG_KEY_FRAME);
+                frame.setKeyFrame((outputInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) == MediaCodec.BUFFER_FLAG_KEY_FRAME);
                 frame.setTimecode(outputInfo.presentationTimeUs / 1000);
                 frame.setTrackNo(track.getTrackNo());
                 frame.setData(clone(output));
