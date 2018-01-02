@@ -9,6 +9,8 @@
         <item>wav</item>
     </string-array>
 
+    <string name="pref_source_title">Recording Source</string>
+
     <string name="title_header">%1$s free ~ %2$s left</string>
     <string name="db">dB</string>
     <string name="no">No</string>

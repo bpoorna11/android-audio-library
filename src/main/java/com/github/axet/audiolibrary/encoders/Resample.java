@@ -12,10 +12,10 @@ import java.nio.ByteOrder;
 import vavi.sound.pcm.resampling.ssrc.SSRC;
 
 public class Resample {
-    public static String TAG = Resample.class.getSimpleName();
+    public static final String TAG = Resample.class.getSimpleName();
 
-    public static ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
-    public static int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
+    public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     Thread thread = null;
     PipedOutputStream is;
