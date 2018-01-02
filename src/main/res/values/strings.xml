@@ -17,7 +17,6 @@
     <string name="yes">Yes</string>
     <string name="delete_recording">Delete Recording</string>
     <string name="rename_recording">Rename Recording</string>
-    <string name="shared_via">"Shared via %1$s"</string>
     <string name="file_not_found">File not found</string>
     <string name="menu_rename">Rename</string>
     <string name="menu_delete">Delete</string>

@@ -10,7 +10,6 @@
     <string name="yes">Ja</string>
     <string name="delete_recording">Lösche Aufnahme</string>
     <string name="rename_recording">Benenne Aufnahme um</string>
-    <string name="shared_via">"Teile via %1$s"</string>
     <string name="file_not_found">Datei nicht gefunden</string>
     <string name="menu_rename">Umbenennen</string>
     <string name="menu_delete">Löschen</string>

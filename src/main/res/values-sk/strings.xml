@@ -10,7 +10,6 @@
     <string name="yes">Áno</string>
     <string name="delete_recording">Odstrániť nahrávku</string>
     <string name="rename_recording">Premenovať nahrávku</string>
-    <string name="shared_via">"Zdieľané cez %1$s"</string>
     <string name="file_not_found">Súbor nebol nájdený</string>
     <string name="menu_rename">Premenovať</string>
     <string name="menu_delete">Odstrániť</string>

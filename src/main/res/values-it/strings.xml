@@ -10,7 +10,6 @@
     <string name="yes">Sì</string>
     <string name="delete_recording">Elimina la Registrazione</string>
     <string name="rename_recording">Rinomina la Registrazione</string>
-    <string name="shared_via">"Condivisa tramite %1$s"</string>
     <string name="file_not_found">File non trovato</string>
     <string name="menu_rename">Rinomina</string>
     <string name="menu_delete">Elimina</string>
