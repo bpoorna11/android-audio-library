@@ -76,10 +76,10 @@ public class Factory {
             return new FormatWAV(info, out);
         }
         if (ext.equals("3gp")) {
-            return new Format3GP(Format3GP.CONTENTTYPE_3GPP, new Storage(context), info, out);
+            return new Format3GP(context, Format3GP.CONTENTTYPE_3GPP, info, out);
         }
         if (ext.equals("m4a")) {
-            return new FormatM4A(new Storage(context), info, out);
+            return new FormatM4A(context, info, out);
         }
         if (ext.equals("mka")) {
             return new FormatMKA_AAC(info, out);
