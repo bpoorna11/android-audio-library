@@ -1,13 +1,12 @@
 <resources>
 
-    <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppThemeLight" parent="AppThemeLightLib">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccentLight</item>
         <item name="titleColor">@color/colorPrimary</item>
         <item name="roundButton">@drawable/round_button_light</item>
         <item name="alertDialogTheme">@style/AppThemeDialogLight</item>
-        <item name="search_rating_bg">@drawable/search_rating_bg_light</item>
     </style>
 
     <style name="AppThemeDialogLight" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
@@ -25,19 +24,9 @@
 
     <style name="AppThemeLight.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"></style>
 
-    <style name="tops_style_light">
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:paddingLeft">5dp</item>
-        <item name="android:paddingRight">5dp</item>
-        <item name="android:textSize">8dp</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@drawable/search_rating_tip_round_light</item>
-    </style>
-
-    <style name="AppThemeDark" parent="Theme.AppCompat">
+    <style name="AppThemeDark" parent="AppThemeDarkLib">
         <item name="titleColor">@android:color/primary_text_dark</item>
         <item name="roundButton">@drawable/round_button_dark</item>
-        <item name="search_rating_bg">@drawable/search_rating_bg_dark</item>
     </style>
 
     <style name="AppThemeDark.NoActionBar">

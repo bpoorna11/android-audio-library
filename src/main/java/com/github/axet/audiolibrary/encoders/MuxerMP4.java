@@ -1,6 +1,7 @@
 package com.github.axet.audiolibrary.encoders;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
@@ -13,6 +14,7 @@ import com.github.axet.audiolibrary.app.Storage;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -79,17 +81,13 @@ public class MuxerMP4 extends FileMuxer implements Encoder {
         }
     }
 
-    public MuxerMP4(Storage storage, FileDescriptor fd) {
-        super(storage, fd);
-    }
-
-    public void create(EncoderInfo info, MediaFormat format, File out) {
+    public void create(Context context, EncoderInfo info, MediaFormat format, FileDescriptor out) {
         this.info = info;
         try {
             encoder = MediaCodec.createEncoderByType(format.getString(MediaFormat.KEY_MIME));
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
-            muxer = new MediaMuxer(out.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            muxer = create(context, out, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -10,7 +10,6 @@
     <string name="yes">Sim</string>
     <string name="delete_recording">Deletar gravação</string>
     <string name="rename_recording">Renomear gravação</string>
-    <string name="shared_via">"Compartilhado pelo %1$s"</string>
     <string name="file_not_found">Arquivo não encontrado</string>
     <string name="menu_rename">Renomear</string>
     <string name="menu_delete">Deletar</string>
@@ -26,4 +25,5 @@
     <string name="share_button">Share</string>
     <string name="trash_button">Delete</string>
     <string name="migrating_data">Migrating data</string>
+    <string name="pref_source_title">Recording Source</string>
 </resources>

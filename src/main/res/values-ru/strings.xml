@@ -10,7 +10,6 @@
     <string name="yes">Да</string>
     <string name="delete_recording">Удалить запись</string>
     <string name="rename_recording">Переименовать запись</string>
-    <string name="shared_via">"Создано с помощью: %1$s"</string>
     <string name="file_not_found">Файл не найден</string>
     <string name="menu_rename">Переименовать</string>
     <string name="menu_delete">Удалить</string>
