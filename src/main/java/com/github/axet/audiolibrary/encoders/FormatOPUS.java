@@ -3,21 +3,12 @@ package com.github.axet.audiolibrary.encoders;
 import android.annotation.TargetApi;
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Native;
+import com.github.axet.androidlibrary.app.Natives;
 import com.github.axet.opusjni.Config;
 import com.github.axet.opusjni.Opus;
 
-import org.gagravarr.opus.OpusAudioData;
-import org.gagravarr.opus.OpusFile;
-import org.gagravarr.opus.OpusInfo;
-import org.gagravarr.opus.OpusTags;
-
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 @TargetApi(21)
@@ -36,7 +27,7 @@ public class FormatOPUS implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            Native.loadLibraries(context, new String[]{"opus", "opusjni"});
+            Natives.loadLibraries(context, "opus", "opusjni");
             Config.natives = false;
         }
     }

@@ -2,7 +2,7 @@ package com.github.axet.audiolibrary.encoders;
 
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Native;
+import com.github.axet.androidlibrary.app.Natives;
 import com.github.axet.lamejni.Lame;
 import com.github.axet.vorbisjni.Config;
 
@@ -19,7 +19,7 @@ public class FormatMP3 implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            Native.loadLibraries(context, new String[]{"lame", "lamejni"});
+            Natives.loadLibraries(context, "lame", "lamejni");
             Config.natives = false;
         }
     }

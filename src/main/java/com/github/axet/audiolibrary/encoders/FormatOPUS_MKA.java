@@ -3,7 +3,7 @@ package com.github.axet.audiolibrary.encoders;
 import android.annotation.TargetApi;
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Native;
+import com.github.axet.androidlibrary.app.Natives;
 import com.github.axet.opusjni.Config;
 import com.github.axet.opusjni.Opus;
 
