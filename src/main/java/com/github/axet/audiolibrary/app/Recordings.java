@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -71,6 +72,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected int scrollState;
     protected Thread thread;
     protected LayoutInflater inflater;
+    protected String filter;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -173,14 +175,17 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     // true - include
-    protected boolean filter(Uri f) {
-        if (toolbarFilterAll) {
-            return true;
-        } else {
-            if (MainApplication.getStar(getContext(), f))
-                return true;
+    protected boolean filter(Storage.RecordingUri f) {
+        if (filter != null) {
+            if (!f.name.toLowerCase().contains(filter))
+                return false;
         }
-        return false;
+        if (toolbarFilterAll)
+            return true;
+        if (MainApplication.getStar(getContext(), f.uri))
+            return true;
+        else
+            return false;
     }
 
     public void scan(final List<Uri> ff, final boolean clean, final Runnable done) {
@@ -250,7 +255,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         }
                         TreeSet<Uri> delete2 = new TreeSet<>(cache.keySet());
                         for (Storage.RecordingUri f : all) {
-                            if (filter(f.uri))
+                            if (filter(f))
                                 add(f); // add recording
                             cleanDelete(delete, f.uri);
                             delete2.remove(f.uri);
@@ -785,5 +790,15 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         if (key.equals(MainApplication.PREFERENCE_STORAGE)) {
             load(true, null);
         }
+    }
+
+    public void search(String q) {
+        filter = q.toLowerCase(Locale.US);
+        load(false, null);
+    }
+
+    public void searchClose() {
+        filter = null;
+        load(false, null);
     }
 }

@@ -2,7 +2,7 @@ package com.github.axet.audiolibrary.encoders;
 
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Native;
+import com.github.axet.androidlibrary.app.Natives;
 import com.github.axet.vorbisjni.Config;
 import com.github.axet.vorbisjni.Vorbis;
 
@@ -18,7 +18,7 @@ public class FormatOGG implements Encoder {
 
     public static void natives(Context context) {
         if (Config.natives) {
-            Native.loadLibraries(context, new String[]{"ogg", "vorbis", "vorbisjni"});
+            Natives.loadLibraries(context, "ogg", "vorbis", "vorbisjni");
             Config.natives = false;
         }
     }
