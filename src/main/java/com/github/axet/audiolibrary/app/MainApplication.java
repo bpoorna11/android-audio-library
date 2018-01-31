@@ -41,7 +41,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static int getTheme(Context context, int light, int dark) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String theme = shared.getString(PREFERENCE_THEME, "");
-        if (theme.equals("Theme_Dark")) {
+        if (theme.equals(context.getString(R.string.Theme_Dark))) {
             return dark;
         } else {
             return light;
