@@ -30,11 +30,10 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     @Override
     public void onCreate() {
         super.onCreate();
-        Context context = this;
-        context.setTheme(getUserTheme());
+        setTheme(getUserTheme()); // services can get proper current theme
     }
 
-    public int getUserTheme() {
+    public int getUserTheme() { // override for app theme
         return getTheme(this, R.style.AppThemeLight, R.style.AppThemeDark);
     }
 
