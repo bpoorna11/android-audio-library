@@ -59,11 +59,12 @@ public class FormatWAV implements Encoder {
     }
 
     void write(String str, ByteOrder order) {
+        byte[] cc = str.getBytes(Charset.defaultCharset());
+        ByteBuffer bb = ByteBuffer.allocate(cc.length);
+        bb.order(order);
+        bb.put(cc);
+        bb.flip();
         try {
-            byte[] cc = str.getBytes(Charset.defaultCharset());
-            ByteBuffer bb = ByteBuffer.allocate(cc.length);
-            bb.order(order);
-            bb.put(cc);
             fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -74,6 +75,7 @@ public class FormatWAV implements Encoder {
         ByteBuffer bb = ByteBuffer.allocate(INT_BYTES);
         bb.order(order);
         bb.putInt(i);
+        bb.flip();
         try {
             fc.write(bb);
         } catch (IOException e) {
@@ -85,6 +87,7 @@ public class FormatWAV implements Encoder {
         ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
         bb.order(order);
         bb.putShort(i);
+        bb.flip();
         try {
             fc.write(bb);
         } catch (IOException e) {
@@ -95,10 +98,10 @@ public class FormatWAV implements Encoder {
     @Override
     public void encode(short[] buf, int pos, int buflen) {
         NumSamples += buflen / info.channels;
+        ByteBuffer bb = ByteBuffer.allocate(buflen * SHORT_BYTES);
+        bb.order(ORDER);
+        bb.asShortBuffer().put(buf, pos, buflen);
         try {
-            ByteBuffer bb = ByteBuffer.allocate(buflen * SHORT_BYTES);
-            bb.order(ORDER);
-            bb.asShortBuffer().put(buf, pos, buflen);
             fc.write(bb);
         } catch (IOException e) {
             throw new RuntimeException(e);
