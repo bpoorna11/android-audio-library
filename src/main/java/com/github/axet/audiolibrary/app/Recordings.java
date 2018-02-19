@@ -416,7 +416,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         dialog.cancel();
                     }
                 });
-                builder.show();
+                showDialog(builder);
             }
         };
 
@@ -436,7 +436,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         load(true, null);
                     }
                 });
-                e.show();
+                showDialog(e);
 
             }
         };
@@ -800,5 +800,9 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     public void searchClose() {
         filter = null;
         load(false, null);
+    }
+
+    public void showDialog(AlertDialog.Builder e) {
+        e.show();
     }
 }
