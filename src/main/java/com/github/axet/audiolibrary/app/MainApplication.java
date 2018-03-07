@@ -67,7 +67,10 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
             str = context.getResources().getQuantityString(R.plurals.seconds, diffSeconds, diffSeconds);
         }
 
-        return context.getString(R.string.title_header, formatSize(context, free), str);
+        if (diffDays > 1) // 2 and more days does not show 'days'
+            return context.getString(R.string.title_free, formatSize(context, free));
+        else
+            return context.getString(R.string.title_header, formatSize(context, free), str);
     }
 
     public static String getHexString(int l) {
