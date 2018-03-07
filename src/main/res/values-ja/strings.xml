@@ -4,6 +4,7 @@
         <item>.wav</item>
     </string-array>
 
+    <string name="title_free">%1$s 空き</string>
     <string name="title_header">%1$s 空き ~ %2$s 残り</string>
     <string name="db">dB</string>
     <string name="no">いいえ</string>
