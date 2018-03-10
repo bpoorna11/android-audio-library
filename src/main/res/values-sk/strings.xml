@@ -5,7 +5,7 @@
     </string-array>
 
     <string name="title_free">Voľné %1$s</string>
-    <string name="title_header">Voľné %1$s ~ Zostáva %2$s</string>
+    <string name="title_left">Zostáva %1$s</string>
     <string name="db">dB</string>
     <string name="no">Nie</string>
     <string name="yes">Áno</string>

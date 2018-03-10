@@ -3,7 +3,6 @@ package com.github.axet.audiolibrary.app;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioFormat;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 
@@ -67,10 +66,10 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
             str = context.getResources().getQuantityString(R.plurals.seconds, diffSeconds, diffSeconds);
         }
 
-        if (diffDays > 1) // 2 and more days does not show 'days'
-            return context.getString(R.string.title_free, formatSize(context, free));
-        else
-            return context.getString(R.string.title_header, formatSize(context, free), str);
+        String s = context.getString(R.string.title_free, formatSize(context, free));
+        if (diffDays < 2) // 2 and more days does not show 'days'
+            s += " ~ " + context.getString(R.string.title_left, str);
+        return s;
     }
 
     public static String getHexString(int l) {
