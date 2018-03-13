@@ -12,7 +12,7 @@
     <string name="pref_source_title">Πηγή Εγγραφής</string>
 
     <string name="title_free">%1$s ελέυθερα</string>
-    <string name="title_header">%1$s ελέυθερα ~ %2$s απομένει</string>
+    <string name="title_left">%1$s απομένει</string>
     <string name="db">dB</string>
     <string name="no">Όχι</string>
     <string name="yes">Ναι</string>
