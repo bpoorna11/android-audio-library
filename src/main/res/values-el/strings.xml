@@ -1,6 +1,6 @@
 <resources>
     <string-array name="encodings_text">
-        <item>.ogg (προεπιλογή)</item>
+        <item>.ogg (Ο€ΟΞΏΞµΟ€ΞΉΞ»ΞΏΞ³Ξ®)</item>
         <item>.wav</item>
     </string-array>
 
@@ -9,28 +9,28 @@
         <item>wav</item>
     </string-array>
 
-    <string name="pref_source_title">Πηγή Εγγραφής</string>
+    <string name="pref_source_title">Ξ Ξ·Ξ³Ξ® Ξ•Ξ³Ξ³ΟΞ±Ο†Ξ®Ο‚</string>
 
-    <string name="title_free">%1$s ελέυθερα</string>
-    <string name="title_header">%1$s ελέυθερα ~ %2$s απομένει</string>
+    <string name="title_free">%1$s ΞµΞ»Ξ­Ο…ΞΈΞµΟΞ±</string>
+    <string name="title_header">%1$s ΞµΞ»Ξ­Ο…ΞΈΞµΟΞ± ~ %2$s Ξ±Ο€ΞΏΞΌΞ­Ξ½ΞµΞΉ</string>
     <string name="db">dB</string>
-    <string name="no">Όχι</string>
-    <string name="yes">Ναι</string>
-    <string name="delete_recording">Διαγραφή Εγγραφής</string>
-    <string name="rename_recording">Μετονομασία Εγγραφής</string>
-    <string name="file_not_found">Το αρχείο δεν βρέθηκε</string>
-    <string name="menu_rename">Μετονομασία</string>
-    <string name="menu_delete">Διαγραφή</string>
-    <string name="tolbar_all">Όλα</string>
-    <string name="tolbar_stars">Αστέρια</string>
-    <string name="tolbar_sort_name">Όνομα</string>
-    <string name="tolbar_sort_date">Ημερομηνία</string>
-    <string name="starred">Με αστέρι</string>
-    <string name="not_starred">Χωρίς αστέρι</string>
-    <string name="pause_button">Παύση</string>
-    <string name="play_button">Αναπαραγωγή</string>
-    <string name="edit_button">Επεξεργασία</string>
-    <string name="share_button">Διαμοίραση</string>
-    <string name="trash_button">Διαγραφή</string>
-    <string name="migrating_data">Μετεγκατάσταση δεδομένων</string>
+    <string name="no">ΞΟ‡ΞΉ</string>
+    <string name="yes">ΞΞ±ΞΉ</string>
+    <string name="delete_recording">Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ® Ξ•Ξ³Ξ³ΟΞ±Ο†Ξ®Ο‚</string>
+    <string name="rename_recording">ΞΞµΟ„ΞΏΞ½ΞΏΞΌΞ±ΟƒΞ―Ξ± Ξ•Ξ³Ξ³ΟΞ±Ο†Ξ®Ο‚</string>
+    <string name="file_not_found">Ξ¤ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ Ξ΄ΞµΞ½ Ξ²ΟΞ­ΞΈΞ·ΞΊΞµ</string>
+    <string name="menu_rename">ΞΞµΟ„ΞΏΞ½ΞΏΞΌΞ±ΟƒΞ―Ξ±</string>
+    <string name="menu_delete">Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ®</string>
+    <string name="tolbar_all">ΞΞ»Ξ±</string>
+    <string name="tolbar_stars">Ξ‘ΟƒΟ„Ξ­ΟΞΉΞ±</string>
+    <string name="tolbar_sort_name">ΞΞ½ΞΏΞΌΞ±</string>
+    <string name="tolbar_sort_date">Ξ—ΞΌΞµΟΞΏΞΌΞ·Ξ½Ξ―Ξ±</string>
+    <string name="starred">ΞΞµ Ξ±ΟƒΟ„Ξ­ΟΞΉ</string>
+    <string name="not_starred">Ξ§Ο‰ΟΞ―Ο‚ Ξ±ΟƒΟ„Ξ­ΟΞΉ</string>
+    <string name="pause_button">Ξ Ξ±ΟΟƒΞ·</string>
+    <string name="play_button">Ξ‘Ξ½Ξ±Ο€Ξ±ΟΞ±Ξ³Ο‰Ξ³Ξ®</string>
+    <string name="edit_button">Ξ•Ο€ΞµΞΎΞµΟΞ³Ξ±ΟƒΞ―Ξ±</string>
+    <string name="share_button">Ξ”ΞΉΞ±ΞΌΞΏΞ―ΟΞ±ΟƒΞ·</string>
+    <string name="trash_button">Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ®</string>
+    <string name="migrating_data">ΞΞµΟ„ΞµΞ³ΞΊΞ±Ο„Ξ¬ΟƒΟ„Ξ±ΟƒΞ· Ξ΄ΞµΞ΄ΞΏΞΌΞ­Ξ½Ο‰Ξ½</string>
 </resources>
