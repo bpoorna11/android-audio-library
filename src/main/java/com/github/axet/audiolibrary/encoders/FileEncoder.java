@@ -5,9 +5,14 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.github.axet.audiolibrary.app.RawSamples;
+import com.github.axet.audiolibrary.filters.Filter;
+import com.github.axet.audiolibrary.filters.VoiceFilter;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import uk.me.berndporr.iirj.Butterworth;
 
 public class FileEncoder {
     public static final String TAG = FileEncoder.class.getSimpleName();
@@ -23,6 +28,7 @@ public class FileEncoder {
     long cur;
     Throwable t;
     final AtomicBoolean pause = new AtomicBoolean(false);
+    public ArrayList<Filter> filters = new ArrayList<>();
 
     public FileEncoder(Context context, File in, Encoder encoder) {
         this.context = context;
@@ -60,6 +66,9 @@ public class FileEncoder {
                         if (len <= 0) {
                             break;
                         } else {
+                            for(Filter f : filters) {
+                                f.filter(buf, 0, len);
+                            }
                             encoder.encode(buf, 0, len);
                             handler.post(progress);
                             synchronized (thread) {

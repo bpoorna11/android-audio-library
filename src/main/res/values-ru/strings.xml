@@ -5,7 +5,7 @@
     </string-array>
 
     <string name="title_free">%1$s свободно</string>
-    <string name="title_header">%1$s свободно ~ %2$s</string>
+    <string name="title_left">%1$s</string>
     <string name="db">дБ</string>
     <string name="no">Нет</string>
     <string name="yes">Да</string>
