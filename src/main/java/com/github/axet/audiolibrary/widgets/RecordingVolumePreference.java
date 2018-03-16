@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.github.axet.androidlibrary.widgets.SeekBarPreference;
+import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.filters.AmplifierFilter;
 
 public class RecordingVolumePreference extends SeekBarPreference {
@@ -37,7 +38,7 @@ public class RecordingVolumePreference extends SeekBarPreference {
             super.onPrepareDialogBuilder(builder);
             seekBar.setMax((AmplifierFilter.MAX - 1) * 100);
             seekBar.setProgress((int) (value * 100));
-            builder.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.default_folder, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }

@@ -14,9 +14,7 @@ public class VoiceFilter extends Filter {
         this.info = info;
         for (int i = 0; i < info.channels; i++) {
             Butterworth b = new Butterworth();
-            // b.bandPass(2, sr, 1850, 1550);
-            // b.highPass(2, sr, 3300);
-            b.lowPass(2, info.hz, 3000);
+            b.bandPass(2, info.hz, 1650, 2700);
             bb.add(b);
         }
     }
