@@ -38,7 +38,7 @@ public class RecordingVolumePreference extends SeekBarPreference {
             super.onPrepareDialogBuilder(builder);
             seekBar.setMax((AmplifierFilter.MAX - 1) * 100);
             seekBar.setProgress((int) (value * 100));
-            builder.setNeutralButton(R.string.default_folder, new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.default_button, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }
