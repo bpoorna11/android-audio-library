@@ -26,5 +26,11 @@
     <string name="share_button">Share</string>
     <string name="trash_button">Delete</string>
     <string name="migrating_data">Migrating data</string>
+
     <string name="pref_source_title">Recording Source</string>
+    <string name="pref_filters">Filters</string>
+    <string name="pref_volume_title">Increase Recording Volume</string>
+    <string name="pref_voice_title">Voice Filter</string>
+    <string name="pref_voice_summary">Bandpass Voice Filter</string>
+
 </resources>
