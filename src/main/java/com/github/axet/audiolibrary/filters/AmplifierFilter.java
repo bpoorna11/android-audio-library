@@ -3,13 +3,16 @@ package com.github.axet.audiolibrary.filters;
 import com.github.axet.audiolibrary.app.Sound;
 
 public class AmplifierFilter extends Filter {
+
+    public static final int MAX = 5;
+
     double db;
 
     public AmplifierFilter(float amp) {
-        this.db = Sound.log1(amp);
+        this.db = Sound.log1(amp, MAX) * (MAX - 1);
     }
 
-    public void filter(short[] buf, int pos, int len) {
+    public short[] filter(short[] buf, int pos, int len) {
         int end = pos + len;
         for (int i = pos; i < end; i++) {
             double d = (buf[i] * db);
@@ -20,5 +23,6 @@ public class AmplifierFilter extends Filter {
                 s = (short) d;
             buf[i] = s;
         }
+        return buf;
     }
 }

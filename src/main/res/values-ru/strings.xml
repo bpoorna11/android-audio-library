@@ -29,7 +29,7 @@
 
     <string name="pref_source_title">Источник записи</string>
     <string name="pref_filters">Фильтры</string>
-    <string name="pref_volume_title">Увеличить громкость записи</string>
+    <string name="pref_volume_title">Громкость записи</string>
     <string name="pref_voice_title">Фильтр голоса</string>
     <string name="pref_voice_summary">Голосовой частотный фильтр</string>
 </resources>

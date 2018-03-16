@@ -67,7 +67,7 @@ public class FileEncoder {
                             break;
                         } else {
                             for(Filter f : filters) {
-                                f.filter(buf, 0, len);
+                                buf = f.filter(buf, 0, len);
                             }
                             encoder.encode(buf, 0, len);
                             handler.post(progress);
