@@ -49,7 +49,7 @@ public class RawSamples {
 
     // https://en.wikipedia.org/wiki/Sound_pressure
     public static double getDB(double amplitude) {
-        return 20.0 * Math.log10(amplitude / 0x7FFF);
+        return 20.0 * Math.log10(amplitude / Short.MAX_VALUE);
     }
 
     public RawSamples(File in) {
