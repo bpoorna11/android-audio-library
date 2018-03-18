@@ -22,6 +22,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_FORMAT = "format";
     public static final String PREFERENCE_SORT = "sort";
     public static final String PREFERENCE_VOICE = "voice";
+    public static final String PREFERENCE_SKIP = "skip";
     public static final String PREFERENCE_VOLUME = "volume";
     public static final String PREFERENCE_FILTER = "filter";
     public static final String PREFERENCE_DETAILS_PREFIX = "details_";

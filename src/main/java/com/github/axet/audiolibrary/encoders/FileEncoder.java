@@ -6,13 +6,10 @@ import android.util.Log;
 
 import com.github.axet.audiolibrary.app.RawSamples;
 import com.github.axet.audiolibrary.filters.Filter;
-import com.github.axet.audiolibrary.filters.VoiceFilter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import uk.me.berndporr.iirj.Butterworth;
 
 public class FileEncoder {
     public static final String TAG = FileEncoder.class.getSimpleName();
@@ -50,7 +47,7 @@ public class FileEncoder {
 
                     short[] buf = new short[1000];
 
-                    rs.open(buf.length); // FileNotFoundException if sdcard removed
+                    rs.open(buf.length); // FileNotFoundException if sdcard removed?
 
                     while (true) {
                         try {
@@ -66,13 +63,15 @@ public class FileEncoder {
                         if (len <= 0) {
                             break;
                         } else {
-                            for(Filter f : filters) {
-                                buf = f.filter(buf, 0, len);
+                            Filter.Buffer b = new Filter.Buffer(buf, 0, len);
+                            for (Filter f : filters) {
+                                f.filter(b);
                             }
-                            encoder.encode(buf, 0, len);
+                            if (b.len > 0)
+                                encoder.encode(b.buf, b.pos, b.len);
                             handler.post(progress);
                             synchronized (thread) {
-                                cur += len;
+                                cur += b.len;
                             }
                         }
                     }

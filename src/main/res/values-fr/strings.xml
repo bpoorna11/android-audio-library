@@ -32,5 +32,6 @@
     <string name="pref_volume_title">Recording Volume</string>
     <string name="pref_voice_title">Voice Filter</string>
     <string name="pref_voice_summary">Bandpass Voice Filter</string>
-
+    <string name="pref_skip_title">Skip Silence</string>
+    <string name="pref_skip_summary">Skip Silence while recording</string>
 </resources>

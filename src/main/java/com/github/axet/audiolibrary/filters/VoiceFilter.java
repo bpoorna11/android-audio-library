@@ -20,16 +20,15 @@ public class VoiceFilter extends Filter {
     }
 
     @Override
-    public short[] filter(short[] buf, int pos, int len) {
-        int end = pos + len;
-        for (int i = pos; i < end; ) {
+    public void filter(Buffer buf) {
+        int end = buf.pos + buf.len;
+        for (int i = buf.pos; i < end; ) {
             for (int c = 0; c < info.channels; c++, i++) {
                 Butterworth b = bb.get(c);
-                double d = buf[i + c] / (double) Short.MAX_VALUE;
+                double d = buf.buf[i + c] / (double) Short.MAX_VALUE;
                 d = b.filter(d);
-                buf[i + c] = (short) (d * Short.MAX_VALUE);
+                buf.buf[i + c] = (short) (d * Short.MAX_VALUE);
             }
         }
-        return buf;
     }
 }

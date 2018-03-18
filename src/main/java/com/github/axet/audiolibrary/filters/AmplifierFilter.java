@@ -4,25 +4,24 @@ import com.github.axet.audiolibrary.app.Sound;
 
 public class AmplifierFilter extends Filter {
 
-    public static final int MAX = 5;
+    public static final int MAX = 4;
 
     double db;
 
     public AmplifierFilter(float amp) {
-        this.db = Sound.log1(amp, MAX) * (MAX - 1);
+        this.db = Sound.log1(amp, MAX + 1) * MAX;
     }
 
-    public short[] filter(short[] buf, int pos, int len) {
-        int end = pos + len;
-        for (int i = pos; i < end; i++) {
-            double d = (buf[i] * db);
+    public void filter(Buffer buf) {
+        int end = buf.pos + buf.len;
+        for (int i = buf.pos; i < end; i++) {
+            double d = (buf.buf[i] * db);
             short s;
             if (d > Short.MAX_VALUE)
                 s = Short.MAX_VALUE;
             else
                 s = (short) d;
-            buf[i] = s;
+            buf.buf[i] = s;
         }
-        return buf;
     }
 }
