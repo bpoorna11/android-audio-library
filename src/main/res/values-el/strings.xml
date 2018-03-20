@@ -10,15 +10,15 @@
     </string-array>
 
     <string name="pref_source_title">Πηγή Εγγραφής</string>
-    <string name="pref_filters">Filters</string>
-    <string name="pref_volume_title">Recording Volume</string>
-    <string name="pref_voice_title">Voice Filter</string>
-    <string name="pref_voice_summary">Bandpass Voice Filter</string>
-    <string name="pref_skip_title">Skip Silence</string>
-    <string name="pref_skip_summary">Skip Silence while recording</string>
+    <string name="pref_filters">Φίλτρα</string>
+    <string name="pref_volume_title">Ένταση Εγγραφής</string>
+    <string name="pref_voice_title">Φίλτρο Φωνής</string>
+    <string name="pref_voice_summary">Ζωνοπερατό Φίλτρο Φωνής</string>
+    <string name="pref_skip_title">Παρέλειψε τη Σιγή</string>
+    <string name="pref_skip_summary">Παρέλειψε τη Σιγή κατά την εγγραφή</string>
 
     <string name="title_free">%1$s ελέυθερα</string>
-    <string name="title_left">%1$s απομένει</string>
+    <string name="title_left">απομένουν %1$s</string>
     <string name="db">dB</string>
     <string name="no">Όχι</string>
     <string name="yes">Ναι</string>
