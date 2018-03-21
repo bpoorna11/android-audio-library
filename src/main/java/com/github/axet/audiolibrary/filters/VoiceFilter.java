@@ -21,14 +21,13 @@ public class VoiceFilter extends Filter {
 
     @Override
     public void filter(Buffer buf) {
-        int end = buf.pos + buf.len;
-        for (int i = buf.pos; i < end; ) {
-            for (int c = 0; c < info.channels; c++, i++) {
-                Butterworth b = bb.get(c);
-                double d = buf.buf[i + c] / (double) Short.MAX_VALUE;
-                d = b.filter(d);
-                buf.buf[i + c] = (short) (d * Short.MAX_VALUE);
-            }
+        for (int i = 0; i < buf.len; i++) {
+            int c = i % info.channels;
+            Butterworth b = bb.get(c);
+            int pos = buf.pos + i;
+            double d = buf.buf[pos] / (double) Short.MAX_VALUE;
+            d = b.filter(d);
+            buf.buf[pos] = (short) (d * Short.MAX_VALUE);
         }
     }
 }
