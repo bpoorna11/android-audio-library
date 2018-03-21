@@ -17,8 +17,8 @@ public class FileEncoder {
     Context context;
     Handler handler;
 
-    File in;
-    Encoder encoder;
+    public File in;
+    public Encoder encoder;
     RawSamples rs;
     Thread thread;
     long samples;

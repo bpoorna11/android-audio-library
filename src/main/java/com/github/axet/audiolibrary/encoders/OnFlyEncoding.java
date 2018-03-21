@@ -55,6 +55,24 @@ public class OnFlyEncoding implements Encoder {
         e = Factory.getEncoder(context, ext, info, out);
     }
 
+    public OnFlyEncoding(Storage storage, File f, EncoderInfo info) {
+        Context context = storage.getContext();
+
+        this.targetUri = Uri.fromFile(f);
+
+        try {
+            fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_READ_WRITE);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        out = fd.getFileDescriptor();
+
+        String ext = Storage.getExt(f);
+
+        e = Factory.getEncoder(context, ext, info, out);
+    }
+
+
     @Override
     public void encode(short[] buf, int pos, int len) {
         e.encode(buf, pos, len);
