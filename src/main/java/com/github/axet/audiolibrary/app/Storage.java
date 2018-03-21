@@ -302,8 +302,11 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         internalOld = new File(context.getApplicationInfo().dataDir, TMP_REC);
         if (internalOld.exists())
             return internalOld;
+        internalOld = new File(context.getCacheDir(), TMP_REC); // cache/ dir auto cleared by OS if space is low
+        if (internalOld.exists())
+            return internalOld;
 
-        File internal = new File(context.getCacheDir(), TMP_REC);
+        File internal = new File(context.getApplicationInfo().dataDir, TMP_REC);
         if (internal.exists())
             return internal;
 
@@ -318,6 +321,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (c == null) // some old phones <15API with disabled sdcard return null
             return internal;
 
+        File p = c.getParentFile();
+        if (canWrite(p))
+            c = p;
+
         File external = new File(c, TMP_REC);
 
         if (external.exists()) // external already been used as tmp storage, keep using it
@@ -326,7 +333,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         try {
             long freeI = getFree(internal);
             long freeE = getFree(external);
-
             if (freeI > freeE)
                 return internal;
             else
@@ -360,7 +366,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         try {
             long freeI = getFree(internal);
             long freeE = getFree(external);
-
             if (freeI > freeE)
                 return internal;
             else
