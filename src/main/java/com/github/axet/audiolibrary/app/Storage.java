@@ -323,7 +323,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return internalOld;
         internalOld = context.getExternalCacheDir();
         if (internalOld != null) {
-            internalOld = new File(context.getExternalCacheDir().getParentFile(), TMP_REC);
+            internalOld = new File(internalOld.getParentFile(), TMP_REC);
             if (internalOld.exists())
                 return internalOld;
         }
