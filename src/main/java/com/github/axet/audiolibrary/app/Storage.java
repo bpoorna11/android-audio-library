@@ -146,7 +146,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public File getLocalInternal() {
-        return new File(context.getFilesDir(), RECORDINGS);
+        File f = new File(context.getFilesDir(), RECORDINGS);
+        if (!f.exists() && !f.mkdirs())
+            throw new RuntimeException("readonly local");
+        return f;
     }
 
     public File getLocalExternal() {
