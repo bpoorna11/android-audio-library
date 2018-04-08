@@ -6,7 +6,7 @@ import com.github.axet.audiolibrary.encoders.EncoderInfo;
 
 public class SkipSilenceFilter extends Filter {
 
-    public static final int SILENCE_DB = 30;
+    public static final int SILENCE_DB = 33;
 
     EncoderInfo info;
     long start;

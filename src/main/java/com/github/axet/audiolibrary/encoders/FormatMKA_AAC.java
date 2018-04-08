@@ -21,7 +21,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-@TargetApi(16) // mp4/aac codec
+@TargetApi(16) // os mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
