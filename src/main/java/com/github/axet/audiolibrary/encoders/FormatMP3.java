@@ -3,6 +3,7 @@ package com.github.axet.audiolibrary.encoders;
 import android.content.Context;
 
 import com.github.axet.androidlibrary.app.Natives;
+import com.github.axet.androidlibrary.sound.Sound;
 import com.github.axet.lamejni.Lame;
 import com.github.axet.vorbisjni.Config;
 
@@ -28,6 +29,8 @@ public class FormatMP3 implements Encoder {
         try {
             FormatMP3.natives(context);
             Lame v = new Lame();
+            v.open(1, Sound.DEFAULT_RATE, Factory.getBitrate(Sound.DEFAULT_RATE) / 1000, 5);
+            v.close();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;

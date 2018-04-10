@@ -32,6 +32,8 @@ import java.util.Locale;
 public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static String TAG = Storage.class.getSimpleName();
 
+    public static final String RECORDINGS = "recordings";
+    public static final String RAW = "raw";
     public static final String TMP_REC = "recording.data";
     public static final String TMP_ENC = "encoding.data";
 
@@ -143,6 +145,14 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return tmp.exists() && tmp.length() > 0;
     }
 
+    public File getLocalInternal() {
+        return new File(context.getFilesDir(), RECORDINGS);
+    }
+
+    public File getLocalExternal() {
+        return context.getExternalFilesDir(RECORDINGS);
+    }
+
     public Uri getStoragePath() {
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
@@ -150,8 +160,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public void migrateLocalStorage() {
-        migrateLocalStorage(new File(context.getApplicationInfo().dataDir, "recordings")); // old recordings folder
+        migrateLocalStorage(new File(context.getApplicationInfo().dataDir, RECORDINGS)); // old recordings folder
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
+        migrateLocalStorage(context.getFilesDir()); // old recordings folder
+        migrateLocalStorage(context.getExternalFilesDir("")); // old recordings folder
         migrateLocalStorage(getLocalInternal());
         migrateLocalStorage(getLocalExternal());
     }
@@ -295,18 +307,28 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return free / perSec * 1000;
     }
 
+    public static File getLocalDataDir(Context context) {
+        return new File(context.getApplicationInfo().dataDir);
+    }
+
     public File getTempRecording() {
-        File internalOld = new File(context.getApplicationInfo().dataDir, "recorind.data");
+        File internalOld = new File(getLocalDataDir(context), "recorind.data");
         if (internalOld.exists())
             return internalOld;
-        internalOld = new File(context.getApplicationInfo().dataDir, TMP_REC);
+        internalOld = new File(getLocalDataDir(context), TMP_REC);
         if (internalOld.exists())
             return internalOld;
         internalOld = new File(context.getCacheDir(), TMP_REC); // cache/ dir auto cleared by OS if space is low
         if (internalOld.exists())
             return internalOld;
+        internalOld = context.getExternalCacheDir();
+        if (internalOld != null) {
+            internalOld = new File(internalOld.getParentFile(), TMP_REC);
+            if (internalOld.exists())
+                return internalOld;
+        }
 
-        File internal = new File(context.getApplicationInfo().dataDir, TMP_REC);
+        File internal = new File(new File(context.getFilesDir(), RAW), TMP_REC);
         if (internal.exists())
             return internal;
 
@@ -317,13 +339,9 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internal;
         }
 
-        File c = context.getExternalCacheDir();
+        File c = context.getExternalFilesDir(RAW);
         if (c == null) // some old phones <15API with disabled sdcard return null
             return internal;
-
-        File p = c.getParentFile();
-        if (canWrite(p))
-            c = p;
 
         File external = new File(c, TMP_REC);
 
@@ -343,7 +361,17 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public File getTempEncoding() {
-        File internal = new File(context.getCacheDir(), TMP_ENC);
+        File internalOld = new File(context.getCacheDir(), TMP_ENC);
+        if (internalOld.exists())
+            return internalOld;
+        internalOld = context.getExternalCacheDir();
+        if (internalOld != null) {
+            internalOld = new File(internalOld, TMP_ENC);
+            if (internalOld.exists())
+                return internalOld;
+        }
+
+        File internal = new File(new File(context.getFilesDir(), RAW), TMP_ENC);
         if (internal.exists())
             return internal;
 
@@ -354,7 +382,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internal;
         }
 
-        File c = context.getExternalCacheDir();
+        File c = context.getExternalFilesDir(RAW);
         if (c == null) // some old phones <15API with disabled sdcard return null
             return internal;
 

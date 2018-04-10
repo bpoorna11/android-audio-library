@@ -3,6 +3,7 @@ package com.github.axet.audiolibrary.encoders;
 import android.content.Context;
 
 import com.github.axet.androidlibrary.app.Natives;
+import com.github.axet.audiolibrary.app.Sound;
 import com.github.axet.vorbisjni.Config;
 import com.github.axet.vorbisjni.Vorbis;
 
@@ -27,6 +28,8 @@ public class FormatOGG implements Encoder {
         try {
             FormatOGG.natives(context);
             Vorbis v = new Vorbis();
+            v.open(1, Sound.DEFAULT_RATE, 1f);
+            v.close();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;

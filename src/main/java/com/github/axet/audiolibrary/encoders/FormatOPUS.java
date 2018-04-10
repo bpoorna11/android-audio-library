@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 
 import com.github.axet.androidlibrary.app.Natives;
+import com.github.axet.androidlibrary.sound.Sound;
 import com.github.axet.opusjni.Config;
 import com.github.axet.opusjni.Opus;
 
@@ -36,6 +37,8 @@ public class FormatOPUS implements Encoder {
         try {
             FormatOPUS.natives(context);
             Opus v = new Opus();
+            v.open(1, Sound.DEFAULT_RATE, getBitrate(Sound.DEFAULT_RATE));
+            v.close();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;
