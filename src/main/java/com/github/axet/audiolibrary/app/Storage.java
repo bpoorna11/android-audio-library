@@ -168,6 +168,25 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         migrateLocalStorage(getLocalExternal());
     }
 
+    public boolean isLocalStorage(File f) {
+        if (super.isLocalStorage(f))
+            return true;
+        File a = context.getFilesDir();
+        if (f.getPath().startsWith(a.getPath()))
+            return true;
+        a = context.getExternalFilesDir("");
+        if (f.getPath().startsWith(a.getPath()))
+            return true;
+        if (Build.VERSION.SDK_INT >= 19) {
+            File[] aa = context.getExternalFilesDirs("");
+            for (File b : aa) {
+                if (f.getPath().startsWith(b.getPath()))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public void migrateLocalStorage(File l) {
         if (l == null)
             return;
@@ -177,14 +196,15 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
         Uri path = getStoragePath();
 
-        if (isLocalStorage(path))
-            return;
-
         String s = path.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            if (!permitted(context, PERMISSIONS_RW))
+            if (!isLocalStorage(path)) {
+                if (!permitted(context, PERMISSIONS_RW))
+                    return;
+            }
+            File p = getFile(path);
+            if (l.equals(p))
                 return;
-            File p = new File(path.getPath());
             if (!canWrite(p))
                 return;
         }
