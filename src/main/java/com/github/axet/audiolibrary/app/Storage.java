@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
@@ -348,7 +349,11 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internalOld;
         }
 
-        File internal = new File(new File(context.getFilesDir(), RAW), TMP_REC);
+        File raw = new File(context.getFilesDir(), RAW);
+        if (!raw.exists() && !raw.mkdirs())
+            throw new RuntimeException("no files permissions");
+
+        File internal = new File(raw, TMP_REC);
         if (internal.exists())
             return internal;
 
@@ -391,7 +396,11 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internalOld;
         }
 
-        File internal = new File(new File(context.getFilesDir(), RAW), TMP_ENC);
+        File raw = new File(context.getFilesDir(), RAW);
+        if (!raw.exists() && !raw.mkdirs())
+            throw new RuntimeException("no files permissions");
+
+        File internal = new File(raw, TMP_ENC);
         if (internal.exists())
             return internal;
 
