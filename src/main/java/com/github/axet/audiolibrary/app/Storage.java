@@ -198,21 +198,16 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         Uri path = getStoragePath();
 
         String s = path.getScheme();
-        if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            if (!isLocalStorage(path)) {
-                if (!permitted(context, PERMISSIONS_RW))
-                    return;
-            }
+        if (s.equals(ContentResolver.SCHEME_FILE)) {
             File p = getFile(path);
-            if (l.equals(p))
-                return;
             if (!canWrite(p))
+                return;
+            if (l.equals(p)) // same storage path
                 return;
         }
 
         Uri u = Uri.fromFile(l);
-
-        if (u.equals(path)) // same storage
+        if (u.equals(path)) // same storage path
             return;
 
         File[] ff = l.listFiles();
