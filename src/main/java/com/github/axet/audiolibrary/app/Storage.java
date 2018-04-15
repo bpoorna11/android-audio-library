@@ -198,21 +198,16 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         Uri path = getStoragePath();
 
         String s = path.getScheme();
-        if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            if (!isLocalStorage(path)) {
-                if (!permitted(context, PERMISSIONS_RW))
-                    return;
-            }
+        if (s.equals(ContentResolver.SCHEME_FILE)) {
             File p = getFile(path);
-            if (l.equals(p))
-                return;
             if (!canWrite(p))
+                return;
+            if (l.equals(p)) // same storage path
                 return;
         }
 
         Uri u = Uri.fromFile(l);
-
-        if (u.equals(path)) // same storage
+        if (u.equals(path)) // same storage path
             return;
 
         File[] ff = l.listFiles();
@@ -332,6 +327,13 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return new File(context.getApplicationInfo().dataDir);
     }
 
+    public static File getFilesDir(Context context, String type) {
+        File raw = new File(context.getFilesDir(), type);
+        if (!raw.exists() && !raw.mkdirs() && !raw.exists())
+            throw new RuntimeException("no files permissions");
+        return raw;
+    }
+
     public File getTempRecording() {
         File internalOld = new File(getLocalDataDir(context), "recorind.data");
         if (internalOld.exists())
@@ -349,11 +351,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internalOld;
         }
 
-        File raw = new File(context.getFilesDir(), RAW);
-        if (!raw.exists() && !raw.mkdirs())
-            throw new RuntimeException("no files permissions");
-
-        File internal = new File(raw, TMP_REC);
+        File internal = new File(getFilesDir(context, RAW), TMP_REC);
         if (internal.exists())
             return internal;
 
@@ -396,11 +394,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return internalOld;
         }
 
-        File raw = new File(context.getFilesDir(), RAW);
-        if (!raw.exists() && !raw.mkdirs())
-            throw new RuntimeException("no files permissions");
-
-        File internal = new File(raw, TMP_ENC);
+        File internal = new File(getFilesDir(context, RAW), TMP_ENC);
         if (internal.exists())
             return internal;
 
