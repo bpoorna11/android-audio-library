@@ -4,6 +4,14 @@
         <item>.wav</item>
     </string-array>
 
+    <string name="pref_source_title">Zdroj nahrávania</string>
+    <string name="pref_filters">Filtre</string>
+    <string name="pref_volume_title">Hlasitosť nahrávania</string>
+    <string name="pref_voice_title">Filter hlasu</string>
+    <string name="pref_voice_summary">Bandpass Voice Filter</string>
+    <string name="pref_skip_title">Preskočiť ticho</string>
+    <string name="pref_skip_summary">Preskočiť ticho počas nahrávania</string>
+
     <string name="title_free">Voľné %1$s</string>
     <string name="title_left">Zostáva %1$s</string>
     <string name="db">dB</string>
@@ -13,7 +21,7 @@
     <string name="rename_recording">Premenovať nahrávku</string>
     <string name="file_not_found">Súbor nebol nájdený</string>
     <string name="menu_rename">Premenovať</string>
-    <string name="menu_delete">Odstrániť</string>
+    <string name="menu_delete">Vymazať</string>
     <string name="tolbar_all">Všetko</string>
     <string name="tolbar_stars">Obľúbené</string>
     <string name="tolbar_sort_name">Podľa názvu</string>
@@ -24,14 +32,6 @@
     <string name="play_button">Prehrať</string>
     <string name="edit_button">Upraviť</string>
     <string name="share_button">Zdieľať</string>
-    <string name="trash_button">Odstrániť</string>
-    <string name="migrating_data">Migrating data</string>
-
-    <string name="pref_source_title">Recording Source</string>
-    <string name="pref_filters">Filters</string>
-    <string name="pref_volume_title">Recording Volume</string>
-    <string name="pref_voice_title">Voice Filter</string>
-    <string name="pref_voice_summary">Bandpass Voice Filter</string>
-    <string name="pref_skip_title">Skip Silence</string>
-    <string name="pref_skip_summary">Skip Silence while recording</string>
+    <string name="trash_button">Vymazať</string>
+    <string name="migrating_data">Migrácia údajov</string>
 </resources>
