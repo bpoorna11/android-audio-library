@@ -483,7 +483,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     }
 
                     Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("audio/*");
+                    intent.setType(Storage.getTypeByName(f.name));
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
                     intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.share(getContext(), f.uri));
                     intent.putExtra(Intent.EXTRA_SUBJECT, f.name);
