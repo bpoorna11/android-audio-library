@@ -176,13 +176,15 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         if (f.getPath().startsWith(a.getPath()))
             return true;
         a = context.getExternalFilesDir("");
-        if (f.getPath().startsWith(a.getPath()))
+        if (a != null && f.getPath().startsWith(a.getPath()))
             return true;
         if (Build.VERSION.SDK_INT >= 19) {
             File[] aa = context.getExternalFilesDirs("");
-            for (File b : aa) {
-                if (f.getPath().startsWith(b.getPath()))
-                    return true;
+            if (aa != null) {
+                for (File b : aa) {
+                    if (f.getPath().startsWith(b.getPath()))
+                        return true;
+                }
             }
         }
         return false;
