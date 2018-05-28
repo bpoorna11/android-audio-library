@@ -11,8 +11,15 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -45,6 +52,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,6 +74,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected Handler handler;
     protected Storage storage;
     protected MediaPlayer player;
+    protected SensorEventListener proximityListener;
+    protected int proximityType;
     protected Runnable updatePlayer;
     protected int selected = -1;
     protected ListView list;
@@ -566,7 +576,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
-    protected void playerPlay(View v, Storage.RecordingUri f) {
+    protected void playerPlay(View v, final Storage.RecordingUri f) {
         if (player == null)
             player = MediaPlayer.create(getContext(), f.uri);
         if (player == null) {
@@ -574,6 +584,51 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             return;
         }
         player.start();
+
+        SensorManager sm = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
+        Sensor proximity = sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        proximityType = AudioManager.STREAM_MUSIC;
+        proximityListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float distance = event.values[0];
+                int next;
+                if (distance <= 2) { // always 0 or 5 on my device (cm)
+                    next = AudioManager.STREAM_VOICE_CALL;
+                } else {
+                    next = AudioManager.STREAM_MUSIC;
+                }
+                if (next != proximityType) {
+                    try {
+                        int pos = player.getCurrentPosition();
+                        int audioSessionId = player.getAudioSessionId();
+                        player.reset();
+                        if (Build.VERSION.SDK_INT >= 21) {
+                            AudioAttributes.Builder b = new AudioAttributes.Builder();
+                            b.setLegacyStreamType(next);
+                            final AudioAttributes aa = b.build();
+                            player.setAudioAttributes(aa);
+                        } else {
+                            player.setAudioStreamType(next);
+                        }
+                        player.setAudioSessionId(audioSessionId);
+                        player.setDataSource(getContext(), f.uri);
+                        player.prepare();
+                        player.seekTo(pos);
+                        player.start();
+                        proximityType = next;
+                    } catch (IOException e) {
+                        Log.d(TAG, "unable to reset payer", e);
+                        playerStop();
+                    }
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+        };
+        sm.registerListener(proximityListener, proximity, SensorManager.SENSOR_DELAY_NORMAL);
 
         updatePlayerRun(v, f);
     }
@@ -598,6 +653,11 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             player.stop();
             player.release();
             player = null;
+        }
+        if (proximityListener != null) {
+            SensorManager sm = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
+            sm.unregisterListener(proximityListener);
+            proximityListener = null;
         }
     }
 
