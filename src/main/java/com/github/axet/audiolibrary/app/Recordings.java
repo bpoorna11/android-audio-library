@@ -1,5 +1,6 @@
 package com.github.axet.audiolibrary.app;
 
+import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -11,10 +12,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -43,13 +40,11 @@ import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
 import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
+import com.github.axet.androidlibrary.widgets.ProximitySensor;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
 import com.github.axet.audiolibrary.encoders.Factory;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,7 +68,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected Handler handler;
     protected Storage storage;
     protected MediaPlayer player;
-    protected SensorEventListener proximityListener;
+    protected ProximitySensor proximity;
     protected int proximityType;
     protected Runnable updatePlayer;
     protected int selected = -1;
@@ -585,19 +579,23 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
         player.start();
 
-        SensorManager sm = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-        Sensor proximity = sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         proximityType = AudioManager.STREAM_MUSIC;
-        proximityListener = new SensorEventListener() {
+        proximity = new ProximitySensor(((Activity) getContext()).getWindow()) {
             @Override
-            public void onSensorChanged(SensorEvent event) {
-                float distance = event.values[0];
-                int next;
-                if (distance <= 2) { // always 0 or 5 on my device (cm)
-                    next = AudioManager.STREAM_VOICE_CALL;
-                } else {
-                    next = AudioManager.STREAM_MUSIC;
-                }
+            public void onNear() {
+                super.onNear();
+                turnScreenOff();
+                prepare(AudioManager.STREAM_VOICE_CALL);
+            }
+
+            @Override
+            public void onFar() {
+                super.onFar();
+                turnScreenOn();
+                prepare(AudioManager.STREAM_MUSIC);
+            }
+
+            void prepare(int next) {
                 if (next != proximityType) {
                     try {
                         int pos = player.getCurrentPosition();
@@ -623,12 +621,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     }
                 }
             }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            }
         };
-        sm.registerListener(proximityListener, proximity, SensorManager.SENSOR_DELAY_NORMAL);
+        proximity.create();
 
         updatePlayerRun(v, f);
     }
@@ -654,10 +648,9 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             player.release();
             player = null;
         }
-        if (proximityListener != null) {
-            SensorManager sm = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-            sm.unregisterListener(proximityListener);
-            proximityListener = null;
+        if (proximity != null) {
+            proximity.close();
+            proximity = null;
         }
     }
 
