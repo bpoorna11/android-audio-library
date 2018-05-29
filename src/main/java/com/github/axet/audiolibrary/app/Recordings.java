@@ -16,10 +16,12 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.net.rtp.AudioStream;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -579,8 +581,9 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
         player.start();
 
+        final AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         proximityType = AudioManager.STREAM_MUSIC;
-        proximity = new ProximitySensor(((Activity) getContext()).getWindow()) {
+        proximity = new ProximitySensor(getContext()) {
             @Override
             public void onNear() {
                 super.onNear();
@@ -596,20 +599,31 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             }
 
             void prepare(int next) {
+                if (!MediaRouter.getInstance(getContext()).getDefaultRoute().isDeviceSpeaker())
+                    next = AudioManager.STREAM_MUSIC;
                 if (next != proximityType) {
                     try {
                         int pos = player.getCurrentPosition();
-                        int audioSessionId = player.getAudioSessionId();
-                        player.reset();
+                        player.release();
+                        player = new MediaPlayer();
                         if (Build.VERSION.SDK_INT >= 21) {
                             AudioAttributes.Builder b = new AudioAttributes.Builder();
+                            switch (next) {
+                                case AudioManager.STREAM_MUSIC:
+                                    b.setUsage(AudioAttributes.USAGE_MEDIA);
+                                    b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+                                    break;
+                                case AudioManager.STREAM_VOICE_CALL:
+                                    b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+                                    b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+                                    break;
+                            }
                             b.setLegacyStreamType(next);
                             final AudioAttributes aa = b.build();
                             player.setAudioAttributes(aa);
                         } else {
                             player.setAudioStreamType(next);
                         }
-                        player.setAudioSessionId(audioSessionId);
                         player.setDataSource(getContext(), f.uri);
                         player.prepare();
                         player.seekTo(pos);
