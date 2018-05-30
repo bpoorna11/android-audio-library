@@ -1,6 +1,5 @@
 package com.github.axet.audiolibrary.app;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -16,7 +15,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.net.rtp.AudioStream;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -42,7 +40,7 @@ import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
 import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
-import com.github.axet.androidlibrary.widgets.ProximitySensor;
+import com.github.axet.androidlibrary.widgets.ProximityShader;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.animations.RecordingAnimation;
@@ -70,7 +68,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected Handler handler;
     protected Storage storage;
     protected MediaPlayer player;
-    protected ProximitySensor proximity;
+    protected ProximityShader proximity;
     protected int proximityType;
     protected Runnable updatePlayer;
     protected int selected = -1;
@@ -573,70 +571,72 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     protected void playerPlay(View v, final Storage.RecordingUri f) {
-        if (player == null)
+        if (player == null) {
             player = MediaPlayer.create(getContext(), f.uri);
+        }
         if (player == null) {
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
         player.start();
 
-        final AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-        proximityType = AudioManager.STREAM_MUSIC;
-        proximity = new ProximitySensor(getContext()) {
-            @Override
-            public void onNear() {
-                super.onNear();
-                turnScreenOff();
-                prepare(AudioManager.STREAM_VOICE_CALL);
-            }
+        if (proximity == null) {
+            proximityType = AudioManager.STREAM_MUSIC;
+            proximity = new ProximityShader(getContext()) {
+                @Override
+                public void onNear() {
+                    super.onNear();
+                    turnScreenOff();
+                    prepare(AudioManager.STREAM_VOICE_CALL);
+                }
 
-            @Override
-            public void onFar() {
-                super.onFar();
-                turnScreenOn();
-                prepare(AudioManager.STREAM_MUSIC);
-            }
+                @Override
+                public void onFar() {
+                    super.onFar();
+                    turnScreenOn();
+                    prepare(AudioManager.STREAM_MUSIC);
+                }
 
-            void prepare(int next) {
-                if (!MediaRouter.getInstance(getContext()).getDefaultRoute().isDeviceSpeaker())
-                    next = AudioManager.STREAM_MUSIC;
-                if (next != proximityType) {
-                    try {
-                        int pos = player.getCurrentPosition();
-                        player.release();
-                        player = new MediaPlayer();
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            AudioAttributes.Builder b = new AudioAttributes.Builder();
-                            switch (next) {
-                                case AudioManager.STREAM_MUSIC:
-                                    b.setUsage(AudioAttributes.USAGE_MEDIA);
-                                    b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
-                                    break;
-                                case AudioManager.STREAM_VOICE_CALL:
-                                    b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
-                                    b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-                                    break;
+                void prepare(int next) {
+                    if (!MediaRouter.getInstance(getContext()).getDefaultRoute().isDeviceSpeaker())
+                        next = AudioManager.STREAM_MUSIC;
+                    if (next != proximityType) {
+                        try {
+                            int pos = player.getCurrentPosition();
+                            player.release();
+                            player = new MediaPlayer();
+                            if (Build.VERSION.SDK_INT >= 21) {
+                                AudioAttributes.Builder b = new AudioAttributes.Builder();
+                                switch (next) {
+                                    case AudioManager.STREAM_MUSIC:
+                                        b.setUsage(AudioAttributes.USAGE_MEDIA);
+                                        b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+                                        break;
+                                    case AudioManager.STREAM_VOICE_CALL:
+                                        b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+                                        b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+                                        break;
+                                }
+                                b.setLegacyStreamType(next);
+                                final AudioAttributes aa = b.build();
+                                player.setAudioAttributes(aa);
+                            } else {
+                                player.setAudioStreamType(next);
                             }
-                            b.setLegacyStreamType(next);
-                            final AudioAttributes aa = b.build();
-                            player.setAudioAttributes(aa);
-                        } else {
-                            player.setAudioStreamType(next);
+                            player.setDataSource(getContext(), f.uri);
+                            player.prepare();
+                            player.seekTo(pos);
+                            player.start();
+                            proximityType = next;
+                        } catch (IOException e) {
+                            Log.d(TAG, "unable to reset payer", e);
+                            playerStop();
                         }
-                        player.setDataSource(getContext(), f.uri);
-                        player.prepare();
-                        player.seekTo(pos);
-                        player.start();
-                        proximityType = next;
-                    } catch (IOException e) {
-                        Log.d(TAG, "unable to reset payer", e);
-                        playerStop();
                     }
                 }
-            }
-        };
-        proximity.create();
+            };
+            proximity.create();
+        }
 
         updatePlayerRun(v, f);
     }
@@ -649,6 +649,10 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             handler.removeCallbacks(updatePlayer);
             updatePlayer = null;
         }
+        if (proximity != null) {
+            proximity.close();
+            proximity = null;
+        }
         updatePlayerText(v, f);
     }
 
@@ -657,14 +661,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             handler.removeCallbacks(updatePlayer);
             updatePlayer = null;
         }
+        if (proximity != null) {
+            proximity.close();
+            proximity = null;
+        }
         if (player != null) {
             player.stop();
             player.release();
             player = null;
-        }
-        if (proximity != null) {
-            proximity.close();
-            proximity = null;
         }
     }
 
