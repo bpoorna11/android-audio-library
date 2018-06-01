@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -40,6 +39,7 @@ import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
 import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
+import com.github.axet.androidlibrary.widgets.ProximityPlayer;
 import com.github.axet.androidlibrary.widgets.ProximityShader;
 import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
@@ -69,7 +69,6 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected Storage storage;
     protected MediaPlayer player;
     protected ProximityShader proximity;
-    protected int proximityType;
     protected Runnable updatePlayer;
     protected int selected = -1;
     protected ListView list;
@@ -581,57 +580,38 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         player.start();
 
         if (proximity == null) {
-            proximityType = AudioManager.STREAM_MUSIC;
-            proximity = new ProximityShader(getContext()) {
+            proximity = new ProximityPlayer(getContext()) {
                 @Override
-                public void onNear() {
-                    super.onNear();
-                    turnScreenOff();
-                    prepare(AudioManager.STREAM_VOICE_CALL);
-                }
-
-                @Override
-                public void onFar() {
-                    super.onFar();
-                    turnScreenOn();
-                    prepare(AudioManager.STREAM_MUSIC);
-                }
-
-                void prepare(int next) {
-                    if (!MediaRouter.getInstance(getContext()).getDefaultRoute().isDeviceSpeaker())
-                        next = AudioManager.STREAM_MUSIC;
-                    if (next != proximityType) {
-                        try {
-                            int pos = player.getCurrentPosition();
-                            player.release();
-                            player = new MediaPlayer();
-                            if (Build.VERSION.SDK_INT >= 21) {
-                                AudioAttributes.Builder b = new AudioAttributes.Builder();
-                                switch (next) {
-                                    case AudioManager.STREAM_MUSIC:
-                                        b.setUsage(AudioAttributes.USAGE_MEDIA);
-                                        b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
-                                        break;
-                                    case AudioManager.STREAM_VOICE_CALL:
-                                        b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
-                                        b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-                                        break;
-                                }
-                                b.setLegacyStreamType(next);
-                                final AudioAttributes aa = b.build();
-                                player.setAudioAttributes(aa);
-                            } else {
-                                player.setAudioStreamType(next);
+                public void prepare() {
+                    try {
+                        int pos = player.getCurrentPosition();
+                        player.release();
+                        player = new MediaPlayer();
+                        if (Build.VERSION.SDK_INT >= 21) {
+                            AudioAttributes.Builder b = new AudioAttributes.Builder();
+                            switch (streamType) {
+                                case AudioManager.STREAM_MUSIC:
+                                    b.setUsage(AudioAttributes.USAGE_MEDIA);
+                                    b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+                                    break;
+                                case AudioManager.STREAM_VOICE_CALL:
+                                    b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+                                    b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
+                                    break;
                             }
-                            player.setDataSource(getContext(), f.uri);
-                            player.prepare();
-                            player.seekTo(pos);
-                            player.start();
-                            proximityType = next;
-                        } catch (IOException e) {
-                            Log.d(TAG, "unable to reset payer", e);
-                            playerStop();
+                            b.setLegacyStreamType(streamType);
+                            final AudioAttributes aa = b.build();
+                            player.setAudioAttributes(aa);
+                        } else {
+                            player.setAudioStreamType(streamType);
                         }
+                        player.setDataSource(getContext(), f.uri);
+                        player.prepare();
+                        player.seekTo(pos);
+                        player.start();
+                    } catch (IOException e) {
+                        Log.d(TAG, "unable to reset payer", e);
+                        playerStop();
                     }
                 }
             };
