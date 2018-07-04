@@ -17,6 +17,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
@@ -47,6 +48,7 @@ import com.github.axet.audiolibrary.animations.RecordingAnimation;
 import com.github.axet.audiolibrary.encoders.Factory;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,6 +78,40 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected Thread thread;
     protected LayoutInflater inflater;
     protected String filter;
+
+    public static int getDuration(Context context, Uri u) {
+        MediaPlayer mp = createPlayer(context, u);
+        int duration = mp.getDuration();
+        mp.release();
+        return duration;
+    }
+
+    public static MediaPlayer createPlayer(Context context, Uri u) {
+        try {
+            MediaPlayer mp = new MediaPlayer(); // MediaPlayer.create(context, u) failed with ':' in uri
+            if (Build.VERSION.SDK_INT >= 21) {
+                final AudioAttributes aa = new AudioAttributes.Builder().build();
+                mp.setAudioAttributes(aa);
+            }
+            String s = u.getScheme();
+            ParcelFileDescriptor pfd;
+            if (s.equals(ContentResolver.SCHEME_CONTENT)) {
+                ContentResolver resolver = context.getContentResolver();
+                pfd = resolver.openFileDescriptor(u, "r");
+            } else if (s.equals(ContentResolver.SCHEME_FILE)) {
+                pfd = ParcelFileDescriptor.open(Storage.getFile(u), ParcelFileDescriptor.MODE_READ_ONLY);
+            } else {
+                throw new RuntimeException("unknown uri");
+            }
+            FileDescriptor fd = pfd.getFileDescriptor();
+            mp.setDataSource(fd);
+            pfd.close();
+            mp.prepare();
+            return mp;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -231,12 +267,10 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         fs.size = storage.getLength(f);
                         fs.last = storage.getLastModified(f);
                         try {
-                            MediaPlayer mp = MediaPlayer.create(getContext(), f);
-                            fs.duration = mp.getDuration();
+                            fs.duration = getDuration(getContext(), f);
                             cache.put(f, fs);
                             setFileStats(getContext(), f, fs);
                             all.add(new Storage.RecordingUri(f, fs));
-                            mp.release();
                         } catch (Exception e) {
                             Log.d(TAG, f.toString(), e);
                         }
@@ -571,7 +605,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
     protected void playerPlay(View v, final Storage.RecordingUri f) {
         if (player == null) {
-            player = MediaPlayer.create(getContext(), f.uri);
+            player = createPlayer(getContext(), f.uri);
         }
         if (player == null) {
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
