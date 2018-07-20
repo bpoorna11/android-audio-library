@@ -1,0 +1,39 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (predeterminado)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">Recording Source</string>
+    <string name="pref_filters">Filtros</string>
+    <string name="pref_volume_title">Volumen de grabación</string>
+    <string name="pref_voice_title">Filtro de voz</string>
+    <string name="pref_voice_summary">Filtro paso banda para la voz</string>
+    <string name="pref_skip_title">Saltar silencio</string>
+    <string name="pref_skip_summary">Omite el silencio mientras estás grabando</string>
+
+    <string name="title_free">%1$s libres</string>
+    <string name="title_left">%1$s restantes</string>
+    <string name="db">dB</string>
+    <string name="no">No</string>
+    <string name="yes">Sí</string>
+    <string name="delete_recording">Eliminar grabación</string>
+    <string name="rename_recording">Renombrar grabación</string>
+    <string name="file_not_found">Archivo no encontrado</string>
+    <string name="menu_rename">Renombrar</string>
+    <string name="menu_delete">Eliminar</string>
+    <string name="tolbar_all">Todas</string>
+    <string name="tolbar_stars">Favoritas</string>
+    <string name="tolbar_sort_name">Nombre</string>
+    <string name="tolbar_sort_date">Fecha</string>
+    <string name="starred">Favorito</string>
+    <string name="not_starred">No Favorito</string>
+    <string name="pause_button">Pausar</string>
+    <string name="play_button">Reproducir</string>
+    <string name="edit_button">Editar</string>
+    <string name="share_button">Compartir</string>
+    <string name="trash_button">Eliminar</string>
+    <string name="migrating_data">Migrando datos</string>
+
+
+</resources>
