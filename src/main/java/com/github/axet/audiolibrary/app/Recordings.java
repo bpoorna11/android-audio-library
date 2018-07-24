@@ -101,7 +101,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             } else if (s.equals(ContentResolver.SCHEME_FILE)) {
                 pfd = ParcelFileDescriptor.open(Storage.getFile(u), ParcelFileDescriptor.MODE_READ_ONLY);
             } else {
-                throw new RuntimeException("unknown uri");
+                throw new UnknownUri();
             }
             FileDescriptor fd = pfd.getFileDescriptor();
             mp.setDataSource(fd);

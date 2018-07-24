@@ -46,7 +46,7 @@ public class OnFlyEncoding implements Encoder {
             }
             out = fd.getFileDescriptor();
         } else {
-            throw new RuntimeException("unkonwn uri");
+            throw new UnknownUri();
         }
 
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
