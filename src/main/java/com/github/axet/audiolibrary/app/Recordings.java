@@ -81,6 +81,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
     public static int getDuration(Context context, Uri u) {
         MediaPlayer mp = createPlayer(context, u);
+        if (mp == null)
+            return 0;
         int duration = mp.getDuration();
         mp.release();
         return duration;
@@ -101,7 +103,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             } else if (s.equals(ContentResolver.SCHEME_FILE)) {
                 pfd = ParcelFileDescriptor.open(Storage.getFile(u), ParcelFileDescriptor.MODE_READ_ONLY);
             } else {
-                throw new UnknownUri();
+                throw new Storage.UnknownUri();
             }
             FileDescriptor fd = pfd.getFileDescriptor();
             mp.setDataSource(fd);
@@ -109,7 +111,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             mp.prepare();
             return mp;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.d(TAG, "Unable create player", e);
+            return null;
         }
     }
 
@@ -522,7 +525,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType(Storage.getTypeByName(f.name));
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
-                    intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.share(getContext(), f.uri));
+                    intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.getProvider().share(getContext(), f.uri));
                     intent.putExtra(Intent.EXTRA_SUBJECT, f.name);
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
                     PopupShareActionProvider.show(getContext(), share, intent);
