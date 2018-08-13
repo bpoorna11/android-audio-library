@@ -310,7 +310,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
 
             return list;
         } else {
-            throw new RuntimeException("unknow uri");
+            throw new UnknownUri();
         }
     }
 

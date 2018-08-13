@@ -19,12 +19,13 @@ public class OnFlyEncoding implements Encoder {
     public Uri targetUri;
     public Encoder e;
     public ParcelFileDescriptor fd;
-    public FileDescriptor out;
 
     public OnFlyEncoding(Storage storage, Uri targetUri, EncoderInfo info) {
         Context context = storage.getContext();
 
         this.targetUri = targetUri;
+
+        FileDescriptor out;
 
         String s = targetUri.getScheme();
         if (s.startsWith(ContentResolver.SCHEME_CONTENT)) {
@@ -46,7 +47,7 @@ public class OnFlyEncoding implements Encoder {
             }
             out = fd.getFileDescriptor();
         } else {
-            throw new RuntimeException("unkonwn uri");
+            throw new Storage.UnknownUri();
         }
 
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
@@ -65,7 +66,7 @@ public class OnFlyEncoding implements Encoder {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        out = fd.getFileDescriptor();
+        FileDescriptor out = fd.getFileDescriptor();
 
         String ext = Storage.getExt(f);
 
