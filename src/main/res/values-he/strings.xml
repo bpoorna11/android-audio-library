@@ -1,0 +1,37 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (ברירת מחדל)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">מקור הקלטה</string>
+    <string name="pref_filters">מסננים</string>
+    <string name="pref_volume_title">עוצמת הקלטה</string>
+    <string name="pref_voice_title">מסנן קול</string>
+    <string name="pref_voice_summary">מסנן קול</string>
+    <string name="pref_skip_title">דלג על שקט</string>
+    <string name="pref_skip_summary">דלג על שקט כאשר מקליט</string>
+
+    <string name="title_free">%1$s פנוי</string>
+    <string name="title_left">%1$s נשאר</string>
+    <string name="db">dB</string>
+    <string name="no">לא</string>
+    <string name="yes">כן</string>
+    <string name="delete_recording">מחק הקלטה</string>
+    <string name="rename_recording">שנה שם הקלטה</string>
+    <string name="file_not_found">קובץ לא נמצא</string>
+    <string name="menu_rename">שנה שם</string>
+    <string name="menu_delete">מחק</string>
+    <string name="tolbar_all">הכל</string>
+    <string name="tolbar_stars">כוכבים</string>
+    <string name="tolbar_sort_name">שם</string>
+    <string name="tolbar_sort_date">תאריך</string>
+    <string name="starred">עם כוכב</string>
+    <string name="not_starred">ללא כוכב</string>
+    <string name="pause_button">השהה</string>
+    <string name="play_button">הפעל</string>
+    <string name="edit_button">ערוך</string>
+    <string name="share_button">שתף</string>
+    <string name="trash_button">מחק</string>
+    <string name="migrating_data">העברת נתונים</string>
+</resources>

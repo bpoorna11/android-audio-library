@@ -91,7 +91,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
             File ff = Storage.getFile(f);
             return PREFERENCE_DETAILS_PREFIX + getHexString(ff.toString().hashCode());
         } else {
-            throw new UnknownUri();
+            throw new Storage.UnknownUri();
         }
     }
 
