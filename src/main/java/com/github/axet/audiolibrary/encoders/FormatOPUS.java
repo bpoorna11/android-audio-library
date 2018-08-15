@@ -16,6 +16,8 @@ import java.nio.ShortBuffer;
 public class FormatOPUS implements Encoder {
     public static final String TAG = FormatOPUS.class.getSimpleName();
 
+    public static final String EXT = "opus";
+
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     EncoderInfo info;
@@ -37,30 +39,23 @@ public class FormatOPUS implements Encoder {
         try {
             FormatOPUS.natives(context);
             Opus v = new Opus();
-            v.open(1, Sound.DEFAULT_RATE, getBitrate(Sound.DEFAULT_RATE));
-            v.close();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;
         }
     }
 
-    public static int getBitrate(int hz) {
+    public static int getBitrate(int hz) { // https://wiki.xiph.org/index.php?title=Opus_Recommended_Settings
         if (hz < 16000) {
-            return 16000;
+            return 16000; // 0 - 16Hz
         } else if (hz < 44100) {
-            return 24000;
+            return 24000; // 16 - 44Hz
         } else {
-            return 32000;
+            return 32000; // 48Hz
         }
     }
 
-    public FormatOPUS(Context context, EncoderInfo info, FileDescriptor out) {
-        natives(context);
-        create(info, out);
-    }
-
-    int match(int hz) {
+    public static int match(int hz) { // opus supports only selected Hz's
         int[] hh = new int[]{
                 8000,
                 12000,
@@ -80,17 +75,20 @@ public class FormatOPUS implements Encoder {
         return r;
     }
 
+    public FormatOPUS(Context context, EncoderInfo info, FileDescriptor out) {
+        natives(context);
+        create(info, out);
+    }
+
     public void create(final EncoderInfo info, FileDescriptor out) {
         this.info = info;
         this.hz = match(info.hz);
 
-        if (hz != info.hz) {
+        if (hz != info.hz)
             resample = new Resample(info.hz, info.channels, hz);
-        }
 
-        int b = getBitrate(info.hz);
         opus = new Opus();
-        opus.open(info.channels, hz, b);
+        opus.open(info.channels, hz, getBitrate(info.hz));
     }
 
     @Override

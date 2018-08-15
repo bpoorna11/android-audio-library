@@ -14,6 +14,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class FormatMP3 implements Encoder {
+    public static final String EXT = "mp3";
+    
     FileOutputStream writer;
     FileChannel fc;
     Lame lame;
@@ -29,8 +31,6 @@ public class FormatMP3 implements Encoder {
         try {
             FormatMP3.natives(context);
             Lame v = new Lame();
-            v.open(1, Sound.DEFAULT_RATE, Factory.getBitrate(Sound.DEFAULT_RATE) / 1000, 5);
-            v.close();
             return true;
         } catch (NoClassDefFoundError | ExceptionInInitializerError | UnsatisfiedLinkError e) {
             return false;

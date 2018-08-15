@@ -10,6 +10,8 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 public class FormatWAV implements Encoder {
+    public static final String EXT = "wav";
+    
     int NumSamples;
     EncoderInfo info;
     int BytesPerSample;

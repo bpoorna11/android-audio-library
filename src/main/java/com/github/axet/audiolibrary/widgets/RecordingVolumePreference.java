@@ -1,17 +1,22 @@
 package com.github.axet.audiolibrary.widgets;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.github.axet.androidlibrary.widgets.SeekBarPreference;
+import com.github.axet.androidlibrary.widgets.ThemeUtils;
 import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.filters.AmplifierFilter;
 
@@ -33,11 +38,18 @@ public class RecordingVolumePreference extends SeekBarPreference {
             return fragment;
         }
 
+        @SuppressLint("RestrictedApi")
         @Override
         protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
             super.onPrepareDialogBuilder(builder);
             seekBar.setMax(AmplifierFilter.MAX * 100);
             seekBar.setProgress((int) (value * 100));
+            TextView t = new TextView(getContext());
+            TextViewCompat.setTextAppearance(t, R.style.TextAppearance_AppCompat_Caption);
+            t.setText(R.string.recording_volume_text);
+            int p = ThemeUtils.dp2px(getContext(), 10);
+            t.setPadding(p, p, p, p);
+            layout.addView(t);
             builder.setNeutralButton(R.string.default_button, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

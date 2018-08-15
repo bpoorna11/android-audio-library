@@ -1,7 +1,6 @@
 package com.github.axet.audiolibrary.encoders;
 
 import android.media.AudioFormat;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -16,6 +15,7 @@ public class Resample {
 
     public static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
+    public static final int PIPE_SIZE = 100 * 1024;
 
     Thread thread = null;
     PipedOutputStream is;
@@ -25,7 +25,7 @@ public class Resample {
     public Resample(final int sampleRate, final int channels, final int hz) {
         try {
             this.is = new PipedOutputStream();
-            this.os = new PipedInputStream(100 * 1024);
+            this.os = new PipedInputStream(PIPE_SIZE);
             final PipedInputStream is = new PipedInputStream(this.is);
             final PipedOutputStream os = new PipedOutputStream(this.os);
             final int c = com.github.axet.audiolibrary.app.Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
