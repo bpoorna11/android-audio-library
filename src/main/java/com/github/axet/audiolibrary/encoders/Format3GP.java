@@ -11,9 +11,9 @@ import java.io.FileDescriptor;
 
 @TargetApi(21)
 public class Format3GP extends MuxerMP4 {
-
     public static final String CONTENTTYPE_3GPP = "audio/3gpp";
     public static final String CONTENTTYPE_AMRWB = "audio/amr-wb";
+    public static final String EXT = "3gp";
 
     public Format3GP(Context context, String ct, EncoderInfo info, FileDescriptor out) {
         MediaFormat format = new MediaFormat();

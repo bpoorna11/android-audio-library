@@ -34,4 +34,5 @@
     <string name="pref_voice_summary">Bandpass Voice Filter</string>
     <string name="pref_skip_title">Skip Silence</string>
     <string name="pref_skip_summary">Skip Silence while recording</string>
+    <string name="recording_volume_text">(Software gain. Use above 100% only if you have hardware issues)</string>
 </resources>

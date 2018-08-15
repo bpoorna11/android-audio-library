@@ -12,6 +12,8 @@ import java.io.IOException;
 
 // compile 'com.github.axet:java-flac-encoder:0.3.8'
 public class FormatFLAC implements Encoder {
+    public static final String EXT = "flac";
+
     EncoderInfo info;
     FLACEncoder flacEncoder;
     FLACFileOutputStream flacOutputStream;

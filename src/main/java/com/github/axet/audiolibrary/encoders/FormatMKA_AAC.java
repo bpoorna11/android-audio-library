@@ -23,6 +23,8 @@ import java.nio.channels.FileChannel;
 
 @TargetApi(16) // os mp4/aac codec
 public class FormatMKA_AAC implements Encoder {
+    public static final String EXT = "mka";
+
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     EncoderInfo info;
@@ -105,7 +107,7 @@ public class FormatMKA_AAC implements Encoder {
 
     public FormatMKA_AAC(EncoderInfo info, FileDescriptor out) {
         MediaFormat format = new MediaFormat();
-        format.setString(MediaFormat.KEY_MIME, Factory.CONTENTTYPE_MP4A);
+        format.setString(MediaFormat.KEY_MIME, FormatM4A.CONTENTTYPE_MP4A);
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, info.hz);
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, info.channels);
         format.setInteger(MediaFormat.KEY_BIT_RATE, Factory.getBitrate(info.hz));

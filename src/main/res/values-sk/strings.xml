@@ -34,4 +34,5 @@
     <string name="share_button">Zdieľať</string>
     <string name="trash_button">Vymazať</string>
     <string name="migrating_data">Migrácia údajov</string>
+    <string name="recording_volume_text">(Software gain. Use above 100% only if you have hardware issues)</string>
 </resources>
