@@ -6,6 +6,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -126,10 +127,12 @@ public class Sound extends com.github.axet.androidlibrary.sound.Sound {
 
     public static boolean isUnprocessedSupported(Context context) {
         AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        if (Build.VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 24) {
             String s = am.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED);
             if (s == null || !s.equals(Boolean.toString(true)))
                 return false;
+        } else {
+            return false;
         }
         return true;
     }
