@@ -27,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 193
-        versionName "1.0.116"
+        versionCode 194
+        versionName "1.0.117"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -124,7 +124,7 @@ dependencies {
     api 'com.github.axet:lame:1.0.3' // compile project(':android-lame')
     api 'com.github.axet:java-flac-encoder:0.3.8'
     api 'com.github.axet:opus:1.0.2' // compile project(':android-opus')
-    api 'com.github.axet:jssrc:1.0.2-1'
+    api 'com.github.axet:jssrc:1.0.2-2'
     api 'org.gagravarr:vorbis-java-core:0.8'
     api 'uk.me.berndporr:iirj:1.0'
     testImplementation 'junit:junit:4.12'

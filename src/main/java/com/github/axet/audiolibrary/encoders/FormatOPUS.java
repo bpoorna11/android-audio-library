@@ -57,9 +57,7 @@ public class FormatOPUS implements Encoder {
 
     public static int match(int hz) { // opus supports only selected Hz's
         int[] hh = new int[]{
-                8000,
-                12000,
-                16000,
+                // 8000, 12000, 16000, // 8Hz && 12Hz && 16Hz crashing MediaPlayer https://gitlab.com/axet/android-audio-recorder/issues/23
                 24000,
                 48000,
         };

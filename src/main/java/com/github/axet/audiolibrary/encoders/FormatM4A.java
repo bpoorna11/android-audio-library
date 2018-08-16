@@ -13,9 +13,10 @@ import java.util.Map;
 
 @TargetApi(18)
 public class FormatM4A extends MuxerMP4 {
+    public static final String EXT = "m4a";
+
     public static final String CONTENTTYPE_MP4 = "audio/mp4";
     public static final String CONTENTTYPE_MP4A = "audio/mp4a-latm";
-    public static final String EXT = "m4a";
 
     public FormatM4A(Context context, EncoderInfo info, FileDescriptor out) {
         Map<String, MediaCodecInfo> map = MuxerMP4.findEncoder(CONTENTTYPE_MP4);
