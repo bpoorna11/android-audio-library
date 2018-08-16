@@ -1,6 +1,9 @@
 package com.github.axet.audiolibrary.encoders;
 
 import android.media.AudioFormat;
+import android.util.Log;
+
+import com.github.axet.androidlibrary.sound.Sound;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -17,26 +20,28 @@ public class Resample {
     public static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
     public static final int PIPE_SIZE = 100 * 1024;
 
-    Thread thread = null;
-    PipedOutputStream is;
-    PipedInputStream os;
+    Thread thread;
+    PipedOutputStream os;
+    PipedInputStream is;
     RuntimeException delayed;
 
     public Resample(final int sampleRate, final int channels, final int hz) {
         try {
-            this.is = new PipedOutputStream();
-            this.os = new PipedInputStream(PIPE_SIZE);
-            final PipedInputStream is = new PipedInputStream(this.is);
-            final PipedOutputStream os = new PipedOutputStream(this.os);
-            final int c = com.github.axet.audiolibrary.app.Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
+            this.os = new PipedOutputStream();
+            this.is = new PipedInputStream(PIPE_SIZE);
+            final PipedInputStream is = new PipedInputStream(this.os);
+            final PipedOutputStream os = new PipedOutputStream(this.is);
+            final int c = Sound.DEFAULT_AUDIOFORMAT == AudioFormat.ENCODING_PCM_16BIT ? 2 : 1;
             thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         SSRC ssrc = new SSRC(is, os, sampleRate, hz, c, c, channels, Integer.MAX_VALUE, 0, 0, true);
                     } catch (RuntimeException e) {
+                        Log.d(TAG, "SSRC failed", e);
                         delayed = e;
                     } catch (IOException e) {
+                        Log.d(TAG, "SSRC failed", e);
                         delayed = new RuntimeException(e);
                     }
                 }
@@ -64,8 +69,8 @@ public class Resample {
             ByteBuffer bb = ByteBuffer.allocate(len * SHORT_BYTES);
             bb.order(ORDER);
             bb.asShortBuffer().put(buf, pos, len);
-            is.write(bb.array());
-            is.flush();
+            os.write(bb.array());
+            os.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -75,11 +80,11 @@ public class Resample {
         if (delayed != null)
             throw delayed;
         try {
-            int blen = os.available();
+            int blen = is.available();
             if (blen <= 0)
                 return null;
             byte[] b = new byte[blen];
-            int read = os.read(b);
+            int read = is.read(b);
             ByteBuffer bb = ByteBuffer.allocate(read);
             bb.order(ORDER);
             bb.put(b, 0, read);
