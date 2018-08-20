@@ -11,8 +11,11 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.axet.androidlibrary.widgets.SeekBarPreference;
@@ -49,7 +52,9 @@ public class RecordingVolumePreference extends SeekBarPreference {
             t.setText(R.string.recording_volume_text);
             int p = ThemeUtils.dp2px(getContext(), 10);
             t.setPadding(p, p, p, p);
-            layout.addView(t);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.gravity = Gravity.CENTER;
+            layout.addView(t, lp);
             builder.setNeutralButton(R.string.default_button, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
