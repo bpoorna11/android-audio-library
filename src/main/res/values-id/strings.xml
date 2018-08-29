@@ -1,0 +1,43 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (bawaan)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string-array name="encodings_values" translatable="false">
+        <item>ogg</item>
+        <item>wav</item>
+    </string-array>
+
+    <string name="pref_source_title">Sumber Rekaman</string>
+    <string name="pref_filters">Filter</string>
+    <string name="pref_volume_title">Volume Rekaman</string>
+    <string name="pref_voice_title">Filter Suara</string>
+    <string name="pref_voice_summary">Filter Suara Bandpass</string>
+    <string name="pref_skip_title">Lewati Diam</string>
+    <string name="pref_skip_summary">Lewati Diam saat rekaman</string>
+
+    <string name="title_free">%1$s bebas</string>
+    <string name="title_left">%1$s tersisa</string>
+    <string name="db">dB</string>
+    <string name="no">Tidak</string>
+    <string name="yes">Ya</string>
+    <string name="delete_recording">Hapus Rekaman</string>
+    <string name="rename_recording">Ganti Nama Rekaman</string>
+    <string name="file_not_found">File tidak ditemukan</string>
+    <string name="menu_rename">Ganti Nama</string>
+    <string name="menu_delete">Hapus</string>
+    <string name="tolbar_all">Semua</string>
+    <string name="tolbar_stars">Bintang</string>
+    <string name="tolbar_sort_name">Nama</string>
+    <string name="tolbar_sort_date">Tanggal</string>
+    <string name="starred">Berbintang</string>
+    <string name="not_starred">Tidak berbintang</string>
+    <string name="pause_button">Jeda</string>
+    <string name="play_button">Mainkan</string>
+    <string name="edit_button">Sunting</string>
+    <string name="share_button">Bagikan</string>
+    <string name="trash_button">Hapus</string>
+    <string name="migrating_data">Memigrasikan data</string>
+    <string name="recording_volume_text">(Keuntungan perangkat lunak. Gunakan di atas 100% hanya jika Anda memiliki masalah perangkat keras)</string>
+</resources>
