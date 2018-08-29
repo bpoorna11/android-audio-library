@@ -4,11 +4,6 @@
         <item>.wav</item>
     </string-array>
 
-    <string-array name="encodings_values" translatable="false">
-        <item>ogg</item>
-        <item>wav</item>
-    </string-array>
-
     <string name="pref_source_title">Sumber Rekaman</string>
     <string name="pref_filters">Filter</string>
     <string name="pref_volume_title">Volume Rekaman</string>
