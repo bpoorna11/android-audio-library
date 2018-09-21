@@ -8,4 +8,9 @@
         <attr name="recColor" format="color" />
         <attr name="cutColor" format="color" />
     </declare-styleable>
+
+    <string-array name="encodings_values" translatable="false">
+        <item>ogg</item>
+        <item>wav</item>
+    </string-array>
 </resources>
