@@ -29,16 +29,6 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_DETAILS_STAR = "_star";
     public static final String PREFERENCE_DETAILS_FS = "_fs";
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        setTheme(getUserTheme()); // services can get proper current theme
-    }
-
-    public int getUserTheme() { // override for app theme
-        return getTheme(this, R.style.AppThemeLight, R.style.AppThemeDark);
-    }
-
     public static int getTheme(Context context, int light, int dark) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String theme = shared.getString(PREFERENCE_THEME, "");
@@ -107,5 +97,15 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         SharedPreferences.Editor editor = shared.edit();
         editor.putBoolean(p, b);
         editor.commit();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        setTheme(getUserTheme()); // services can get proper current theme
+    }
+
+    public int getUserTheme() { // override for app theme
+        return getTheme(this, R.style.AppThemeLight, R.style.AppThemeDark);
     }
 }
