@@ -525,7 +525,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType(Storage.getTypeByName(f.name));
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
-                    intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.getProvider().share(getContext(), f.uri));
+                    intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.getProvider().share(f.uri));
                     intent.putExtra(Intent.EXTRA_SUBJECT, f.name);
                     intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
                     PopupShareActionProvider.show(getContext(), share, intent);
