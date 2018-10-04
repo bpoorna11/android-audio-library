@@ -1,0 +1,38 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (mặc định)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">Nguồn ghi âm</string>
+    <string name="pref_filters">Lọc</string>
+    <string name="pref_volume_title">Âm lượng ghi âm</string>
+    <string name="pref_voice_title">Lọc giọng nói</string>
+    <string name="pref_voice_summary">Lọc băng thông</string>
+    <string name="pref_skip_title">Bỏ qua im lặng</string>
+    <string name="pref_skip_summary">Bỏ qua im lặng khi ghi âm</string>
+
+    <string name="title_free">%1$s trống</string>
+    <string name="title_left">%1$s còn lại</string>
+    <string name="db">dB</string>
+    <string name="no">Không</string>
+    <string name="yes">Có</string>
+    <string name="delete_recording">Xóa bản ghi</string>
+    <string name="rename_recording">Đổi tên bản ghi</string>
+    <string name="file_not_found">Không tìm thấy</string>
+    <string name="menu_rename">Đổi tên</string>
+    <string name="menu_delete">Xóa</string>
+    <string name="tolbar_all">Tất cả</string>
+    <string name="tolbar_stars">Đánh dấu</string>
+    <string name="tolbar_sort_name">Tên</string>
+    <string name="tolbar_sort_date">Ngày</string>
+    <string name="starred">Đánh dấu</string>
+    <string name="not_starred">Không đánh dấu</string>
+    <string name="pause_button">Dừng</string>
+    <string name="play_button">Chạy</string>
+    <string name="edit_button">Sửa</string>
+    <string name="share_button">Chia sẻ</string>
+    <string name="trash_button">Xóa</string>
+    <string name="migrating_data">Di chuyển dữ liệu</string>
+    <string name="recording_volume_text">(Tăng âm lượng trên 100% chỉ khi bạn có lỗi về phần cứng)</string>
+</resources>
