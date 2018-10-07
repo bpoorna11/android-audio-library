@@ -30,13 +30,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_DETAILS_FS = "_fs";
 
     public static int getTheme(Context context, int light, int dark) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        String theme = shared.getString(PREFERENCE_THEME, "");
-        if (theme.equals(context.getString(R.string.Theme_Dark))) {
-            return dark;
-        } else {
-            return light;
-        }
+        return com.github.axet.androidlibrary.app.MainApplication.getTheme(context, PREFERENCE_THEME, light, dark);
     }
 
     public static String formatFree(Context context, long free, long left) {
@@ -102,10 +96,5 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     @Override
     public void onCreate() {
         super.onCreate();
-        setTheme(getUserTheme()); // services can get proper current theme
-    }
-
-    public int getUserTheme() { // override for app theme
-        return getTheme(this, R.style.AppThemeLight, R.style.AppThemeDark);
     }
 }
