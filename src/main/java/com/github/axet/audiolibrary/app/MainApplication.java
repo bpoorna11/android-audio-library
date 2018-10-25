@@ -92,9 +92,4 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
         editor.putBoolean(p, b);
         editor.commit();
     }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
 }
