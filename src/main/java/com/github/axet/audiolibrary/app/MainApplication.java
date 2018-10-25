@@ -30,7 +30,7 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
     public static final String PREFERENCE_DETAILS_FS = "_fs";
 
     public static int getTheme(Context context, int light, int dark) {
-        return com.github.axet.androidlibrary.app.MainApplication.getTheme(context, PREFERENCE_THEME, light, dark);
+        return com.github.axet.androidlibrary.app.MainApplication.getTheme(context, PREFERENCE_THEME, light, dark, context.getString(R.string.Theme_Dark));
     }
 
     public static String formatFree(Context context, long free, long left) {
