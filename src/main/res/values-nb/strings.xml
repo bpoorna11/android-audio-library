@@ -1,0 +1,38 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (default)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">Opptakskilde</string>
+    <string name="pref_filters">Filtre</string>
+    <string name="pref_volume_title">Opptaksvolum</string>
+    <string name="pref_voice_title">Stemmefilter</string>
+    <string name="pref_voice_summary">Båndpass-stemmefilter</string>
+    <string name="pref_skip_title">Hopp over stillhet</string>
+    <string name="pref_skip_summary">Hopp over stillhet under opptak</string>
+
+    <string name="title_free">%1$s er ledig</string>
+    <string name="title_left">%1$s igjen</string>
+    <string name="db">dB</string>
+    <string name="no">Nei</string>
+    <string name="yes">Ja</string>
+    <string name="delete_recording">Slett opptaket</string>
+    <string name="rename_recording">Gi nytt navn til opptaket</string>
+    <string name="file_not_found">Filen ble ikke funnet</string>
+    <string name="menu_rename">Gi nytt navn</string>
+    <string name="menu_delete">Slett</string>
+    <string name="tolbar_all">Alle</string>
+    <string name="tolbar_stars">Stjerner</string>
+    <string name="tolbar_sort_name">Navn</string>
+    <string name="tolbar_sort_date">Dato</string>
+    <string name="starred">Gitt stjerner</string>
+    <string name="not_starred">Ikke gitt stjerner</string>
+    <string name="pause_button">Pause</string>
+    <string name="play_button">Spill av</string>
+    <string name="edit_button">Rediger</string>
+    <string name="share_button">Del</string>
+    <string name="trash_button">Slett</string>
+    <string name="migrating_data">Migrerer dataene</string>
+    <string name="recording_volume_text">(Programvareforsterking. Gå bare over 100% dersom du har maskinvareproblemer)</string>
+</resources>
