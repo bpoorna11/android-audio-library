@@ -230,7 +230,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             return false;
     }
 
-    public void scan(final List<Uri> ff, final boolean clean, final Runnable done) {
+    public void scan(final List<Storage.Node> nn, final boolean clean, final Runnable done) {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
         final Map<String, ?> prefs = shared.getAll();
 
@@ -250,35 +250,33 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                 }
                 final Thread t = Thread.currentThread();
                 final ArrayList<Storage.RecordingUri> all = new ArrayList<>();
-                for (Uri f : ff) {
+                for (Storage.Node n : nn) {
                     if (t.isInterrupted())
                         return;
-                    Storage.RecordingStats fs = cache.get(f);
+                    Storage.RecordingStats fs = cache.get(n.uri);
                     if (fs == null) {
-                        fs = getFileStats(prefs, f);
+                        fs = getFileStats(prefs, n.uri);
                         if (fs != null)
-                            cache.put(f, fs);
+                            cache.put(n.uri, fs);
                     }
                     if (fs != null) {
-                        long last = storage.getLastModified(f);
-                        long size = storage.getLength(f);
-                        if (last != fs.last || size != fs.size)
+                        if (n.last != fs.last || n.size != fs.size)
                             fs = null;
                     }
                     if (fs == null) {
                         fs = new Storage.RecordingStats();
-                        fs.size = storage.getLength(f);
-                        fs.last = storage.getLastModified(f);
+                        fs.size = n.size;
+                        fs.last = n.last;
                         try {
-                            fs.duration = getDuration(getContext(), f);
-                            cache.put(f, fs);
-                            setFileStats(getContext(), f, fs);
-                            all.add(new Storage.RecordingUri(f, fs));
+                            fs.duration = getDuration(getContext(), n.uri);
+                            cache.put(n.uri, fs);
+                            setFileStats(getContext(), n.uri, fs);
+                            all.add(new Storage.RecordingUri(n.uri, fs));
                         } catch (Exception e) {
-                            Log.d(TAG, f.toString(), e);
+                            Log.d(TAG, n.toString(), e);
                         }
                     } else {
-                        all.add(new Storage.RecordingUri(f, fs));
+                        all.add(new Storage.RecordingUri(n.uri, fs));
                     }
                 }
                 handler.post(new Runnable() {
