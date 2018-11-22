@@ -1,16 +1,12 @@
 package com.github.axet.audiolibrary.app;
 
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.DocumentsContract;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -25,7 +21,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -260,58 +255,17 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getNextFile(parent, SIMPLE.format(new Date()), ext);
     }
 
-    public List<Uri> scan(Uri uri, String[] ee) {
-        String s = uri.getScheme();
-        if (Build.VERSION.SDK_INT >= 21 && s.startsWith(ContentResolver.SCHEME_CONTENT)) {
-            ArrayList<Uri> list = new ArrayList<>();
-
-            ContentResolver contentResolver = context.getContentResolver();
-            Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
-            Cursor childCursor = contentResolver.query(childrenUri, null, null, null, null);
-            if (childCursor != null) {
-                try {
-                    while (childCursor.moveToNext()) {
-                        String id = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID));
-                        String t = childCursor.getString(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
-                        long size = childCursor.getLong(childCursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE));
-                        if (size > 0) {
-                            String n = t.toLowerCase();
-                            for (String e : ee) {
-                                if (n.endsWith("." + e)) {
-                                    Uri d = DocumentsContract.buildDocumentUriUsingTree(uri, id);
-                                    list.add(d);
-                                }
-                            }
-                        }
-                    }
-                } finally {
-                    childCursor.close();
+    public List<Node> scan(Uri uri, final String[] ee) {
+        return list(uri, new NodeFilter() {
+            @Override
+            public boolean accept(Node n) {
+                for (String e : ee) {
+                    if (n.size > 0 && n.name.toLowerCase().endsWith("." + e))
+                        return true;
                 }
+                return false;
             }
-
-            return list;
-        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
-            File dir = getFile(uri);
-            ArrayList<Uri> list = new ArrayList<>();
-
-            File[] ff = dir.listFiles();
-            if (ff == null)
-                return list;
-
-            for (File f : ff) {
-                if (f.length() > 0) {
-                    String n = f.getName().toLowerCase();
-                    for (String e : ee) {
-                        if (n.endsWith("." + e))
-                            list.add(Uri.fromFile(f));
-                    }
-                }
-            }
-
-            return list;
-        } else {
-            throw new UnknownUri();
-        }
+        });
     }
 
     // get average recording miliseconds based on compression format
