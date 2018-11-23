@@ -9,6 +9,7 @@
     <string name="pref_filters">Filtry</string>
     <string name="pref_volume_title">Głośność Nagrywania</string>
     <string name="pref_voice_title">Filtr Głosu</string>
+    <string name="pref_voice_summary">Bandpass Voice Filter</string>
     <string name="pref_skip_title">Pomiń Ciszę</string>
     <string name="pref_skip_summary">Pomiń Ciszę podczas nagrywania</string>
 

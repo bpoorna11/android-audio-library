@@ -19,7 +19,6 @@
     <string name="yes">Evet</string>
     <string name="delete_recording">Kaydı Sil</string>
     <string name="rename_recording">Kaydı Yeniden Adlandır</string>
-    <string name="shared_via">"%1$s aracılığıyla paylaşıldı"</string>
     <string name="file_not_found">Dosya bulunamadı</string>
     <string name="menu_rename">Yeniden adlandır</string>
     <string name="menu_delete">Sil</string>
