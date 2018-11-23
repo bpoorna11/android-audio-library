@@ -271,12 +271,12 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                             fs.duration = getDuration(getContext(), n.uri);
                             cache.put(n.uri, fs);
                             setFileStats(getContext(), n.uri, fs);
-                            all.add(new Storage.RecordingUri(n.uri, fs));
+                            all.add(new Storage.RecordingUri(getContext(), n.uri, fs));
                         } catch (Exception e) {
                             Log.d(TAG, n.toString(), e);
                         }
                     } else {
-                        all.add(new Storage.RecordingUri(n.uri, fs));
+                        all.add(new Storage.RecordingUri(getContext(), n.uri, fs));
                     }
                 }
                 handler.post(new Runnable() {

@@ -78,10 +78,10 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         public Uri uri;
         public String name;
 
-        public RecordingUri(Uri f, RecordingStats fs) {
+        public RecordingUri(Context context, Uri f, RecordingStats fs) {
             super(fs);
             uri = f;
-            name = Storage.getDocumentName(uri);
+            name = Storage.getName(context, uri);
         }
     }
 

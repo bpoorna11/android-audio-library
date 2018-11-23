@@ -1,0 +1,38 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg (默认)</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">录制源</string>
+    <string name="pref_filters">过滤</string>
+    <string name="pref_volume_title">录制音量</string>
+    <string name="pref_voice_title">声音过滤</string>
+    <string name="pref_voice_summary">语音带通滤波器</string>
+    <string name="pref_skip_title">静音保持</string>
+    <string name="pref_skip_summary">录音时跳过静音</string>
+
+    <string name="title_free">%1$s 可用</string>
+    <string name="title_left">%1$s 剩余</string>
+    <string name="db">dB</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="delete_recording">删除录音</string>
+    <string name="rename_recording">重命名录音</string>
+    <string name="file_not_found">未找到文件</string>
+    <string name="menu_rename">重命名</string>
+    <string name="menu_delete">删除</string>
+    <string name="tolbar_all">全部</string>
+    <string name="tolbar_stars">星级</string>
+    <string name="tolbar_sort_name">名称</string>
+    <string name="tolbar_sort_date">日期</string>
+    <string name="starred">星标</string>
+    <string name="not_starred">无星标</string>
+    <string name="pause_button">暂停</string>
+    <string name="play_button">播放</string>
+    <string name="edit_button">编辑</string>
+    <string name="share_button">分享</string>
+    <string name="trash_button">删除</string>
+    <string name="migrating_data">迁移数据</string>
+    <string name="recording_volume_text">（软件增益。硬件问题时仅在100%以上使用）</string>
+</resources>
