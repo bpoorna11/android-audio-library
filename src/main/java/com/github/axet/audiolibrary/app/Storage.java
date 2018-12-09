@@ -36,6 +36,31 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss", Locale.US);
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.US);
 
+    public Handler handler = new Handler();
+
+    public static Uri rename(Context context, Uri f, String t) {
+        Uri u = com.github.axet.androidlibrary.app.Storage.rename(context, f, t);
+        if (u == null)
+            return null;
+        boolean star = MainApplication.getStar(context, f);
+        MainApplication.setStar(context, u, star); // copy star to renamed name
+        return u;
+    }
+
+
+    public static List<Node> scan(Context context, Uri uri, final String[] ee) {
+        return list(context, uri, new NodeFilter() {
+            @Override
+            public boolean accept(Node n) {
+                for (String e : ee) {
+                    if (n.size > 0 && n.name.toLowerCase().endsWith("." + e))
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
     public static class RecordingStats {
         public int duration;
         public long size;
@@ -85,42 +110,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         }
     }
 
-    public static void migrateLocalStorageDialog(final Context context, final Handler handler, final Storage storage) {
-        int dp10 = ThemeUtils.dp2px(context, 10);
-        ProgressBar progress = new ProgressBar(context);
-        progress.setIndeterminate(true);
-        progress.setPadding(dp10, dp10, dp10, dp10);
-        AlertDialog.Builder b = new AlertDialog.Builder(context);
-        b.setTitle(R.string.migrating_data);
-        b.setView(progress);
-        b.setCancelable(false);
-        final AlertDialog dialog = b.create();
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storage.migrateLocalStorage();
-                } catch (final RuntimeException e) {
-                    Log.d(TAG, "migrate error", e);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.cancel();
-                    }
-                });
-            }
-        });
-        dialog.show();
-        thread.start();
-    }
-
     public Storage(Context context) {
         super(context);
     }
@@ -155,15 +144,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return getStoragePath(path);
     }
 
-    public void migrateLocalStorage() {
-        migrateLocalStorage(new File(context.getApplicationInfo().dataDir, RECORDINGS)); // old recordings folder
-        migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
-        migrateLocalStorage(context.getFilesDir()); // old recordings folder
-        migrateLocalStorage(context.getExternalFilesDir("")); // old recordings folder
-        migrateLocalStorage(getLocalInternal());
-        migrateLocalStorage(getLocalExternal());
-    }
-
     public boolean isLocalStorage(File f) {
         if (super.isLocalStorage(f))
             return true;
@@ -183,6 +163,51 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             }
         }
         return false;
+    }
+
+    public void migrateLocalStorageDialog() {
+        int dp10 = ThemeUtils.dp2px(context, 10);
+        ProgressBar progress = new ProgressBar(context);
+        progress.setIndeterminate(true);
+        progress.setPadding(dp10, dp10, dp10, dp10);
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle(R.string.migrating_data);
+        b.setView(progress);
+        b.setCancelable(false);
+        final AlertDialog dialog = b.create();
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    migrateLocalStorage();
+                } catch (final RuntimeException e) {
+                    Log.d(TAG, "migrate error", e);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.cancel();
+                    }
+                });
+            }
+        });
+        dialog.show();
+        thread.start();
+    }
+
+    public void migrateLocalStorage() {
+        migrateLocalStorage(new File(context.getApplicationInfo().dataDir, RECORDINGS)); // old recordings folder
+        migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
+        migrateLocalStorage(context.getFilesDir()); // old recordings folder
+        migrateLocalStorage(context.getExternalFilesDir("")); // old recordings folder
+        migrateLocalStorage(getLocalInternal());
+        migrateLocalStorage(getLocalExternal());
     }
 
     public void migrateLocalStorage(File l) {
@@ -213,29 +238,17 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
             return;
 
         for (File f : ff) {
-            if (f.isFile()) { // skip directories (we didn't create one)
+            if (f.isFile()) // skip directories (we didn't create one)
                 migrate(f, path);
-            }
         }
     }
 
-    @Override
     public Uri migrate(File f, Uri t) {
-        Uri u = super.migrate(f, t);
+        Uri u = super.migrate(context, f, t);
         if (u == null)
             return null;
         boolean star = MainApplication.getStar(context, Uri.fromFile(f));
         MainApplication.setStar(context, u, star); // copy star to migrated file
-        return u;
-    }
-
-    @Override
-    public Uri rename(Uri f, String t) {
-        Uri u = super.rename(f, t);
-        if (u == null)
-            return null;
-        boolean star = MainApplication.getStar(context, f);
-        MainApplication.setStar(context, u, star); // copy star to renamed name
         return u;
     }
 
@@ -246,26 +259,13 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         Uri parent = getStoragePath();
 
         String s = parent.getScheme();
-        if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+        if (s.equals(ContentResolver.SCHEME_FILE)) {
             File p = getFile(parent);
             if (!p.exists() && !p.mkdirs())
                 throw new RuntimeException("Unable to create: " + parent);
         }
 
-        return getNextFile(parent, SIMPLE.format(new Date()), ext);
-    }
-
-    public List<Node> scan(Uri uri, final String[] ee) {
-        return list(uri, new NodeFilter() {
-            @Override
-            public boolean accept(Node n) {
-                for (String e : ee) {
-                    if (n.size > 0 && n.name.toLowerCase().endsWith("." + e))
-                        return true;
-                }
-                return false;
-            }
-        });
+        return getNextFile(context, parent, SIMPLE.format(new Date()), ext);
     }
 
     // get average recording miliseconds based on compression format

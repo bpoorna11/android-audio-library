@@ -28,9 +28,9 @@ public class OnFlyEncoding implements Encoder {
         FileDescriptor out;
 
         String s = targetUri.getScheme();
-        if (s.startsWith(ContentResolver.SCHEME_CONTENT)) {
+        if (s.equals(ContentResolver.SCHEME_CONTENT)) {
             Uri root = Storage.getDocumentTreeUri(targetUri);
-            Uri o = storage.createFile(root, Storage.getDocumentChildPath(targetUri));
+            Uri o = Storage.createFile(context, root, Storage.getDocumentChildPath(targetUri));
             ContentResolver resolver = context.getContentResolver();
             try {
                 fd = resolver.openFileDescriptor(o, "rw");
@@ -38,7 +38,7 @@ public class OnFlyEncoding implements Encoder {
                 throw new RuntimeException(e);
             }
             out = fd.getFileDescriptor();
-        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+        } else if (s.equals(ContentResolver.SCHEME_FILE)) {
             File f = Storage.getFile(targetUri);
             try {
                 fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_READ_WRITE);
