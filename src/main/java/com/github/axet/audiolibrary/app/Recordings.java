@@ -369,7 +369,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         if (!user.equals(mount))
             clean = false; // do not clean if we failed to mount user selected folder
 
-        scan(storage.scan(mount, getEncodingValues()), clean, done);
+        scan(Storage.scan(getContext(), mount, getEncodingValues()), clean, done);
     }
 
     public View inflate(int id, ViewGroup parent) {
@@ -439,7 +439,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                             @Override
                             public void run() {
                                 playerStop(); // in case if playback got started twice during delete animation
-                                storage.delete(f.uri);
+                                Storage.delete(getContext(), f.uri);
                                 view.setTag(TYPE_DELETED);
                                 select(-1);
                                 remove(f); // instant remove
@@ -470,7 +470,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         playerStop();
                         String ext = Storage.getExt(f.name);
                         String s = String.format("%s.%s", e.getText(), ext);
-                        storage.rename(f.uri, s);
+                        Storage.rename(getContext(), f.uri, s);
                         load(true, null);
                     }
                 });
