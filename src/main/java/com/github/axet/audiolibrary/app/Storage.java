@@ -165,42 +165,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return false;
     }
 
-    public void migrateLocalStorageDialog() {
-        int dp10 = ThemeUtils.dp2px(context, 10);
-        ProgressBar progress = new ProgressBar(context);
-        progress.setIndeterminate(true);
-        progress.setPadding(dp10, dp10, dp10, dp10);
-        AlertDialog.Builder b = new AlertDialog.Builder(context);
-        b.setTitle(R.string.migrating_data);
-        b.setView(progress);
-        b.setCancelable(false);
-        final AlertDialog dialog = b.create();
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    migrateLocalStorage();
-                } catch (final RuntimeException e) {
-                    Log.d(TAG, "migrate error", e);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.cancel();
-                    }
-                });
-            }
-        });
-        dialog.show();
-        thread.start();
-    }
-
+    @Override
     public void migrateLocalStorage() {
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir, RECORDINGS)); // old recordings folder
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
