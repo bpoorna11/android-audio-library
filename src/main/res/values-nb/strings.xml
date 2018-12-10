@@ -33,6 +33,5 @@
     <string name="edit_button">Rediger</string>
     <string name="share_button">Del</string>
     <string name="trash_button">Slett</string>
-    <string name="migrating_data">Migrerer dataene</string>
     <string name="recording_volume_text">(Programvareforsterking. Gå bare over 100% dersom du har maskinvareproblemer)</string>
 </resources>

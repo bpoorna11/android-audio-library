@@ -33,6 +33,5 @@
     <string name="edit_button">Sửa</string>
     <string name="share_button">Chia sẻ</string>
     <string name="trash_button">Xóa</string>
-    <string name="migrating_data">Di chuyển dữ liệu</string>
     <string name="recording_volume_text">(Tăng âm lượng trên 100% chỉ khi bạn có lỗi về phần cứng)</string>
 </resources>

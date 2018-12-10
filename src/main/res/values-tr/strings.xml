@@ -33,6 +33,5 @@
     <string name="edit_button">Düzenle</string>
     <string name="share_button">Paylaş</string>
     <string name="trash_button">Sil</string>
-    <string name="migrating_data">Veri aktarılıyor</string>
     <string name="recording_volume_text">(Software gain. Use above 100% only if you have hardware issues)</string>
 </resources>
