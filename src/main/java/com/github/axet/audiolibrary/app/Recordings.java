@@ -369,6 +369,10 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         if (!user.equals(mount))
             clean = false; // do not clean if we failed to mount user selected folder
 
+        load(mount, clean, done);
+    }
+
+    public void load(Uri mount, boolean clean, Runnable done) {
         scan(Storage.scan(getContext(), mount, getEncodingValues()), clean, done);
     }
 
