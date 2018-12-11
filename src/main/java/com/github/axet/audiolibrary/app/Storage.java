@@ -5,15 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.github.axet.androidlibrary.widgets.ThemeUtils;
-import com.github.axet.audiolibrary.R;
 import com.github.axet.audiolibrary.encoders.Factory;
 
 import org.json.JSONException;
@@ -36,18 +29,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static final SimpleDateFormat SIMPLE = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss", Locale.US);
     public static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.US);
 
-    public Handler handler = new Handler();
-
-    public static Uri rename(Context context, Uri f, String t) {
-        Uri u = com.github.axet.androidlibrary.app.Storage.rename(context, f, t);
-        if (u == null)
-            return null;
-        boolean star = MainApplication.getStar(context, f);
-        MainApplication.setStar(context, u, star); // copy star to renamed name
-        return u;
-    }
-
-
     public static List<Node> scan(Context context, Uri uri, final String[] ee) {
         return list(context, uri, new NodeFilter() {
             @Override
@@ -59,6 +40,26 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
                 return false;
             }
         });
+    }
+
+    public static long average(Context context, long free) { // get average recording miliseconds based on compression format
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        int rate = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_RATE, ""));
+        String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
+        int m = Sound.getChannels(context);
+        long perSec = Factory.getEncoderRate(ext, rate) * m;
+        return free / perSec * 1000;
+    }
+
+    public static File getLocalDataDir(Context context) {
+        return new File(context.getApplicationInfo().dataDir);
+    }
+
+    public static File getFilesDir(Context context, String type) {
+        File raw = new File(context.getFilesDir(), type);
+        if (!raw.exists() && !raw.mkdirs() && !raw.exists())
+            throw new RuntimeException("no files permissions");
+        return raw;
     }
 
     public static class RecordingStats {
@@ -165,42 +166,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         return false;
     }
 
-    public void migrateLocalStorageDialog() {
-        int dp10 = ThemeUtils.dp2px(context, 10);
-        ProgressBar progress = new ProgressBar(context);
-        progress.setIndeterminate(true);
-        progress.setPadding(dp10, dp10, dp10, dp10);
-        AlertDialog.Builder b = new AlertDialog.Builder(context);
-        b.setTitle(R.string.migrating_data);
-        b.setView(progress);
-        b.setCancelable(false);
-        final AlertDialog dialog = b.create();
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    migrateLocalStorage();
-                } catch (final RuntimeException e) {
-                    Log.d(TAG, "migrate error", e);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.cancel();
-                    }
-                });
-            }
-        });
-        dialog.show();
-        thread.start();
-    }
-
+    @Override
     public void migrateLocalStorage() {
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir, RECORDINGS)); // old recordings folder
         migrateLocalStorage(new File(context.getApplicationInfo().dataDir)); // old recordings folder
@@ -244,11 +210,18 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public Uri migrate(File f, Uri t) {
-        Uri u = super.migrate(context, f, t);
+        Uri u = com.github.axet.androidlibrary.app.Storage.migrate(context, f, t);
         if (u == null)
             return null;
-        boolean star = MainApplication.getStar(context, Uri.fromFile(f));
-        MainApplication.setStar(context, u, star); // copy star to migrated file
+        MainApplication.setStar(context, u, MainApplication.getStar(context, Uri.fromFile(f))); // copy star to migrated file
+        return u;
+    }
+
+    public Uri rename(Uri f, String t) {
+        Uri u = com.github.axet.androidlibrary.app.Storage.rename(context, f, t);
+        if (u == null)
+            return null;
+        MainApplication.setStar(context, u, MainApplication.getStar(context, f)); // copy star to renamed name
         return u;
     }
 
@@ -266,28 +239,6 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         }
 
         return getNextFile(context, parent, SIMPLE.format(new Date()), ext);
-    }
-
-    // get average recording miliseconds based on compression format
-    public static long average(Context context, long free) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        int rate = Integer.parseInt(shared.getString(MainApplication.PREFERENCE_RATE, ""));
-        String ext = shared.getString(MainApplication.PREFERENCE_ENCODING, "");
-
-        int m = Sound.getChannels(context);
-        long perSec = Factory.getEncoderRate(ext, rate) * m;
-        return free / perSec * 1000;
-    }
-
-    public static File getLocalDataDir(Context context) {
-        return new File(context.getApplicationInfo().dataDir);
-    }
-
-    public static File getFilesDir(Context context, String type) {
-        File raw = new File(context.getFilesDir(), type);
-        if (!raw.exists() && !raw.mkdirs() && !raw.exists())
-            throw new RuntimeException("no files permissions");
-        return raw;
     }
 
     public File getTempRecording() {

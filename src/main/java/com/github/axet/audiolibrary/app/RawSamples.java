@@ -37,9 +37,8 @@ public class RawSamples {
 
     public static double getAmplitude(short[] buffer, int offset, int len) {
         double sum = 0;
-        for (int i = offset; i < offset + len; i++) {
+        for (int i = offset; i < offset + len; i++)
             sum += buffer[i] * buffer[i];
-        }
         return Math.sqrt(sum / len);
     }
 

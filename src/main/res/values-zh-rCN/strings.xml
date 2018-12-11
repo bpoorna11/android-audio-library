@@ -33,6 +33,5 @@
     <string name="edit_button">编辑</string>
     <string name="share_button">分享</string>
     <string name="trash_button">删除</string>
-    <string name="migrating_data">迁移数据</string>
     <string name="recording_volume_text">（软件增益。硬件问题时仅在100%以上使用）</string>
 </resources>

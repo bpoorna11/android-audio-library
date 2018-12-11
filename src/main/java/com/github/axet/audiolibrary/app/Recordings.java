@@ -470,7 +470,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         playerStop();
                         String ext = Storage.getExt(f.name);
                         String s = String.format("%s.%s", e.getText(), ext);
-                        Storage.rename(getContext(), f.uri, s);
+                        storage.rename(f.uri, s);
                         load(true, null);
                     }
                 });

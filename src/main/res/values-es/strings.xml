@@ -33,8 +33,5 @@
     <string name="edit_button">Editar</string>
     <string name="share_button">Compartir</string>
     <string name="trash_button">Eliminar</string>
-    <string name="migrating_data">Migrando datos</string>
     <string name="recording_volume_text">(Software gain. Use above 100% only if you have hardware issues)</string>
-
-
 </resources>
