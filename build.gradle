@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 221
-        versionName "1.0.144"
+        versionCode 222
+        versionName "1.0.145"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -121,7 +121,7 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    api 'com.github.axet:android-library:1.28.41' // api project(':android-library')
+    api 'com.github.axet:android-library:1.29.1' // api project(':android-library')
     api 'com.android.support:design:25.3.1'
     api 'org.apache.commons:commons-math3:3.6.1'
     api 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
