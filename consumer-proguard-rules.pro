@@ -1,0 +1,3 @@
+-dontwarn net.sourceforge.javaflacencoder.**
+-dontwarn com.jssrc.resample.**
+-dontwarn org.slf4j.**
