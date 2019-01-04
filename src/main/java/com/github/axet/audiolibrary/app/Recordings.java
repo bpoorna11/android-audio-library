@@ -22,6 +22,8 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -79,6 +81,50 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected LayoutInflater inflater;
     protected String filter;
 
+    protected ViewGroup toolbar;
+    protected View toolbar_a;
+    protected View toolbar_s;
+    protected View toolbar_n;
+    protected View toolbar_d;
+    protected boolean toolbarFilterAll = true; // all or stars
+    protected boolean toolbarSortName = true; // name or date
+
+    PhoneStateChangeListener pscl;
+
+    protected Map<Uri, Storage.RecordingStats> cache = new ConcurrentHashMap<>();
+
+    protected BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive()");
+            String a = intent.getAction();
+            if (a.equals(Intent.ACTION_MEDIA_EJECT)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+            if (a.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+            if (a.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        load(false, null);
+                    }
+                });
+            }
+        }
+    };
+
     public static int getDuration(Context context, Uri u) {
         MediaPlayer mp = createPlayer(context, u);
         if (mp == null)
@@ -116,48 +162,6 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
-    protected BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive()");
-            String a = intent.getAction();
-            if (a.equals(Intent.ACTION_MEDIA_EJECT)) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        load(false, null);
-                    }
-                });
-            }
-            if (a.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        load(false, null);
-                    }
-                });
-            }
-            if (a.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        load(false, null);
-                    }
-                });
-            }
-        }
-    };
-
-    protected ViewGroup toolbar;
-    protected View toolbar_a;
-    protected View toolbar_s;
-    protected View toolbar_n;
-    protected View toolbar_d;
-    protected boolean toolbarFilterAll = true; // all or stars
-    protected boolean toolbarSortName = true; // name or date
-
-    protected Map<Uri, Storage.RecordingStats> cache = new ConcurrentHashMap<>();
-
     public static Storage.RecordingStats getFileStats(Map<String, ?> prefs, Uri f) {
         String json = (String) prefs.get(MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS);
         if (json != null && !json.isEmpty()) {
@@ -187,6 +191,43 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             long l1 = file.last;
             long l2 = file2.last;
             return Long.valueOf(l1).compareTo(l2);
+        }
+    }
+
+    class PhoneStateChangeListener extends PhoneStateListener {
+        public boolean wasRinging;
+        public boolean pausedByCall;
+
+        public View v;
+        public Storage.RecordingUri f;
+
+        public PhoneStateChangeListener(View v, final Storage.RecordingUri f) {
+            this.v = v;
+            this.f = f;
+        }
+
+        @Override
+        public void onCallStateChanged(int s, String incomingNumber) {
+            switch (s) {
+                case TelephonyManager.CALL_STATE_RINGING:
+                    wasRinging = true;
+                    break;
+                case TelephonyManager.CALL_STATE_OFFHOOK:
+                    wasRinging = true;
+                    if (player != null && player.isPlaying()) {
+                        playerPause(v, f);
+                        pausedByCall = true;
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_IDLE:
+                    if (pausedByCall) {
+                        if (player != null && !player.isPlaying())
+                            playerPause(v, f);
+                    }
+                    wasRinging = false;
+                    pausedByCall = false;
+                    break;
+            }
         }
     }
 
@@ -608,9 +649,18 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
+    public boolean getPrefCall() {
+        return false;
+    }
+
     protected void playerPlay(View v, final Storage.RecordingUri f) {
         if (player == null) {
             player = createPlayer(getContext(), f.uri);
+            if (getPrefCall()) {
+                pscl = new PhoneStateChangeListener(v, f);
+                TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+                tm.listen(pscl, PhoneStateListener.LISTEN_CALL_STATE);
+            }
         }
         if (player == null) {
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
@@ -688,6 +738,11 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             player.stop();
             player.release();
             player = null;
+        }
+        if (pscl != null) {
+            TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+            tm.listen(pscl, PhoneStateListener.LISTEN_NONE);
+            pscl = null;
         }
     }
 
