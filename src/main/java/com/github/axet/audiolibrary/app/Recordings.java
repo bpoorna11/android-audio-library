@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
+import com.github.axet.androidlibrary.app.MediaPlayerCompat;
 import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
@@ -126,40 +127,12 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     };
 
     public static int getDuration(Context context, Uri u) {
-        MediaPlayer mp = createPlayer(context, u);
+        MediaPlayer mp = MediaPlayerCompat.createMediaPlayer(context, u, null);
         if (mp == null)
             return 0;
         int duration = mp.getDuration();
         mp.release();
         return duration;
-    }
-
-    public static MediaPlayer createPlayer(Context context, Uri u) {
-        try {
-            MediaPlayer mp = new MediaPlayer(); // MediaPlayer.create(context, u) failed with ':' in uri
-            if (Build.VERSION.SDK_INT >= 21) {
-                final AudioAttributes aa = new AudioAttributes.Builder().build();
-                mp.setAudioAttributes(aa);
-            }
-            String s = u.getScheme();
-            ParcelFileDescriptor pfd;
-            if (s.equals(ContentResolver.SCHEME_CONTENT)) {
-                ContentResolver resolver = context.getContentResolver();
-                pfd = resolver.openFileDescriptor(u, "r");
-            } else if (s.equals(ContentResolver.SCHEME_FILE)) {
-                pfd = ParcelFileDescriptor.open(Storage.getFile(u), ParcelFileDescriptor.MODE_READ_ONLY);
-            } else {
-                throw new Storage.UnknownUri();
-            }
-            FileDescriptor fd = pfd.getFileDescriptor();
-            mp.setDataSource(fd);
-            pfd.close();
-            mp.prepare();
-            return mp;
-        } catch (IOException e) {
-            Log.d(TAG, "Unable create player", e);
-            return null;
-        }
     }
 
     public static Storage.RecordingStats getFileStats(Map<String, ?> prefs, Uri f) {
@@ -655,7 +628,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
     protected void playerPlay(View v, final Storage.RecordingUri f) {
         if (player == null) {
-            player = createPlayer(getContext(), f.uri);
+            player = MediaPlayerCompat.createMediaPlayer(getContext(), f.uri, null);
             if (getPrefCall()) {
                 pscl = new PhoneStateChangeListener(v, f);
                 TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
