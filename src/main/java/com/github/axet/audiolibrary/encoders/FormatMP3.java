@@ -3,9 +3,8 @@ package com.github.axet.audiolibrary.encoders;
 import android.content.Context;
 
 import com.github.axet.androidlibrary.app.Natives;
-import com.github.axet.androidlibrary.sound.Sound;
+import com.github.axet.lamejni.Config;
 import com.github.axet.lamejni.Lame;
-import com.github.axet.vorbisjni.Config;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
