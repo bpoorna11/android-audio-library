@@ -33,5 +33,5 @@
     <string name="edit_button">Düzenle</string>
     <string name="share_button">Paylaş</string>
     <string name="trash_button">Sil</string>
-    <string name="recording_volume_text">(Yazılım kazanımı. Yalnızca donanım sorunlarınız varsa %100'ün üzerinde kullanın.)</string>
+    <string name="recording_volume_text">(Yazılım kazanımı. Yalnızca donanım sorunlarınız varsa %100\'ün üzerinde kullanın.)</string>
 </resources>
