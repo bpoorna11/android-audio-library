@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
 import com.github.axet.androidlibrary.app.MediaPlayerCompat;
 import com.github.axet.androidlibrary.services.StorageProvider;
+import com.github.axet.androidlibrary.widgets.AboutPreferenceCompat;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ProximityPlayer;
@@ -529,15 +530,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String name = "Recordings";
-                    try {
-                        PackageManager pm = getContext().getPackageManager();
-                        ApplicationInfo info = pm.getApplicationInfo(getContext().getPackageName(), 0);
-                        name = info.loadLabel(pm).toString();
-                    } catch (PackageManager.NameNotFoundException e) {
-                        ;
-                    }
-
+                    String name = AboutPreferenceCompat.getVersion(getContext());
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType(Storage.getTypeByName(f.name));
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
