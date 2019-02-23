@@ -188,6 +188,8 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
         String s = path.getScheme();
         if (s.equals(ContentResolver.SCHEME_FILE)) {
             File p = getFile(path);
+            if (!p.exists() && !p.mkdirs()) // try create non existen folder
+                return;
             if (!canWrite(p))
                 return;
             if (l.equals(p)) // same storage path
