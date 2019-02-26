@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 225
-        versionName "1.0.148"
+        versionCode 226
+        versionName "1.0.149"
 
         consumerProguardFiles 'consumer-proguard-rules.pro'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -123,7 +123,7 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    api 'com.github.axet:android-library:1.30.14' // api project(':android-library')
+    api 'com.github.axet:android-library:1.30.16' // api project(':android-library')
     api 'com.android.support:design:25.3.1'
     api 'org.apache.commons:commons-math3:3.6.1'
     api 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
