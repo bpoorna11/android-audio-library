@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 
 import com.github.axet.androidlibrary.app.Natives;
-import com.github.axet.androidlibrary.sound.Sound;
 import com.github.axet.opusjni.Config;
 import com.github.axet.opusjni.Opus;
 
@@ -46,13 +45,12 @@ public class FormatOPUS implements Encoder {
     }
 
     public static int getBitrate(int hz) { // https://wiki.xiph.org/index.php?title=Opus_Recommended_Settings
-        if (hz < 16000) {
+        if (hz < 16000)
             return 16000; // 0 - 16Hz
-        } else if (hz < 44100) {
+        else if (hz < 44100)
             return 24000; // 16 - 44Hz
-        } else {
+        else
             return 32000; // 48Hz
-        }
     }
 
     public static int match(int hz) { // opus supports only selected Hz's

@@ -9,7 +9,6 @@ import org.gagravarr.opus.OpusAudioData;
 import org.gagravarr.opus.OpusInfo;
 import org.gagravarr.opus.OpusTags;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;

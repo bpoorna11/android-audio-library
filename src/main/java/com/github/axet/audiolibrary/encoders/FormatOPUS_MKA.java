@@ -3,23 +3,16 @@ package com.github.axet.audiolibrary.encoders;
 import android.annotation.TargetApi;
 import android.content.Context;
 
-import com.github.axet.androidlibrary.app.Natives;
-import com.github.axet.opusjni.Config;
-import com.github.axet.opusjni.Opus;
-
-import org.ebml.io.FileDataWriter;
 import org.ebml.matroska.MatroskaFileFrame;
 import org.ebml.matroska.MatroskaFileTrack;
 import org.ebml.matroska.MatroskaFileWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 // https://wiki.xiph.org/MatroskaOpus
 @TargetApi(21)
