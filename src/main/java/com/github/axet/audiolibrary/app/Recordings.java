@@ -8,16 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
@@ -39,8 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
-import com.github.axet.androidlibrary.app.MediaPlayerCompat;
+import com.github.axet.androidlibrary.app.AssetsDexLoader;
 import com.github.axet.androidlibrary.services.StorageProvider;
+import com.github.axet.androidlibrary.sound.MediaPlayerCompat;
 import com.github.axet.androidlibrary.widgets.AboutPreferenceCompat;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
@@ -52,8 +48,6 @@ import com.github.axet.audiolibrary.animations.RecordingAnimation;
 import com.github.axet.audiolibrary.encoders.Factory;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,7 +67,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
     protected Handler handler;
     protected Storage storage;
-    protected MediaPlayer player;
+    protected MediaPlayerCompat player;
     protected ProximityShader proximity;
     protected Runnable updatePlayer;
     protected int selected = -1;
@@ -127,20 +121,19 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     };
 
-    public static int getDuration(Context context, Uri u) {
-        MediaPlayer mp = MediaPlayerCompat.createMediaPlayer(context, u, null);
+    public static long getDuration(Context context, Uri u) {
+        MediaPlayerCompat mp = MediaPlayerCompat.create(context, u);
         if (mp == null)
             return 0;
-        int duration = mp.getDuration();
+        long duration = mp.getDuration();
         mp.release();
         return duration;
     }
 
     public static Storage.RecordingStats getFileStats(Map<String, ?> prefs, Uri f) {
         String json = (String) prefs.get(MainApplication.getFilePref(f) + MainApplication.PREFERENCE_DETAILS_FS);
-        if (json != null && !json.isEmpty()) {
+        if (json != null && !json.isEmpty())
             return new Storage.RecordingStats(json);
-        }
         return null;
     }
 
@@ -188,14 +181,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     break;
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                     wasRinging = true;
-                    if (player != null && player.isPlaying()) {
+                    if (player != null && player.getPlayWhenReady()) {
                         playerPause(v, f);
                         pausedByCall = true;
                     }
                     break;
                 case TelephonyManager.CALL_STATE_IDLE:
                     if (pausedByCall) {
-                        if (player != null && !player.isPlaying())
+                        if (player != null && !player.getPlayWhenReady())
                             playerPause(v, f);
                     }
                     wasRinging = false;
@@ -220,6 +213,9 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         inflater = LayoutInflater.from(getContext());
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         shared.registerOnSharedPreferenceChangeListener(this);
+
+        if (Build.VERSION.SDK_INT >= 14 && MediaPlayerCompat.classLoader == MediaPlayerCompat.class.getClassLoader())
+            MediaPlayerCompat.classLoader = AssetsDexLoader.deps(context, "exoplayer-core", "exoplayer-dash", "exoplayer-hsls", "exoplayer-smoothstreaming", "exoplayer-ui");
     }
 
     @Override
@@ -510,7 +506,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                 public void onClick(View v) {
                     if (player == null) {
                         playerPlay(playerBase, f);
-                    } else if (player.isPlaying()) {
+                    } else if (player.getPlayWhenReady()) {
                         playerPause(playerBase, f);
                     } else {
                         playerPlay(playerBase, f);
@@ -621,7 +617,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
     protected void playerPlay(View v, final Storage.RecordingUri f) {
         if (player == null) {
-            player = MediaPlayerCompat.createMediaPlayer(getContext(), f.uri, null);
+            player = MediaPlayerCompat.create(getContext(), f.uri);
             if (getPrefCall()) {
                 pscl = new PhoneStateChangeListener(v, f);
                 TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
@@ -632,42 +628,13 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
-        player.start();
+        player.setPlayWhenReady(true);
 
         if (proximity == null) {
             proximity = new ProximityPlayer(getContext()) {
                 @Override
                 public void prepare() {
-                    try {
-                        int pos = player.getCurrentPosition();
-                        player.release();
-                        player = new MediaPlayer();
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            AudioAttributes.Builder b = new AudioAttributes.Builder();
-                            switch (streamType) {
-                                case AudioManager.STREAM_MUSIC:
-                                    b.setUsage(AudioAttributes.USAGE_MEDIA);
-                                    b.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
-                                    break;
-                                case AudioManager.STREAM_VOICE_CALL:
-                                    b.setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION);
-                                    b.setContentType(AudioAttributes.CONTENT_TYPE_SPEECH);
-                                    break;
-                            }
-                            b.setLegacyStreamType(streamType);
-                            final AudioAttributes aa = b.build();
-                            player.setAudioAttributes(aa);
-                        } else {
-                            player.setAudioStreamType(streamType);
-                        }
-                        player.setDataSource(getContext(), f.uri);
-                        player.prepare();
-                        player.seekTo(pos);
-                        player.start();
-                    } catch (IOException e) {
-                        Log.d(TAG, "unable to reset payer", e);
-                        playerStop();
-                    }
+                    player.setAudioStreamType(streamType);
                 }
             };
             proximity.create();
@@ -677,9 +644,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     protected void playerPause(View v, Storage.RecordingUri f) {
-        if (player != null) {
-            player.pause();
-        }
+        if (player != null)
+            player.setPlayWhenReady(false);
         if (updatePlayer != null) {
             handler.removeCallbacks(updatePlayer);
             updatePlayer = null;
@@ -701,7 +667,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             proximity = null;
         }
         if (player != null) {
-            player.stop();
+            player.setPlayWhenReady(false); // stop()
             player.release();
             player = null;
         }
@@ -738,7 +704,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected boolean updatePlayerText(final View v, final Storage.RecordingUri f) {
         ImageView i = (ImageView) v.findViewById(R.id.recording_player_play);
 
-        final boolean playing = player != null && player.isPlaying();
+        final boolean playing = player != null && player.getPlayWhenReady();
 
         i.setImageResource(playing ? R.drawable.ic_pause_black_24dp : R.drawable.ic_play_arrow_black_24dp);
         i.setContentDescription(getContext().getString(playing ? R.string.pause_button : R.string.play_button));
@@ -747,8 +713,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         SeekBar bar = (SeekBar) v.findViewById(R.id.recording_player_seek);
         TextView end = (TextView) v.findViewById(R.id.recording_player_end);
 
-        int c = 0;
-        Integer d = f.duration;
+        long c = 0;
+        Long d = f.duration;
 
         if (player != null) {
             c = player.getCurrentPosition();
@@ -766,7 +732,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
                 if (player != null) {
                     player.seekTo(progress);
-                    if (!player.isPlaying())
+                    if (!player.getPlayWhenReady())
                         playerPlay(v, f);
                 }
             }
@@ -781,9 +747,9 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         });
 
         start.setText(MainApplication.formatDuration(getContext(), c));
-        bar.setMax(d);
+        bar.setMax(d.intValue());
         bar.setKeyProgressIncrement(1);
-        bar.setProgress(c);
+        bar.setProgress((int) c);
         end.setText("-" + MainApplication.formatDuration(getContext(), d - c));
 
         return playing;

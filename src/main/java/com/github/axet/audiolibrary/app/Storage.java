@@ -63,7 +63,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     }
 
     public static class RecordingStats {
-        public int duration;
+        public long duration;
         public long size;
         public long last;
 

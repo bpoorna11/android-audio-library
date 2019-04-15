@@ -5,8 +5,8 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'digital.wup:android-maven-publish:3.6.2'
     }
 }
 
@@ -19,7 +19,7 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 apply plugin: 'signing'
-apply plugin: 'com.github.dcendents.android-maven' // 'gradle install' task
+apply plugin: 'digital.wup.android-maven-publish' // 'gradle publishToMavenLocal' and 'publish' tasks
 
 android {
     compileSdkVersion 25
@@ -28,12 +28,9 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 226
-        versionName "1.0.149"
-
+        versionCode 227
+        versionName "1.0.150"
         consumerProguardFiles 'consumer-proguard-rules.pro'
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         release {
@@ -42,7 +39,7 @@ android {
     }
 }
 
-// http://central.sonatype.org/pages/gradle.html
+// https://docs.gradle.org/current/userguide/publishing_maven.html
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -59,71 +56,68 @@ task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-group = "com.github.axet"
-archivesBaseName = "android-audio-library"
-version = android.defaultConfig.versionName
-
 def prop(String name) {
     project.hasProperty(name) ? project.getProperty(name) : null
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'com.github.axet'
+            artifactId 'android-audio-library'
+            version android.defaultConfig.versionName
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: prop('ossrhUsername'), password: prop('ossrhPassword'))
-            }
+            from components.android
+            artifact sourcesJar
+            artifact javadocJar
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: prop('ossrhUsername'), password: prop('ossrhPassword'))
-            }
-
-            pom.project {
-                name 'Android Library'
-                packaging 'jar'
-                description 'Android Simple Widgets and Support classes.'
-                url 'https://gitlab.com/axet/android-audio-library'
-
-                scm {
-                    connection 'scm:git:https://gitlab.com/axet/android-library'
-                    developerConnection 'scm:git:https://gitlab.com/axet/android-library'
-                    url 'https://gitlab.com/axet/android-audio-library'
-                }
-
+            pom {
+                name = 'Android Audio Library'
+                description = 'Android Audio Common classes.'
+                url = 'https://gitlab.com/axet/android-audio-library'
                 licenses {
                     license {
-                        name 'GNU LESSER GENERAL PUBLIC LICENSE 3.0'
-                        url 'http://www.gnu.org/copyleft/lesser.html'
+                        name = 'GNU LESSER GENERAL PUBLIC LICENSE 3.0'
+                        url = 'http://www.gnu.org/copyleft/lesser.html'
                     }
                 }
-
                 developers {
                     developer {
-                        id 'axet'
-                        name 'Alexey Kuznetsov'
-                        email 'axet@me.com'
+                        id = 'axet'
+                        name = 'Alexey Kuznetsov'
+                        email = 'axet@me.com'
                     }
+                }
+                scm {
+                    connection = 'scm:git:https://gitlab.com/axet/android-library'
+                    developerConnection = 'scm:git:https://gitlab.com/axet/android-library'
+                    url = 'https://gitlab.com/axet/android-library'
                 }
             }
         }
     }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username prop('ossrhUsername')
+                password prop('ossrhPassword')
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
 
 dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    api 'com.github.axet:android-library:1.30.16' // api project(':android-library')
+    api 'com.github.axet:android-library:1.30.27' // api project(':android-library')
     api 'com.android.support:design:25.3.1'
     api 'org.apache.commons:commons-math3:3.6.1'
     api 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
