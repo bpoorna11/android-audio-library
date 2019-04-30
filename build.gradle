@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 227
-        versionName "1.0.150"
+        versionCode 228
+        versionName "1.0.151"
         consumerProguardFiles 'consumer-proguard-rules.pro'
     }
     buildTypes {
