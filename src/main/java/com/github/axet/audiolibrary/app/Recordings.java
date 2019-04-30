@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -145,6 +144,28 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         editor.commit();
     }
 
+    public static class ExoLoader extends AssetsDexLoader.ThreadLoader {
+        public static final Object lock = new Object();
+
+        public ExoLoader(Context context, boolean block) {
+            super(context, block, "exoplayer-core", "exoplayer-dash", "exoplayer-hsls", "exoplayer-smoothstreaming", "exoplayer-ui");
+        }
+
+        @Override
+        public boolean need() {
+            synchronized (lock) {
+                return Build.VERSION.SDK_INT >= 14 && MediaPlayerCompat.classLoader == MediaPlayerCompat.class.getClassLoader();
+            }
+        }
+
+        @Override
+        public void done(ClassLoader l) {
+            synchronized (lock) {
+                MediaPlayerCompat.classLoader = l;
+            }
+        }
+    }
+
     public class SortName implements Comparator<Storage.RecordingUri> {
         @Override
         public int compare(Storage.RecordingUri file, Storage.RecordingUri file2) {
@@ -213,9 +234,6 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         inflater = LayoutInflater.from(getContext());
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         shared.registerOnSharedPreferenceChangeListener(this);
-
-        if (Build.VERSION.SDK_INT >= 14 && MediaPlayerCompat.classLoader == MediaPlayerCompat.class.getClassLoader())
-            MediaPlayerCompat.classLoader = AssetsDexLoader.deps(context, "exoplayer-core", "exoplayer-dash", "exoplayer-hsls", "exoplayer-smoothstreaming", "exoplayer-ui");
     }
 
     @Override
@@ -258,6 +276,11 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         Thread.currentThread().interrupt();
                         return;
                     }
+                }
+                try {
+                    new ExoLoader(getContext(), true);
+                } catch (Exception e) {
+                    Log.e(TAG, "error", e);
                 }
                 final Thread t = Thread.currentThread();
                 final ArrayList<Storage.RecordingUri> all = new ArrayList<>();

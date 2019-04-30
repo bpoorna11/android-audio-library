@@ -5,7 +5,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.android.tools.build:gradle:3.4.0'
         classpath 'digital.wup:android-maven-publish:3.6.2'
     }
 }
@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
-        versionCode 227
-        versionName "1.0.150"
+        versionCode 228
+        versionName "1.0.151"
         consumerProguardFiles 'consumer-proguard-rules.pro'
     }
     buildTypes {
@@ -114,10 +114,7 @@ signing {
 }
 
 dependencies {
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    api 'com.github.axet:android-library:1.30.27' // api project(':android-library')
+    api 'com.github.axet:android-library:1.30.28' // api project(':android-library')
     api 'com.android.support:design:25.3.1'
     api 'org.apache.commons:commons-math3:3.6.1'
     api 'com.github.axet:jebml:0.0.2' // compile project(':jebml')
