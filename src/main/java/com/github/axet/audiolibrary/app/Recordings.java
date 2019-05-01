@@ -56,6 +56,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
@@ -120,13 +121,46 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     };
 
-    public static long getDuration(Context context, Uri u) {
-        MediaPlayerCompat mp = MediaPlayerCompat.create(context, u);
+    public static long getDuration(final Context context, final Uri u) {
+        final Object lock = new Object();
+        final AtomicLong duration = new AtomicLong();
+        final MediaPlayerCompat mp = MediaPlayerCompat.create(context, u);
         if (mp == null)
             return 0;
-        long duration = mp.getDuration();
-        mp.release();
-        return duration;
+        mp.addListener(new MediaPlayerCompat.Listener() {
+            @Override
+            public void onReady() {
+                synchronized (lock) {
+                    duration.set(mp.getDuration());
+                    lock.notifyAll();
+                }
+            }
+
+            @Override
+            public void onEnd() {
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
+        });
+        try {
+            synchronized (lock) {
+                mp.prepare();
+                duration.set(mp.getDuration());
+                if (duration.longValue() == 0)
+                    lock.wait();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return duration.longValue();
     }
 
     public static Storage.RecordingStats getFileStats(Map<String, ?> prefs, Uri f) {
@@ -651,6 +685,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
+        player.prepare();
         player.setPlayWhenReady(true);
 
         if (proximity == null) {
