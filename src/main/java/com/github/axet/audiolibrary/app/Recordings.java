@@ -85,7 +85,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected boolean toolbarFilterAll = true; // all or stars
     protected boolean toolbarSortName = true; // name or date
 
-    PhoneStateChangeListener pscl;
+    protected PhoneStateChangeListener pscl;
 
     protected Map<Uri, Storage.RecordingStats> cache = new ConcurrentHashMap<>();
 

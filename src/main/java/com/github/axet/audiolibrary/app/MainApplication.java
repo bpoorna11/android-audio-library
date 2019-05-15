@@ -69,9 +69,9 @@ public class MainApplication extends com.github.axet.androidlibrary.app.MainAppl
 
     public static String getFilePref(Uri f) {
         String s = f.getScheme();
-        if (s.startsWith(ContentResolver.SCHEME_CONTENT)) {
+        if (s.equals(ContentResolver.SCHEME_CONTENT)) {
             return PREFERENCE_DETAILS_PREFIX + getHexString(f.toString().hashCode());
-        } else if (s.startsWith(ContentResolver.SCHEME_FILE)) {
+        } else if (s.equals(ContentResolver.SCHEME_FILE)) {
             File ff = Storage.getFile(f);
             return PREFERENCE_DETAILS_PREFIX + getHexString(ff.toString().hashCode());
         } else {
