@@ -14,13 +14,14 @@
         android:orientation="horizontal">
 
         <FrameLayout
-            android:layout_width="@dimen/notification_large_icon_height"
+            android:layout_width="@dimen/notification_large_icon_width"
             android:layout_height="@dimen/notification_large_icon_height">
 
             <ImageView
                 android:id="@+id/icon_circle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_gravity="center"
                 android:padding="5dp"
                 android:src="@drawable/ic_circle_black_24dp" />
 
