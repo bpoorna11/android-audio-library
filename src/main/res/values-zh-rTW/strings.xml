@@ -1,0 +1,37 @@
+<resources>
+    <string-array name="encodings_text">
+        <item>.ogg（預設）</item>
+        <item>.wav</item>
+    </string-array>
+
+    <string name="pref_source_title">錄音來源</string>
+    <string name="pref_filters">過濾</string>
+    <string name="pref_volume_title">錄製音量</string>
+    <string name="pref_voice_title">聲音過濾</string>
+    <string name="pref_voice_summary">Bandpass 聲音過濾</string>
+    <string name="pref_skip_title">跳過靜音</string>
+    <string name="pref_skip_summary">錄音時跳過靜音</string>
+
+    <string name="title_free">%1$s 可用</string>
+    <string name="title_left">%1$s 剩餘</string>
+    <string name="db">dB</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="delete_recording">刪除錄音</string>
+    <string name="rename_recording">重新命名錄音</string>
+    <string name="file_not_found">找不到檔案</string>
+    <string name="menu_rename">重新命名</string>
+    <string name="menu_delete">刪除</string>
+    <string name="tolbar_all">全部</string>
+    <string name="tolbar_stars">星號</string>
+    <string name="tolbar_sort_name">名稱</string>
+    <string name="tolbar_sort_date">日期</string>
+    <string name="starred">星號</string>
+    <string name="not_starred">無星號</string>
+    <string name="pause_button">暫停</string>
+    <string name="play_button">播放</string>
+    <string name="edit_button">編輯</string>
+    <string name="share_button">分享</string>
+    <string name="trash_button">刪除</string>
+    <string name="recording_volume_text">（軟體增益。只有當你有硬體問題時，才使用高於 100%）</string>
+</resources>
