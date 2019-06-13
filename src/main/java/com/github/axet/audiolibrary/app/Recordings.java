@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -24,19 +25,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
+import android.view.animation.Animation;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.axet.androidlibrary.animations.RemoveItemAnimation;
+import com.github.axet.androidlibrary.animations.ExpandItemAnimator;
 import com.github.axet.androidlibrary.app.AssetsDexLoader;
 import com.github.axet.androidlibrary.services.StorageProvider;
 import com.github.axet.androidlibrary.sound.MediaPlayerCompat;
 import com.github.axet.androidlibrary.widgets.AboutPreferenceCompat;
+import com.github.axet.androidlibrary.widgets.HeaderRecyclerAdapter;
 import com.github.axet.androidlibrary.widgets.OpenFileDialog;
 import com.github.axet.androidlibrary.widgets.PopupShareActionProvider;
 import com.github.axet.androidlibrary.widgets.ProximityPlayer;
@@ -58,23 +58,17 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder> implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static String TAG = Recordings.class.getSimpleName();
 
-    protected static final int TYPE_COLLAPSED = 0;
-    protected static final int TYPE_EXPANDED = 1;
-    protected static final int TYPE_DELETED = 2;
-
     protected Handler handler;
+    protected Context context;
     protected Storage storage;
     protected MediaPlayerCompat player;
     protected ProximityShader proximity;
     protected Runnable updatePlayer;
     protected int selected = -1;
-    protected ListView list;
-    protected int scrollState;
     protected Thread thread;
-    protected LayoutInflater inflater;
     protected String filter;
 
     protected ViewGroup toolbar;
@@ -88,6 +82,11 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     protected PhoneStateChangeListener pscl;
 
     protected Map<Uri, Storage.RecordingStats> cache = new ConcurrentHashMap<>();
+
+    protected ArrayList<Storage.RecordingUri> items = new ArrayList<>();
+
+    public ExpandItemAnimator animator;
+    public HeaderRecyclerAdapter empty = new HeaderRecyclerAdapter(this);
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -200,14 +199,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
-    public class SortName implements Comparator<Storage.RecordingUri> {
+    public static class SortName implements Comparator<Storage.RecordingUri> {
         @Override
         public int compare(Storage.RecordingUri file, Storage.RecordingUri file2) {
             return file.name.compareTo(file2.name);
         }
     }
 
-    public class SortDate implements Comparator<Storage.RecordingUri> {
+    public static class SortDate implements Comparator<Storage.RecordingUri> {
         @Override
         public int compare(Storage.RecordingUri file, Storage.RecordingUri file2) {
             long l1 = file.last;
@@ -216,15 +215,50 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
+    public static class RecordingHolder extends RecyclerView.ViewHolder {
+        public View base;
+        public ImageView star;
+        public TextView title;
+        public TextView time;
+        public TextView dur;
+        public TextView size;
+        public View playerBase;
+        public ImageView play;
+        public TextView start;
+        public SeekBar bar;
+        public TextView end;
+        public View edit;
+        public View share;
+        public ImageView trash;
+
+        public RecordingHolder(View v) {
+            super(v);
+            base = v.findViewById(R.id.recording_base);
+            star = (ImageView) v.findViewById(R.id.recording_star);
+            title = (TextView) v.findViewById(R.id.recording_title);
+            time = (TextView) v.findViewById(R.id.recording_time);
+            dur = (TextView) v.findViewById(R.id.recording_duration);
+            size = (TextView) v.findViewById(R.id.recording_size);
+            playerBase = v.findViewById(R.id.recording_player);
+            play = (ImageView) v.findViewById(R.id.recording_player_play);
+            start = (TextView) v.findViewById(R.id.recording_player_start);
+            bar = (SeekBar) v.findViewById(R.id.recording_player_seek);
+            end = (TextView) v.findViewById(R.id.recording_player_end);
+            edit = v.findViewById(R.id.recording_player_edit);
+            share = v.findViewById(R.id.recording_player_share);
+            trash = (ImageView) v.findViewById(R.id.recording_player_trash);
+        }
+    }
+
     class PhoneStateChangeListener extends PhoneStateListener {
         public boolean wasRinging;
         public boolean pausedByCall;
 
-        public View v;
+        public RecordingHolder h;
         public Storage.RecordingUri f;
 
-        public PhoneStateChangeListener(View v, final Storage.RecordingUri f) {
-            this.v = v;
+        public PhoneStateChangeListener(RecordingHolder h, final Storage.RecordingUri f) {
+            this.h = h;
             this.f = f;
         }
 
@@ -237,14 +271,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                     wasRinging = true;
                     if (player != null && player.getPlayWhenReady()) {
-                        playerPause(v, f);
+                        playerPause(h, f);
                         pausedByCall = true;
                     }
                     break;
                 case TelephonyManager.CALL_STATE_IDLE:
                     if (pausedByCall) {
                         if (player != null && !player.getPlayWhenReady())
-                            playerPause(v, f);
+                            playerPause(h, f);
                     }
                     wasRinging = false;
                     pausedByCall = false;
@@ -253,30 +287,29 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
     }
 
-    public Recordings(Context context, ListView list) {
-        super(context, 0);
-        this.list = list;
+    public Recordings(Context context, final RecyclerView list) {
+        this.context = context;
         this.handler = new Handler();
         this.storage = new Storage(context);
-        this.list.setOnScrollListener(this);
+        this.animator = new ExpandItemAnimator() {
+            @Override
+            public Animation apply(RecyclerView.ViewHolder h, boolean animate) {
+                if (selected == h.getAdapterPosition())
+                    return RecordingAnimation.apply(list, h.itemView, true, animate);
+                else
+                    return RecordingAnimation.apply(list, h.itemView, false, animate);
+            }
+        };
+        list.setItemAnimator(animator);
+        list.addOnScrollListener(animator.onScrollListener);
         load();
         IntentFilter ff = new IntentFilter();
         ff.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
         ff.addAction(Intent.ACTION_MEDIA_MOUNTED);
         ff.addAction(Intent.ACTION_MEDIA_EJECT);
         context.registerReceiver(receiver, ff);
-        inflater = LayoutInflater.from(getContext());
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         shared.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        this.scrollState = scrollState;
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
     }
 
     // true - include
@@ -287,14 +320,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         }
         if (toolbarFilterAll)
             return true;
-        if (MainApplication.getStar(getContext(), f.uri))
+        if (MainApplication.getStar(context, f.uri))
             return true;
         else
             return false;
     }
 
     public void scan(final List<Storage.Node> nn, final boolean clean, final Runnable done) {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         final Map<String, ?> prefs = shared.getAll();
 
         final Thread old = thread;
@@ -312,7 +345,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     }
                 }
                 try {
-                    new ExoLoader(getContext(), true);
+                    new ExoLoader(context, true);
                 } catch (Exception e) {
                     Log.e(TAG, "error", e);
                 }
@@ -336,15 +369,15 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         fs.size = n.size;
                         fs.last = n.last;
                         try {
-                            fs.duration = getDuration(getContext(), n.uri);
+                            fs.duration = getDuration(context, n.uri);
                             cache.put(n.uri, fs);
-                            setFileStats(getContext(), n.uri, fs);
-                            all.add(new Storage.RecordingUri(getContext(), n.uri, fs));
+                            setFileStats(context, n.uri, fs);
+                            all.add(new Storage.RecordingUri(context, n.uri, fs));
                         } catch (Exception e) {
                             Log.d(TAG, n.toString(), e);
                         }
                     } else {
-                        all.add(new Storage.RecordingUri(getContext(), n.uri, fs));
+                        all.add(new Storage.RecordingUri(context, n.uri, fs));
                     }
                 }
                 handler.post(new Runnable() {
@@ -352,8 +385,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                     public void run() {
                         if (thread != t)
                             return; // replaced with new thread, exit
-                        setNotifyOnChange(false);
-                        clear(); // clear recordings
+                        items.clear(); // clear recordings
                         TreeSet<String> delete = new TreeSet<>();
                         for (String k : prefs.keySet()) {
                             if (k.startsWith(MainApplication.PREFERENCE_DETAILS_PREFIX))
@@ -362,7 +394,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                         TreeSet<Uri> delete2 = new TreeSet<>(cache.keySet());
                         for (Storage.RecordingUri f : all) {
                             if (filter(f))
-                                add(f); // add recording
+                                items.add(f); // add recording
                             cleanDelete(delete, f.uri);
                             delete2.remove(f.uri);
                         }
@@ -399,7 +431,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             sort = new SortName();
         else
             sort = new SortDate();
-        sort(Collections.reverseOrder(sort));
+        Collections.sort(items, Collections.reverseOrder(sort));
     }
 
     public void close() {
@@ -409,19 +441,19 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             thread = null;
         }
         if (receiver != null) {
-            getContext().unregisterReceiver(receiver);
+            context.unregisterReceiver(receiver);
             receiver = null;
         }
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         shared.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public String[] getEncodingValues() {
-        return Factory.getEncodingValues(getContext());
+        return Factory.getEncodingValues(context);
     }
 
     public void load(boolean clean, Runnable done) {
-        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         String path = shared.getString(MainApplication.PREFERENCE_STORAGE, "");
 
         Uri user;
@@ -441,56 +473,44 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     public void load(Uri mount, boolean clean, Runnable done) {
-        scan(Storage.scan(getContext(), mount, getEncodingValues()), clean, done);
+        scan(Storage.scan(context, mount, getEncodingValues()), clean, done);
     }
 
-    public View inflate(int id, ViewGroup parent) {
+    public View inflate(LayoutInflater inflater, int id, ViewGroup parent) {
         return inflater.inflate(id, parent, false);
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = inflate(R.layout.recording, parent);
-            convertView.setTag(-1);
-        }
+    public RecordingHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View convertView = inflate(inflater, R.layout.recording, parent);
+        return new RecordingHolder(convertView);
+    }
 
-        final View view = convertView;
-        final View base = convertView.findViewById(R.id.recording_base);
+    @Override
+    public void onBindViewHolder(final RecordingHolder h, int position) {
+        final Storage.RecordingUri f = items.get(position);
 
-        if ((int) convertView.getTag() == TYPE_DELETED) {
-            RemoveItemAnimation.restore(base);
-            convertView.setTag(-1);
-        }
-
-        final Storage.RecordingUri f = getItem(position);
-
-        final boolean starb = MainApplication.getStar(getContext(), f.uri);
-        final ImageView star = (ImageView) convertView.findViewById(R.id.recording_star);
-        starUpdate(star, starb);
-        star.setOnClickListener(new View.OnClickListener() {
+        final boolean starb = MainApplication.getStar(context, f.uri);
+        starUpdate(h.star, starb);
+        h.star.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean b = !MainApplication.getStar(getContext(), f.uri);
-                MainApplication.setStar(getContext(), f.uri, b);
-                starUpdate(star, b);
+                boolean b = !MainApplication.getStar(context, f.uri);
+                MainApplication.setStar(context, f.uri, b);
+                starUpdate(h.star, b);
             }
         });
 
-        TextView title = (TextView) convertView.findViewById(R.id.recording_title);
-        title.setText(f.name);
+        h.title.setText(f.name);
 
-        TextView time = (TextView) convertView.findViewById(R.id.recording_time);
-        time.setText(MainApplication.SIMPLE.format(new Date(f.last)));
+        h.time.setText(MainApplication.SIMPLE.format(new Date(f.last)));
 
-        TextView dur = (TextView) convertView.findViewById(R.id.recording_duration);
-        dur.setText(MainApplication.formatDuration(getContext(), f.duration));
+        h.dur.setText(MainApplication.formatDuration(context, f.duration));
 
-        TextView size = (TextView) convertView.findViewById(R.id.recording_size);
-        size.setText(MainApplication.formatSize(getContext(), f.size));
+        h.size.setText(MainApplication.formatSize(context, f.size));
 
-        final View playerBase = convertView.findViewById(R.id.recording_player);
-        playerBase.setOnClickListener(new View.OnClickListener() {
+        h.playerBase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
             }
@@ -499,25 +519,20 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         final Runnable delete = new Runnable() {
             @Override
             public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(R.string.delete_recording);
-                builder.setMessage("...\\" + f.name + "\n\n" + getContext().getString(R.string.are_you_sure));
+                builder.setMessage("...\\" + f.name + "\n\n" + context.getString(R.string.are_you_sure));
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        playerStop();
                         dialog.cancel();
-                        RemoveItemAnimation.apply(list, base, new Runnable() {
-                            @Override
-                            public void run() {
-                                playerStop(); // in case if playback got started twice during delete animation
-                                Storage.delete(getContext(), f.uri);
-                                view.setTag(TYPE_DELETED);
-                                select(-1);
-                                remove(f); // instant remove
-                                load(true, null); // thread load
-                            }
-                        });
+                        playerStop();
+                        Storage.delete(context, f.uri);
+                        select(-1);
+                        int pos = items.indexOf(f);
+                        items.remove(f); // instant remove
+                        notifyItemRemoved(pos);
+                        load(true, null); // thread load
                     }
                 });
                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -533,8 +548,8 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         final Runnable rename = new Runnable() {
             @Override
             public void run() {
-                final OpenFileDialog.EditTextDialog e = new OpenFileDialog.EditTextDialog(getContext());
-                e.setTitle(getContext().getString(R.string.rename_recording));
+                final OpenFileDialog.EditTextDialog e = new OpenFileDialog.EditTextDialog(context);
+                e.setTitle(context.getString(R.string.rename_recording));
                 e.setText(Storage.getNameNoExt(f.name));
                 e.setPositiveButton(new DialogInterface.OnClickListener() {
                     @Override
@@ -552,59 +567,52 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         };
 
         if (selected == position) {
-            RecordingAnimation.apply(list, convertView, true, scrollState == SCROLL_STATE_IDLE && (int) convertView.getTag() == TYPE_COLLAPSED);
-            convertView.setTag(TYPE_EXPANDED);
+            updatePlayerText(h, f);
 
-            updatePlayerText(convertView, f);
-
-            final View play = convertView.findViewById(R.id.recording_player_play);
-            play.setOnClickListener(new View.OnClickListener() {
+            h.play.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (player == null) {
-                        playerPlay(playerBase, f);
+                        playerPlay(h, f);
                     } else if (player.getPlayWhenReady()) {
-                        playerPause(playerBase, f);
+                        playerPause(h, f);
                     } else {
-                        playerPlay(playerBase, f);
+                        playerPlay(h, f);
                     }
                 }
             });
 
-            final View edit = convertView.findViewById(R.id.recording_player_edit);
-            edit.setOnClickListener(new View.OnClickListener() {
+            h.edit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     rename.run();
                 }
             });
 
-            final View share = convertView.findViewById(R.id.recording_player_share);
-            share.setOnClickListener(new View.OnClickListener() {
+            h.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String name = AboutPreferenceCompat.getVersion(getContext());
+                    String name = AboutPreferenceCompat.getVersion(context);
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType(Storage.getTypeByName(f.name));
                     intent.putExtra(Intent.EXTRA_EMAIL, "");
                     intent.putExtra(Intent.EXTRA_STREAM, StorageProvider.getProvider().share(f.uri));
                     intent.putExtra(Intent.EXTRA_SUBJECT, f.name);
-                    intent.putExtra(Intent.EXTRA_TEXT, getContext().getString(R.string.shared_via, name));
-                    PopupShareActionProvider.show(getContext(), share, intent);
+                    intent.putExtra(Intent.EXTRA_TEXT, context.getString(R.string.shared_via, name));
+                    PopupShareActionProvider.show(context, h.share, intent);
                 }
             });
 
-            KeyguardManager myKM = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
+            KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
             final boolean locked = myKM.inKeyguardRestrictedInputMode();
 
-            ImageView trash = (ImageView) convertView.findViewById(R.id.recording_player_trash);
             if (locked) {
-                trash.setOnClickListener(null);
-                trash.setClickable(true);
-                trash.setColorFilter(Color.GRAY);
+                h.trash.setOnClickListener(null);
+                h.trash.setClickable(true);
+                h.trash.setColorFilter(Color.GRAY);
             } else {
-                trash.setColorFilter(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent));
-                trash.setOnClickListener(new View.OnClickListener() {
+                h.trash.setColorFilter(ThemeUtils.getThemeColor(context, R.attr.colorAccent));
+                h.trash.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         delete.run();
@@ -612,28 +620,25 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
                 });
             }
 
-            convertView.setOnClickListener(new View.OnClickListener() {
+            h.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     select(-1);
                 }
             });
         } else {
-            RecordingAnimation.apply(list, convertView, false, scrollState == SCROLL_STATE_IDLE && (int) convertView.getTag() == TYPE_EXPANDED);
-            convertView.setTag(TYPE_COLLAPSED);
-
-            convertView.setOnClickListener(new View.OnClickListener() {
+            h.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    select(position);
+                    select(h.getAdapterPosition());
                 }
             });
         }
 
-        convertView.setOnLongClickListener(new View.OnLongClickListener() {
+        h.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                PopupMenu popup = new PopupMenu(getContext(), v);
+                PopupMenu popup = new PopupMenu(context, v);
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.menu_context, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -655,16 +660,16 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             }
         });
 
-        return convertView;
+        animator.onBindViewHolder(h, position);
     }
 
     protected void starUpdate(ImageView star, boolean starb) {
         if (starb) {
             star.setImageResource(R.drawable.ic_star_black_24dp);
-            star.setContentDescription(getContext().getString(R.string.starred));
+            star.setContentDescription(context.getString(R.string.starred));
         } else {
             star.setImageResource(R.drawable.ic_star_border_black_24dp);
-            star.setContentDescription(getContext().getString(R.string.not_starred));
+            star.setContentDescription(context.getString(R.string.not_starred));
         }
     }
 
@@ -672,24 +677,24 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
         return false;
     }
 
-    protected void playerPlay(View v, final Storage.RecordingUri f) {
+    protected void playerPlay(RecordingHolder h, final Storage.RecordingUri f) {
         if (player == null) {
-            player = MediaPlayerCompat.create(getContext(), f.uri);
+            player = MediaPlayerCompat.create(context, f.uri);
             if (getPrefCall()) {
-                pscl = new PhoneStateChangeListener(v, f);
-                TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+                pscl = new PhoneStateChangeListener(h, f);
+                TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 tm.listen(pscl, PhoneStateListener.LISTEN_CALL_STATE);
             }
         }
         if (player == null) {
-            Toast.makeText(getContext(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.file_not_found, Toast.LENGTH_SHORT).show();
             return;
         }
         player.prepare();
         player.setPlayWhenReady(true);
 
         if (proximity == null) {
-            proximity = new ProximityPlayer(getContext()) {
+            proximity = new ProximityPlayer(context) {
                 @Override
                 public void prepare() {
                     player.setAudioStreamType(streamType);
@@ -698,10 +703,10 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             proximity.create();
         }
 
-        updatePlayerRun(v, f);
+        updatePlayerRun(h, f);
     }
 
-    protected void playerPause(View v, Storage.RecordingUri f) {
+    protected void playerPause(RecordingHolder h, Storage.RecordingUri f) {
         if (player != null)
             player.setPlayWhenReady(false);
         if (updatePlayer != null) {
@@ -712,7 +717,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             proximity.close();
             proximity = null;
         }
-        updatePlayerText(v, f);
+        updatePlayerText(h, f);
     }
 
     protected void playerStop() {
@@ -730,14 +735,14 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             player = null;
         }
         if (pscl != null) {
-            TelephonyManager tm = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             tm.listen(pscl, PhoneStateListener.LISTEN_NONE);
             pscl = null;
         }
     }
 
-    protected void updatePlayerRun(final View v, final Storage.RecordingUri f) {
-        boolean playing = updatePlayerText(v, f);
+    protected void updatePlayerRun(final RecordingHolder h, final Storage.RecordingUri f) {
+        boolean playing = updatePlayerText(h, f);
 
         if (updatePlayer != null) {
             handler.removeCallbacks(updatePlayer);
@@ -746,30 +751,24 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
 
         if (!playing) {
             playerStop(); // clear player instance
-            updatePlayerText(v, f); // update length
+            updatePlayerText(h, f); // update length
             return;
         }
 
         updatePlayer = new Runnable() {
             @Override
             public void run() {
-                updatePlayerRun(v, f);
+                updatePlayerRun(h, f);
             }
         };
         handler.postDelayed(updatePlayer, 200);
     }
 
-    protected boolean updatePlayerText(final View v, final Storage.RecordingUri f) {
-        ImageView i = (ImageView) v.findViewById(R.id.recording_player_play);
-
+    protected boolean updatePlayerText(final RecordingHolder h, final Storage.RecordingUri f) {
         final boolean playing = player != null && player.getPlayWhenReady();
 
-        i.setImageResource(playing ? R.drawable.ic_pause_black_24dp : R.drawable.ic_play_arrow_black_24dp);
-        i.setContentDescription(getContext().getString(playing ? R.string.pause_button : R.string.play_button));
-
-        TextView start = (TextView) v.findViewById(R.id.recording_player_start);
-        SeekBar bar = (SeekBar) v.findViewById(R.id.recording_player_seek);
-        TextView end = (TextView) v.findViewById(R.id.recording_player_end);
+        h.play.setImageResource(playing ? R.drawable.ic_pause_black_24dp : R.drawable.ic_play_arrow_black_24dp);
+        h.play.setContentDescription(context.getString(playing ? R.string.pause_button : R.string.play_button));
 
         long c = 0;
         Long d = f.duration;
@@ -779,19 +778,19 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             d = player.getDuration();
         }
 
-        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        h.bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (!fromUser)
                     return;
 
                 if (player == null)
-                    playerPlay(v, f);
+                    playerPlay(h, f);
 
                 if (player != null) {
                     player.seekTo(progress);
                     if (!player.getPlayWhenReady())
-                        playerPlay(v, f);
+                        playerPlay(h, f);
                 }
             }
 
@@ -804,23 +803,31 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
             }
         });
 
-        start.setText(MainApplication.formatDuration(getContext(), c));
-        bar.setMax(d.intValue());
-        bar.setKeyProgressIncrement(1);
-        bar.setProgress((int) c);
-        end.setText("-" + MainApplication.formatDuration(getContext(), d - c));
+        h.start.setText(MainApplication.formatDuration(context, c));
+        h.bar.setMax(d.intValue());
+        h.bar.setKeyProgressIncrement(1);
+        h.bar.setProgress((int) c);
+        h.end.setText("-" + MainApplication.formatDuration(context, d - c));
 
         return playing;
     }
 
     public void select(int pos) {
+        if (selected != pos && selected != -1)
+            notifyItemChanged(selected);
         selected = pos;
-        notifyDataSetChanged();
+        if (pos != -1)
+            notifyItemChanged(pos);
         playerStop();
     }
 
-    public int getSelected() {
-        return selected;
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    public Storage.RecordingUri getItem(int pos) {
+        return items.get(pos);
     }
 
     protected AppCompatImageButton getCheckBox(View v) {
@@ -907,7 +914,7 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     protected void save() {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = shared.edit();
         edit.putBoolean(MainApplication.PREFERENCE_SORT, toolbarSortName);
         edit.putBoolean(MainApplication.PREFERENCE_FILTER, toolbarFilterAll);
@@ -915,16 +922,15 @@ public class Recordings extends ArrayAdapter<Storage.RecordingUri> implements Ab
     }
 
     protected void load() {
-        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         toolbarSortName = shared.getBoolean(MainApplication.PREFERENCE_SORT, true);
         toolbarFilterAll = shared.getBoolean(MainApplication.PREFERENCE_FILTER, true);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(MainApplication.PREFERENCE_STORAGE)) {
+        if (key.equals(MainApplication.PREFERENCE_STORAGE))
             load(true, null);
-        }
     }
 
     public void search(String q) {
