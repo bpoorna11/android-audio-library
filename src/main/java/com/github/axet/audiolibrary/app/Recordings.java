@@ -400,12 +400,10 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                         }
                         if (clean) {
                             SharedPreferences.Editor editor = shared.edit();
-                            for (String s : delete) {
+                            for (String s : delete)
                                 editor.remove(s);
-                            }
-                            for (Uri f : delete2) {
+                            for (Uri f : delete2)
                                 cache.remove(f);
-                            }
                             editor.commit();
                         }
                         sort();
@@ -532,7 +530,6 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                         int pos = items.indexOf(f);
                         items.remove(f); // instant remove
                         notifyItemRemoved(pos);
-                        load(true, null); // thread load
                     }
                 });
                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -558,7 +555,9 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                         String ext = Storage.getExt(f.name);
                         String s = String.format("%s.%s", e.getText(), ext);
                         storage.rename(f.uri, s);
-                        load(true, null);
+                        f.name = s;
+                        int pos = items.indexOf(f);
+                        notifyItemChanged(pos);
                     }
                 });
                 showDialog(e);
