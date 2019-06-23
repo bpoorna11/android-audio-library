@@ -679,17 +679,17 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
     protected void playerPlay(RecordingHolder h, final Storage.RecordingUri f) {
         if (player == null) {
             player = MediaPlayerCompat.create(context, f.uri);
+            if (player == null) {
+                Toast.makeText(context, R.string.file_not_found, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            player.prepare();
             if (getPrefCall()) {
                 pscl = new PhoneStateChangeListener(h, f);
                 TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 tm.listen(pscl, PhoneStateListener.LISTEN_CALL_STATE);
             }
         }
-        if (player == null) {
-            Toast.makeText(context, R.string.file_not_found, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        player.prepare();
         player.setPlayWhenReady(true);
 
         if (proximity == null) {
