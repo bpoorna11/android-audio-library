@@ -156,6 +156,7 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                 if (duration.longValue() == 0)
                     lock.wait();
             }
+            mp.release();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -370,6 +371,8 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                         fs.last = n.last;
                         try {
                             fs.duration = getDuration(context, n.uri);
+                            if (t.isInterrupted()) // getDuration can be interrupted and value is invalid
+                                return;
                             cache.put(n.uri, fs);
                             setFileStats(context, n.uri, fs);
                             all.add(new Storage.RecordingUri(context, n.uri, fs));
