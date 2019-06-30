@@ -943,7 +943,7 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
     public void onCreateOptionsMenu(Menu menu) {
         MenuItem sort = menu.findItem(R.id.action_sort);
         SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        int selected = context.getResources().getIdentifier(shared.getString(MainApplication.PREFERENCE_SORT, context.getResources().getResourceEntryName(R.id.sort_name_ask)), "id", context.getPackageName());
+        int selected = context.getResources().getIdentifier(shared.getString(MainApplication.PREFERENCE_SORT, context.getResources().getResourceEntryName(R.id.sort_date_desc)), "id", context.getPackageName());
         SubMenu sorts = sort.getSubMenu();
         for (int i = 0; i < sorts.size(); i++) {
             MenuItem m = sorts.getItem(i);
