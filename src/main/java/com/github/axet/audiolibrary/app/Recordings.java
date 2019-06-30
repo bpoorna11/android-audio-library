@@ -74,10 +74,7 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
     protected ViewGroup toolbar;
     protected View toolbar_a;
     protected View toolbar_s;
-    protected View toolbar_n;
-    protected View toolbar_d;
     protected boolean toolbarFilterAll = true; // all or stars
-    protected boolean toolbarSortName = true; // name or date
 
     protected PhoneStateChangeListener pscl;
 
@@ -200,14 +197,14 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
         }
     }
 
-    public static class SortName implements Comparator<Storage.RecordingUri> {
+    public static class SortByName implements Comparator<Storage.RecordingUri> {
         @Override
         public int compare(Storage.RecordingUri file, Storage.RecordingUri file2) {
             return file.name.compareTo(file2.name);
         }
     }
 
-    public static class SortDate implements Comparator<Storage.RecordingUri> {
+    public static class SortByDate implements Comparator<Storage.RecordingUri> {
         @Override
         public int compare(Storage.RecordingUri file, Storage.RecordingUri file2) {
             long l1 = file.last;
@@ -410,7 +407,6 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                             editor.commit();
                         }
                         sort();
-                        notifyDataSetChanged();
                         if (done != null)
                             done.run();
                     }
@@ -426,13 +422,28 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
         delete.remove(p + MainApplication.PREFERENCE_DETAILS_STAR);
     }
 
+    public Comparator<Storage.RecordingUri> getSort() {
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        int selected = context.getResources().getIdentifier(shared.getString(MainApplication.PREFERENCE_SORT, context.getResources().getResourceEntryName(R.id.sort_name_ask)), "id", context.getPackageName());
+        if (selected == R.id.sort_date_ask) {
+            return new SortByDate();
+        } else if (selected == R.id.sort_date_desc) {
+            return Collections.reverseOrder(new SortByDate());
+        } else if (selected == R.id.sort_name_ask) {
+            return new SortByName();
+        } else if (selected == R.id.sort_name_desc) {
+            return Collections.reverseOrder(new SortByName());
+        }
+        return new SortByName();
+    }
+
+    public void sort(Comparator<Storage.RecordingUri> sort) {
+        Collections.sort(items, sort);
+        notifyDataSetChanged();
+    }
+
     public void sort() {
-        Comparator<Storage.RecordingUri> sort;
-        if (toolbarSortName)
-            sort = new SortName();
-        else
-            sort = new SortDate();
-        Collections.sort(items, Collections.reverseOrder(sort));
+        sort(getSort());
     }
 
     public void close() {
@@ -866,8 +877,6 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
     protected void selectToolbar() {
         selectToolbar(toolbar_a, toolbarFilterAll);
         selectToolbar(toolbar_s, !toolbarFilterAll);
-        selectToolbar(toolbar_n, toolbarSortName);
-        selectToolbar(toolbar_d, !toolbarSortName);
     }
 
     public void setToolbar(ViewGroup v) {
@@ -892,40 +901,18 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
                 save();
             }
         });
-        toolbar_n = v.findViewById(R.id.toolbar_name);
-        toolbar_n.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toolbarSortName = true;
-                sort();
-                selectToolbar();
-                save();
-            }
-        });
-        toolbar_d = v.findViewById(R.id.toolbar_date);
-        toolbar_d.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toolbarSortName = false;
-                sort();
-                selectToolbar();
-                save();
-            }
-        });
         selectToolbar();
     }
 
     protected void save() {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = shared.edit();
-        edit.putBoolean(MainApplication.PREFERENCE_SORT, toolbarSortName);
         edit.putBoolean(MainApplication.PREFERENCE_FILTER, toolbarFilterAll);
         edit.commit();
     }
 
     protected void load() {
         final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
-        toolbarSortName = shared.getBoolean(MainApplication.PREFERENCE_SORT, true);
         toolbarFilterAll = shared.getBoolean(MainApplication.PREFERENCE_FILTER, true);
     }
 

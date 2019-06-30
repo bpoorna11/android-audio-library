@@ -34,4 +34,9 @@
     <string name="share_button">分享</string>
     <string name="trash_button">删除</string>
     <string name="recording_volume_text">（软件增益。硬件问题时仅在100%以上使用）</string>
+    <string name="sort_by">Sort By...</string>
+    <string name="sort_by_name_a_z">Name A-Z</string>
+    <string name="sort_by_name_z_a">Name Z-A</string>
+    <string name="sort_by_date_ask">Date Ask</string>
+    <string name="sort_by_date_desc">Date Desc</string>
 </resources>

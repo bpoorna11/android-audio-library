@@ -34,4 +34,9 @@
     <string name="share_button">Zdieľať</string>
     <string name="trash_button">Vymazať</string>
     <string name="recording_volume_text">(Software gain. Use above 100% only if you have hardware issues)</string>
+    <string name="sort_by">Sort By...</string>
+    <string name="sort_by_name_a_z">Name A-Z</string>
+    <string name="sort_by_name_z_a">Name Z-A</string>
+    <string name="sort_by_date_ask">Date Ask</string>
+    <string name="sort_by_date_desc">Date Desc</string>
 </resources>
