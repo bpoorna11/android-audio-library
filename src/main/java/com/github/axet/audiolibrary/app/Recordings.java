@@ -1,5 +1,6 @@
 package com.github.axet.audiolibrary.app;
 
+import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -13,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.PopupMenu;
@@ -21,8 +23,10 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -934,5 +938,41 @@ public class Recordings extends RecyclerView.Adapter<Recordings.RecordingHolder>
 
     public void showDialog(AlertDialog.Builder e) {
         e.show();
+    }
+
+    public void onCreateOptionsMenu(Menu menu) {
+        MenuItem sort = menu.findItem(R.id.action_sort);
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        int selected = context.getResources().getIdentifier(shared.getString(MainApplication.PREFERENCE_SORT, context.getResources().getResourceEntryName(R.id.sort_name_ask)), "id", context.getPackageName());
+        SubMenu sorts = sort.getSubMenu();
+        for (int i = 0; i < sorts.size(); i++) {
+            MenuItem m = sorts.getItem(i);
+            if (m.getItemId() == selected)
+                m.setChecked(true);
+            m.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return false;
+                }
+            });
+        }
+    }
+
+    public boolean onOptionsItemSelected(Activity a, MenuItem item) {
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        int i = item.getItemId();
+        if (i == R.id.sort_date_ask || i == R.id.sort_date_desc || i == R.id.sort_name_ask || i == R.id.sort_name_desc) {
+            onSortOptionSelected(a, i);
+            return true;
+        }
+        return false;
+    }
+
+    public void onSortOptionSelected(Activity a, int id) {
+        SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(context);
+        shared.edit().putString(MainApplication.PREFERENCE_SORT, context.getResources().getResourceEntryName(id)).commit();
+        select(-1);
+        sort();
+        ActivityCompat.invalidateOptionsMenu(a);
     }
 }
