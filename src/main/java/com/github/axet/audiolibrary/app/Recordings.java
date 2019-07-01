@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatImageButton;
@@ -41,7 +40,6 @@ import android.widget.Toast;
 import com.github.axet.androidlibrary.animations.ExpandItemAnimator;
 import com.github.axet.androidlibrary.app.AssetsDexLoader;
 import com.github.axet.androidlibrary.services.StorageProvider;
-import com.github.axet.audiolibrary.encoders.MediaDecoderCompat;
 import com.github.axet.androidlibrary.sound.MediaPlayerCompat;
 import com.github.axet.androidlibrary.widgets.AboutPreferenceCompat;
 import com.github.axet.androidlibrary.widgets.CacheImagesAdapter;
@@ -57,13 +55,7 @@ import com.github.axet.audiolibrary.animations.RecordingAnimation;
 import com.github.axet.audiolibrary.encoders.Factory;
 import com.github.axet.audiolibrary.widgets.MoodbarView;
 
-import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -179,71 +171,6 @@ public class Recordings extends CacheImagesRecyclerAdapter<Recordings.RecordingH
 
     public static File getCover(Context context, Storage.RecordingUri f) {
         return CacheImagesAdapter.cacheUri(context, f.uri);
-    }
-
-    public static double[] getMoodbar(Context context, Uri uri) throws IOException {
-        final int wps = 1000;
-        final double[] dd = new double[wps];
-        final MediaDecoderCompat decoder = new MediaDecoderCompat(context, uri);
-        final long part = decoder.duration * decoder.hz * decoder.channels / wps / 1000 / 1000;
-        OutputStream os = new OutputStream() {
-            double sum = 0;
-            int samples = 0;
-            int total = 0;
-            int i = 0;
-
-            @Override
-            public void write(int b) throws IOException {
-                push(b);
-            }
-
-            @Override
-            public void write(@NonNull byte[] b, int off, int len) throws IOException {
-                short[] ss = MediaDecoderCompat.asShortBuffer(b, off, len);
-                for (short s : ss)
-                    push(s);
-            }
-
-            void push(double s) {
-                sum += s * s;
-                samples++;
-                total++;
-                if (samples >= part) {
-                    if (i < dd.length)
-                        dd[i++] = Math.sqrt(sum / samples);
-                    sum = 0;
-                    samples = 0;
-                }
-            }
-
-            @Override
-            public void close() throws IOException {
-                if (i < dd.length)
-                    dd[i++] = Math.sqrt(sum / samples);
-                sum = 0;
-                samples = 0;
-            }
-        };
-        decoder.decode(os);
-        os.close();
-        decoder.close();
-        return dd;
-    }
-
-    public void saveMoodbar(double[] data, File cover) throws Exception {
-        JSONArray a = new JSONArray();
-        for (double d : data)
-            a.put(d);
-        FileUtils.write(cover, a.toString(), Charset.defaultCharset());
-    }
-
-    public double[] loadMoodbar(File cover) throws Exception {
-        String s = FileUtils.readFileToString(cover, Charset.defaultCharset());
-        JSONArray a = new JSONArray(s);
-        double[] data = new double[a.length()];
-        for (int i = 0; i < a.length(); i++)
-            data[i] = a.optDouble(i);
-        return data;
     }
 
     public static Storage.RecordingStats getFileStats(Map<String, ?> prefs, Uri f) {
@@ -773,8 +700,12 @@ public class Recordings extends CacheImagesRecyclerAdapter<Recordings.RecordingH
         try {
             File cover = getCover(context, f);
             try {
-                double[] data = getMoodbar(context, f.uri);
-                saveMoodbar(data, cover);
+                if (cover.exists() && f.data == null)
+                    f.data = MoodbarView.loadMoodbar(cover);
+                if (f.data == null) {
+                    f.data = MoodbarView.getMoodbar(context, f.uri);
+                    MoodbarView.saveMoodbar(f.data, cover);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -791,21 +722,11 @@ public class Recordings extends CacheImagesRecyclerAdapter<Recordings.RecordingH
         RecordingHolder h = new RecordingHolder((View) view);
         h.moodbarProgress.setVisibility((task == null || task.done) ? View.GONE : View.VISIBLE);
         Storage.RecordingUri f = (Storage.RecordingUri) item;
-        File cover = getCover(context, f);
-        double[] data = null;
-        if (cover.exists()) {
-            try {
-                data = loadMoodbar(cover);
-            } catch (Exception e) {
-                cover.delete();
-                Log.e(TAG, "Unable to load cover", e);
-            }
-        }
-        if (task == null || !task.done || data == null)
+        if (task == null || !task.done || f.data == null)
             h.moodbar.setVisibility(View.INVISIBLE);
         else
             h.moodbar.setVisibility(View.VISIBLE);
-        h.moodbar.setData(data);
+        h.moodbar.setData(f.data);
     }
 
     protected void starUpdate(ImageView star, boolean starb) {

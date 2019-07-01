@@ -103,6 +103,7 @@ public class Storage extends com.github.axet.androidlibrary.app.Storage {
     public static class RecordingUri extends RecordingStats {
         public Uri uri;
         public String name;
+        public double[] data;
 
         public RecordingUri(Context context, Uri f, RecordingStats fs) {
             super(fs);
