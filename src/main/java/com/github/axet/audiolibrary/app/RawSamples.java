@@ -155,7 +155,6 @@ public class RawSamples {
                 is.close();
                 is = null;
             }
-
             if (os != null) {
                 os.close();
                 os = null;

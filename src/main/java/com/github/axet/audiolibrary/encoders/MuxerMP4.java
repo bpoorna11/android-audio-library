@@ -108,9 +108,8 @@ public class MuxerMP4 extends FileMuxer implements Encoder {
                 input.clear();
             }
             input.putShort(buf[offset]);
-            if (!input.hasRemaining()) {
+            if (!input.hasRemaining())
                 queue();
-            }
         }
     }
 
@@ -163,9 +162,8 @@ public class MuxerMP4 extends FileMuxer implements Encoder {
     }
 
     public void end() {
-        if (input != null) {
+        if (input != null)
             queue();
-        }
         int inputIndex = encoder.dequeueInputBuffer(-1);
         if (inputIndex >= 0) {
             ByteBuffer input;
